@@ -1,0 +1,63 @@
+#pragma once
+
+#define VERSION "@PACKAGE_VERSION@"
+#define COPYRIGHT "Copyright (c) 2020-2021 Yuri Voinov"
+
+#define DEFAULT_LOG_FILE "./memory.log"
+#define DEFAULT_OUTPUT_FILE "./memory_alloc_report.log"
+
+#define HELP_LOG "-l<full log file name> - set log file. Default " DEFAULT_LOG_FILE
+#define HELP_OUT "-f<full output file name> - set output file. Default " DEFAULT_OUTPUT_FILE
+#define HELP_VER "-v - show version and exit"
+#define HELP_HELP "-h|-? - show this help and exit"
+
+/* Counters array size; for 3 functions */
+#define ARRAY_SIZE 3
+/* Reserve tokens vector size */
+#define TOKENS_RESERVE_SIZE 3
+/* Reserve line size */
+#define LINE_RESERVE_SIZE 256
+
+/* Memory functions names */
+#define FUNC_1 "malloc"
+#define FUNC_2 "realloc"
+#define FUNC_3 "calloc"
+
+/* Fields delimiter */
+#define DELIMITER ":"
+
+/* Report literals */
+#define ALLOC_64K   " up to 64k           : "
+#define ALLOC_128K  " from 64k to 128k    : "
+#define ALLOC_256K  " from 128k to 256k   : "
+#define ALLOC_512K  " from 256k to 512k   : "
+#define ALLOC_1024K " from 512k to 1024k  : "
+#define ALLOC_2048K " from 1024k to 2048k : "
+#define ALLOC_4096K " from 2048k to 4096k : "
+#define ALLOC_8192K " from 4096k to 8192k : "
+#define ALLOC_MORE  " >8192k              : "
+#define SEPARATION_LINE "---------------------------------------------------"
+
+/* Error messages */
+#define ERR_MSG "ERROR: "
+#define ERR_MSG_A ERR_MSG "Report array empty"
+#define ERR_MSG_F ERR_MSG "Failed to open file "
+#define ERR_MSG_O ERR_MSG "Unknown or invalid option "
+#define ERR_MSG_NF "No other calls found"
+
+/* Return codes */
+#define EXIT_0 0	//Normal exit
+#define EXIT_1 1	//Report array empty
+#define EXIT_2 2	//Failed to open file
+#define EXIT_3 3	//Unknown or invalid option
+
+#include <cstdlib>	/* For std::exit */
+#include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
+#include <fstream>
+#include <ostream>	/* For std::ostream */
+#include <sstream>      /* For std::ostringstream */
+#include <string>
+#include <algorithm>	/* For std::transform */
+#include <array>
+#include <vector>
+#include <iterator>	/* For std::next */
