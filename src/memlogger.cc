@@ -64,6 +64,12 @@ class MemoryLoggerFunctions {
 			m_Malloc = (func_t)dlsym(RTLD_NEXT, FUNC_1);
 			m_Realloc = (func2_t)dlsym(RTLD_NEXT, FUNC_2);
 			m_Calloc = (func3_t)dlsym(RTLD_NEXT, FUNC_3);
+			char* fname = std::getenv("MEMLOGGER_LOG_FILENAME");	/* Get logfile name from environment if specified */
+			if (fname)
+				if (!::freopen(fname, "w", stderr)) {		/* Redirect stderr to logfile */
+					std::fprintf(stdout, "%s%s\n", "Cannot open log file ", fname);
+					return;					/* Terminate execution; will segfault here */
+				}
 			v_innerCalloc.store(false, std::memory_order_release);
 			std::setbuf(stderr, v_buffer);
 		};
@@ -102,7 +108,7 @@ void *malloc(std::size_t size)
 {
 	if (v_IOMalloc.load(std::memory_order_acquire))		/* IO malloc hack */
 		return v_static_alloc_buffer;
-	if (!v_innerMalloc.load(std::memory_order_acquire))
+	if (!v_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		MemoryLoggerFunctions::GetInstance().protectedWrite(FUNC_1, size);
 	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
 }
@@ -117,7 +123,7 @@ void *realloc(void *ptr, std::size_t size)
 
 void *calloc(std::size_t n, std::size_t size)
 {
-	if (v_innerCalloc.load(std::memory_order_acquire))		/* Dirty hack to stop recursion with dlsym inner calloc call */
+	if (v_innerCalloc.load(std::memory_order_acquire))	/* Dirty hack to stop recursion with dlsym inner calloc call */
 		return v_static_alloc_buffer;
 	v_innerMalloc.store(true, std::memory_order_release);
 	MemoryLoggerFunctions::GetInstance().protectedWrite(FUNC_3, n * size);

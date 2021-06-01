@@ -74,21 +74,15 @@ add `/usr/local/lib` to `/etc/ld.so.conf`, then run ldconfig as root.
 
 After the preparation is complete, you are ready to profile your application.
 
-Since the easiest way to intercept memory allocation functions cross-platform is to use LD_PRELOAD, you must load the logger library before using (after building memlogger of the appropriate bit size):
+Since  the  easiest  way to intercept memory allocation functions cross-platform is to use LD_PRELOAD, you must load the logger library before using (after building memlogger of the appropriate bit size):
 
 ```sh
-# export LD_PRELOAD = libmemlogger.so
+# export LD_PRELOAD=libmemlogger.so
 ```
-or
-```sh
-# export LD_PRELOAD = libmemlogger.so your_program_name
-```
-
-Note: Some platforms uses `LD_PRELOAD_32/LD_PRELOAD_64` environment variables instead.
 
 Note: Please keep in mind that logging is carried out in STDERR (due to technical limitations of writing to a file inside the logger library itself), and, accordingly, you need to redirect the STDERR output to a file to save the raw log on disk.
 
-To write allocations to the log, you need to start your application as follows (interactively or similarly as a service):
+To  write  allocations to the log, you need to start your application as follows (interactively or similarly as a service):
 
 ```sh
 # your_program_name 2>memory.log
@@ -97,6 +91,27 @@ To write allocations to the log, you need to start your application as follows (
 Then allow your program or application to run for a while to accumulate relevant data.
 
 Note: The log is saved in the current directory by default.
+
+Also you can use logger this manner to preload, start and redirect log to file:
+
+```sh
+# LD_PRELOAD=libmemlogger.so your_program_name 2>memory.log
+```
+
+Note: Please keep in mind that logging is carried out in STDERR by default. To log allocations to log file directly, just specify filename via environment variable before starting the profiled program:
+
+```sh
+# export MEMLOGGER_LOG_FILENAME=/tmp/memory.log
+```
+
+When permission denied or file cannot be created (or path does not exists), following occurs:
+
+```
+Cannot open log file /1/memory3.log
+Segmentation Fault (core dumped)
+```
+
+Note: Some platforms uses `LD_PRELOAD_32/LD_PRELOAD_64` environment variables instead.
 
 Raw log contains the follows:
 ```

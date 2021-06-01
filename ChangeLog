@@ -106,3 +106,7 @@ FIX: Wrong counting inner malloc calls inside realloc&calloc.
 05-31-2021
 ==========
 IMPROVEMENT: Logger reworked with singleton pattern.
+
+06-01-2021
+==========
+IMPROVEMENT: Feature added - log to file instead stderr.
