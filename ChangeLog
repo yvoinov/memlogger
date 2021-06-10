@@ -110,3 +110,7 @@ IMPROVEMENT: Logger reworked with singleton pattern.
 06-01-2021
 ==========
 IMPROVEMENT: Feature added - log to file instead stderr.
+
+06-10-2021
+==========
+IMPROVEMENT: Code restructured.

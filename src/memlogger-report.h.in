@@ -61,3 +61,99 @@
 #include <array>
 #include <vector>
 #include <iterator>	/* For std::next */
+
+namespace {
+
+/* Write by default; create file if not exists */
+class FileForReadWrite {
+public:
+	std::fstream fd;
+	FileForReadWrite(const std::string& name,
+			std::ios_base::openmode mode = std::ios_base::binary|std::ios_base::out)
+			: fd(std::fstream(name, mode)), m_fname(name), m_fmode(mode) {};
+	~FileForReadWrite() { fd.close(); }
+private:
+	std::string m_fname;
+	std::ios_base::openmode m_fmode;
+};
+
+class AsyncWriter {
+public:
+	AsyncWriter(std::ostream &s = std::cout):m_stream(s) {}
+	template <typename T>
+	AsyncWriter& operator<<(T const& t) noexcept {
+		m_st << t;
+		return *this;
+	}
+	AsyncWriter& operator<<(std::ostream&(*f)(std::ostream&)) noexcept {
+		m_st << f;
+		return *this;
+	}
+	~AsyncWriter() { m_stream << m_st.str(); }
+private:
+	std::ostringstream m_st;
+	std::ostream &m_stream;
+};
+
+class Help {
+public:
+	friend std::ostream& operator<<(std::ostream& os, const Help& o) {
+		return os << "Arguments:" << std::endl
+			<< o.m_l1 << std::endl
+			<< o.m_o2 << std::endl
+			<< o.m_v3 << std::endl
+			<< o.m_h4 << std::endl;
+	}
+private:
+	const std::string m_l1 = HELP_LOG;
+	const std::string m_o2 = HELP_OUT;
+	const std::string m_v3 = HELP_VER;
+	const std::string m_h4 = HELP_HELP;
+};
+
+class MemloggerReport {
+public:
+	void processArgs(int argc, char* argv[]);
+	void processData();
+	void printReportTotal();
+
+	MemloggerReport() : m_OutputConsole(true), m_LogFile(DEFAULT_LOG_FILE), m_OutputFile(DEFAULT_OUTPUT_FILE) {}
+private:
+	/* Globals */
+	bool m_OutputConsole;
+	std::string m_LogFile;
+	std::string m_OutputFile;
+
+	using m_Counters = struct m_Counters {
+		std::string memory_function;
+		std::size_t allc_64k;
+		std::size_t allc_128k;
+		std::size_t allc_256k;
+		std::size_t allc_512k;
+		std::size_t allc_1024k;
+		std::size_t allc_2048k;
+		std::size_t allc_4096k;
+		std::size_t allc_8192k;
+		std::size_t allc_more;
+		long start, stop;	/* Time interval in epoch */
+	};
+
+	std::array<m_Counters, ARRAY_SIZE> m_CounterArray;
+
+	const std::string m_c_delim { DELIMITER };
+
+	static constexpr std::size_t m_num_64K = 64 * 1024;
+	static constexpr std::size_t m_num_128K = 128 * 1024;
+	static constexpr std::size_t m_num_256K = 256 * 1024;
+	static constexpr std::size_t m_num_512K = 512 * 1024;
+	static constexpr std::size_t m_num_1024K = 1024 * 1024;
+	static constexpr std::size_t m_num_2048K = 2048 * 1024;
+	static constexpr std::size_t m_num_4096K = 4096 * 1024;
+	static constexpr std::size_t m_num_8192K = 8192 * 1024;
+
+	void fillArrayEntry(const std::string& p_fname, const std::size_t p_value, const long p_timestamp);
+	void printReport(AsyncWriter& p_stream, const std::size_t p_idx);
+	std::size_t sumCounters(const std::size_t p_idx);
+};
+
+}	/* namespace */
