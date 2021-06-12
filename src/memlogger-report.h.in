@@ -56,6 +56,7 @@
 #include <fstream>
 #include <ostream>	/* For std::ostream */
 #include <sstream>      /* For std::ostringstream */
+#include <utility>	/* For std::move */
 #include <string>
 #include <algorithm>	/* For std::transform */
 #include <array>
@@ -151,7 +152,7 @@ private:
 	static constexpr std::size_t m_num_4096K = 4096 * 1024;
 	static constexpr std::size_t m_num_8192K = 8192 * 1024;
 
-	void fillArrayEntry(const std::string& p_fname, const std::size_t p_value, const long p_timestamp);
+	void fillArrayEntry(std::string&& p_fname, const std::size_t p_value, const long p_timestamp);
 	void printReport(AsyncWriter& p_stream, const std::size_t p_idx);
 	std::size_t sumCounters(const std::size_t p_idx);
 };

@@ -114,3 +114,7 @@ IMPROVEMENT: Feature added - log to file instead stderr.
 06-10-2021
 ==========
 IMPROVEMENT: Code restructured.
+
+06-12-2021
+==========
+IMPROVEMENT: Move semantic implemented in fillArrayEntry().

@@ -7,7 +7,7 @@
 namespace {
 
 /* Implementations */
-void MemloggerReport::fillArrayEntry(const std::string& p_fname, const std::size_t p_value, const long p_timestamp)
+void MemloggerReport::fillArrayEntry(std::string&& p_fname, const std::size_t p_value, const long p_timestamp)
 {
 	std::size_t v_array_line = 0;					/* Choose appropriate array line */
 	if (p_fname == FUNC_2) v_array_line = 1;
@@ -60,7 +60,7 @@ void MemloggerReport::processData()
 			}
 			try {
 				if (v_tokens[0] == FUNC_1 || v_tokens[0] == FUNC_2 || v_tokens[0] == FUNC_3)
-					fillArrayEntry(v_tokens[0], std::stoul(v_tokens[1]), std::stol(v_tokens[2]));
+					fillArrayEntry(std::move(v_tokens[0]), std::stoul(v_tokens[1]), std::stol(v_tokens[2]));
 				else continue;		/* If token not known, skip line */
 			} catch(...) {
 				continue;		/* In case of any exception, skip line */
