@@ -1,5 +1,9 @@
 #pragma once
 
+#if !__cplusplus >= 201103L || !__cplusplus >= 199711L
+  #error This program needs at least a C++11 compliant compiler
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <chrono>
@@ -66,9 +70,10 @@ private:
 
 class MemoryLoggerFunctions {
 	public:
-		typedef void* (*func_t)(std::size_t size);		/* func_t Type 1: malloc */
-		typedef void* (*func2_t)(void*, std::size_t);		/* func2_t Type 2: realloc */
-		typedef void* (*func3_t)(std::size_t, std::size_t);	/* func3_t Type 3: calloc */
+		using voidPtr = void*;
+		typedef voidPtr (*func_t)(std::size_t size);		/* func_t Type 1: malloc */
+		typedef voidPtr (*func2_t)(voidPtr, std::size_t);	/* func2_t Type 2: realloc */
+		typedef voidPtr (*func3_t)(std::size_t, std::size_t);	/* func3_t Type 3: calloc */
 		func_t m_Malloc;	/* Arg type 1 */
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */
@@ -87,9 +92,9 @@ class MemoryLoggerFunctions {
 	private:
 		MemoryLoggerFunctions() : m_lock(m_output_lock) {
 			v_innerCalloc.store(true, std::memory_order_release);
-			m_Malloc = (func_t)dlsym(RTLD_NEXT, FUNC_1);
-			m_Realloc = (func2_t)dlsym(RTLD_NEXT, FUNC_2);
-			m_Calloc = (func3_t)dlsym(RTLD_NEXT, FUNC_3);
+			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
+			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
+			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
 			char* fname = std::getenv("MEMLOGGER_LOG_FILENAME");	/* Get logfile name from environment if specified */
 			if (fname)
 				if (!::freopen(fname, "w", stderr)) {		/* Redirect stderr to logfile */

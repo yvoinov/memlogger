@@ -118,3 +118,9 @@ IMPROVEMENT: Code restructured.
 06-12-2021
 ==========
 IMPROVEMENT: Move semantic implemented in fillArrayEntry().
+
+06-19-2021
+==========
+IMPROVEMENT: Replaced C-style cast to C++.
+IMPROVEMENT: Added compiler version check to headers.
+FIX: Potential UB with casting a function pointer to a different function pointer.

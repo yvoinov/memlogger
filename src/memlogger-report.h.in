@@ -1,5 +1,9 @@
 #pragma once
 
+#if !__cplusplus >= 201103L || !__cplusplus >= 199711L
+  #error This program needs at least a C++11 compliant compiler
+#endif
+
 #define VERSION "@PACKAGE_VERSION@"
 #define COPYRIGHT "Copyright (c) 2020-2021 Yuri Voinov"
 
