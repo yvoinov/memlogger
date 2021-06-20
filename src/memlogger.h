@@ -71,9 +71,9 @@ private:
 class MemoryLoggerFunctions {
 	public:
 		using voidPtr = void*;
-		typedef voidPtr (*func_t)(std::size_t size),		/* func_t Type 1: malloc */
-				(*func2_t)(voidPtr, std::size_t),	/* func2_t Type 2: realloc */
-				(*func3_t)(std::size_t, std::size_t);	/* func3_t Type 3: calloc */
+		using func_t = voidPtr (*)(std::size_t);		/* func_t Type 1: malloc */
+		using func2_t = voidPtr (*)(voidPtr, std::size_t);	/* func2_t Type 2: realloc */
+		using func3_t = voidPtr (*)(std::size_t, std::size_t);	/* func3_t Type 3: calloc */
 		func_t m_Malloc;	/* Arg type 1 */
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */

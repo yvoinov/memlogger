@@ -62,7 +62,7 @@
 #include <sstream>      /* For std::ostringstream */
 #include <utility>	/* For std::move */
 #include <string>
-#include <algorithm>	/* For std::transform */
+#include <algorithm>	/* For std::transform, std::min_element, std::max_element */
 #include <array>
 #include <vector>
 #include <iterator>	/* For std::next */
@@ -118,16 +118,25 @@ private:
 
 class MemloggerReport {
 public:
+	bool m_OutputConsole;
+	std::string m_OutputFile;
+
 	void processArgs(int argc, char* argv[]);
 	void processData();
-	void printReportTotal();
+	void printReportTotal(AsyncWriter& p_stream);
 
-	MemloggerReport() : m_OutputConsole(true), m_LogFile(DEFAULT_LOG_FILE), m_OutputFile(DEFAULT_OUTPUT_FILE) {}
+	static MemloggerReport& GetInstance() {
+		static MemloggerReport inst;
+		return inst;
+	}
+
+	MemloggerReport(MemloggerReport &other) = delete;
+	void operator=(const MemloggerReport &) = delete;
+
 private:
-	/* Globals */
-	bool m_OutputConsole;
+	MemloggerReport() : m_OutputConsole(true), m_OutputFile(DEFAULT_OUTPUT_FILE), m_LogFile(DEFAULT_LOG_FILE) {}
+
 	std::string m_LogFile;
-	std::string m_OutputFile;
 
 	using m_Counters = struct m_Counters {
 		std::string memory_function;
@@ -158,6 +167,7 @@ private:
 
 	void fillArrayEntry(std::string&& p_fname, const std::size_t p_value, const long p_timestamp);
 	void printReport(AsyncWriter& p_stream, const std::size_t p_idx);
+	long computeTotalLoggingTime();
 	std::size_t sumCounters(const std::size_t p_idx);
 };
 

@@ -75,7 +75,7 @@ void MemloggerReport::processData()
 
 std::size_t MemloggerReport::sumCounters(const std::size_t p_idx)
 {
-	std::size_t v_sum = 0;	/* Warning SunStudio when uninitialized */
+	std::size_t v_sum = 0;
 	v_sum += m_CounterArray[p_idx].allc_64k;
 	v_sum += m_CounterArray[p_idx].allc_128k;
 	v_sum += m_CounterArray[p_idx].allc_256k;
@@ -108,23 +108,22 @@ void MemloggerReport::printReport(AsyncWriter& p_stream, const std::size_t p_idx
 	p_stream << SEPARATION_LINE << std::endl;
 }
 
-void MemloggerReport::printReportTotal()
+long MemloggerReport::computeTotalLoggingTime()
+{
+	return *std::max_element(&m_CounterArray[0].stop, &m_CounterArray[0].stop + (m_CounterArray.size() - 1)) -
+		*std::min_element(&m_CounterArray[0].start, &m_CounterArray[0].start + (m_CounterArray.size() - 1));
+}
+
+void MemloggerReport::printReportTotal(AsyncWriter& p_stream)
 {
 	if (m_CounterArray.size() > 0) {
 		for (std::size_t i = 0; i < m_CounterArray.size(); ++i) {
-			if (m_OutputConsole && !m_CounterArray[i].memory_function.empty()) {
-				AsyncWriter v_out_stream;
-				printReport(v_out_stream, i);
-			} else if (!m_CounterArray[i].memory_function.empty()) {
-				FileForReadWrite v_out_f(m_OutputFile, std::ios_base::app|std::ios_base::out);
-				if (!v_out_f.fd.is_open()) {
-					std::cerr << ERR_MSG_F + m_OutputFile << std::endl;
-					std::exit(EXIT_2);
-				}
-				AsyncWriter v_out_stream(v_out_f.fd);
-				printReport(v_out_stream, i);
-			} else std::cerr << ERR_MSG_NF << std::endl;
+			if (!m_CounterArray[i].memory_function.empty())
+				printReport(p_stream, i);
+			else
+				p_stream << ERR_MSG_NF << std::endl;
 		}
+		p_stream << "Elapsed time: " << computeTotalLoggingTime() << " sec" << std::endl;
 	} else {
 		std::cerr << ERR_MSG_A << std::endl;
 		std::exit(EXIT_1);
@@ -158,8 +157,6 @@ void MemloggerReport::processArgs(int argc, char* argv[])
 	if (!m_OutputConsole) FileForReadWrite v_out_f(m_OutputFile);	/* Truncate file on first run */
 }
 
-MemloggerReport memloggerReport;
-
 }	/* namespace */
 
 int main(int argc, char* argv[])
@@ -168,11 +165,22 @@ int main(int argc, char* argv[])
 	std::cin.tie(nullptr);				/* Untie cin from cout */
 
 	if (argc > 1)
-		memloggerReport.processArgs(argc, argv);
+		MemloggerReport::GetInstance().processArgs(argc, argv);
 
-	memloggerReport.processData();
+	MemloggerReport::GetInstance().processData();
 
-	memloggerReport.printReportTotal();
+	if (MemloggerReport::GetInstance().m_OutputConsole) {
+		AsyncWriter v_out_stream;
+		MemloggerReport::GetInstance().printReportTotal(v_out_stream);
+	} else {
+		FileForReadWrite v_out_f(MemloggerReport::GetInstance().m_OutputFile, std::ios_base::app|std::ios_base::out);
+		if (!v_out_f.fd.is_open()) {
+			std::cerr << ERR_MSG_F + MemloggerReport::GetInstance().m_OutputFile << std::endl;
+			std::exit(EXIT_2);
+		}
+		AsyncWriter v_out_stream(v_out_f.fd);
+		MemloggerReport::GetInstance().printReportTotal(v_out_stream);
+	}
 
 	return 0;
 }

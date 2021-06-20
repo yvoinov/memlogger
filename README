@@ -175,10 +175,12 @@ malloc >8192k              : 0
 2539 malloc calls/sec
 ---------------------------------------------------
 No other calls found
+Elapsed time: 79 sec
 ...
 
 where  the  numbers  show the number of calls to the corresponding function with
-the size of the sice in the range of the corresponding basket.
+the  size  of  the sice in the range of the corresponding basket. "Elapsed time"
+shows total logging time.
 
 Log processor arguments
 =======================
