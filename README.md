@@ -1,3 +1,5 @@
+[![CodeQL](https://github.com/yvoinov/memlogger/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/yvoinov/memlogger/actions/workflows/codeql-analysis.yml)
+
 # Memlogger
 
 ## Concepts
