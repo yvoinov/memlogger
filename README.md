@@ -1,5 +1,5 @@
 # Memlogger
-[![CodeQL](https://github.com/yvoinov/memlogger/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/yvoinov/memlogger/actions/workflows/codeql-analysis.yml) [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![CodeQL](https://github.com/yvoinov/memlogger/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/yvoinov/memlogger/actions/workflows/codeql-analysis.yml) [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/yvoinov/memlogger/blob/main/LICENSE)
 ## Concepts
 
 Unlike most similar solutions, memlogger is designed to profile the application by the nature of memory allocations in accordance with the size of the chunks.
