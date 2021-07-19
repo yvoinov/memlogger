@@ -1,0 +1,136 @@
+10-11-2020
+==========
+Initial code written.
+
+11-29-2020
+==========
+FIX: Logger format %d to %lu.
+FIX: warning: "std::fstream {anonymous}::FileForReadWrite::fd [-Wreorder]"
+FIX: Class MemoryFunctions must me instantiated on each hooked function to prevent segfault on dlsym() call.
+
+11-30-2020
+==========
+IMPROVEMENT: Added static buffer for output to avoid malloc.
+FIX: Removed calloc overriding due to dlsym() implementations with 32 bytes calloc, which can lead to endless recursion;
+     due to calloc implementations uses malloc in most cases, this do not skew overall statistics.
+     However, this leads better compatibility with different libC/glibC.
+IMPROVEMENT: Added --enable-static-libs configuration option to build reporting tool static.
+
+12-07-2020
+==========
+IMPROVEMENT: Timing added.
+IMPROVEMENT: Empty results array processing.
+FIX: Typo in printReport(), allc_more not counted.
+FIX: Division by zero.
+
+04-02-2021
+==========
+IMPROVEMENT: Logger library refactoring.
+
+04-05-2021
+==========
+FIX: Protect output with lock to prevent interleaving with threaded environment.
+
+04-06-2021
+==========
+FIX: Crash reporter on garbage in memory logs.
+
+04-07-2021
+==========
+IMPROVEMENT: Logger refactored.
+FIX: Some minor fixes.
+FIX: Crash on empty log lines.
+
+04-09-2021
+==========
+IMPROVEMENT: Speed up processing ~20%.
+
+04-12-2021
+==========
+FIX: Borders of ranges.
+
+04-14-2021
+==========
+IMPROVEMENT: Reporter refactored.
+
+04-15-2021
+==========
+FIX: Bug with overwriting output file.
+
+04-17-2021
+==========
+IMPROVEMENT: A bit more optimization of reporting tool.
+FIX: Code formatting.
+
+04-18-2021
+==========
+IMPROVEMENT: Reporter reworked.
+
+04-25-2021
+==========
+IMPROVEMENT: Uses std::stoul() for string conversion.
+
+04-28-2021
+==========
+IMPROVEMENT: Got rid unnesessary implicit type conversion.
+
+05-12-2021
+==========
+IMPROVEMENT: processData() refactored to reduce unnesessary movements.
+FIX: Added missed header inclusion.
+
+05-15-2021
+==========
+IMPROVEMENT: Reporter reworked; performance improvement.
+
+05-16-2021
+==========
+FIX: Move unnesessary globals to private.
+
+05-23-2021
+==========
+IMPROVEMENT: Hide all globals into private.
+
+05-27-2021
+==========
+IMPROVEMENT: Added conrer case condition to fillArrayEntry().
+IMPROVEMENT: Got rid stupid pass by reference for timestamp.
+FIX: Warning "Likely uninitialized read (variable v_sum)".
+FIX: MemoryLoggerFunctions reorder initialization warning.
+
+05-30-2021
+==========
+IMPROVEMENT: Returned back correct implementation of calloc interposition.
+FIX: Wrong counting inner malloc calls inside realloc&calloc.
+
+05-31-2021
+==========
+IMPROVEMENT: Logger reworked with singleton pattern.
+
+06-01-2021
+==========
+IMPROVEMENT: Feature added - log to file instead stderr.
+
+06-10-2021
+==========
+IMPROVEMENT: Code restructured.
+
+06-12-2021
+==========
+IMPROVEMENT: Move semantic implemented in fillArrayEntry().
+
+06-19-2021
+==========
+IMPROVEMENT: Replaced C-style cast to C++.
+IMPROVEMENT: Added compiler version check to headers.
+FIX: Potential UB with casting a function pointer to a different function pointer.
+
+06-20-2021
+==========
+IMPROVEMENT: Added print elapsed logging time.
+FIX: "No other calls found" message output.
+FIX: Minor wix with malloc function ptr argument.
+
+07-19-2021
+==========
+IMPROVEMENT: Added max size feature.

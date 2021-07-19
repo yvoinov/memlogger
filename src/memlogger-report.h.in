@@ -1,0 +1,179 @@
+#pragma once
+
+#if !__cplusplus >= 201103L || !__cplusplus >= 199711L
+  #error This program needs at least a C++11 compliant compiler
+#endif
+
+#define VERSION "@PACKAGE_VERSION@"
+#define COPYRIGHT "Copyright (c) 2020-2021 Yuri Voinov"
+
+#define DEFAULT_LOG_FILE "./memory.log"
+#define DEFAULT_OUTPUT_FILE "./memory_alloc_report.log"
+
+#define HELP_LOG "-l<full log file name> - set log file. Default " DEFAULT_LOG_FILE
+#define HELP_OUT "-f<full output file name> - set output file. Default " DEFAULT_OUTPUT_FILE
+#define HELP_VER "-v - show version and exit"
+#define HELP_HELP "-h|-? - show this help and exit"
+
+/* Counters array size; for 3 functions */
+#define ARRAY_SIZE 3
+/* Reserve tokens vector size */
+#define TOKENS_RESERVE_SIZE 3
+/* Reserve line size */
+#define LINE_RESERVE_SIZE 256
+
+/* Memory functions names */
+#define FUNC_1 "malloc"
+#define FUNC_2 "realloc"
+#define FUNC_3 "calloc"
+
+/* Fields delimiter */
+#define DELIMITER ":"
+
+/* Report literals */
+#define ALLOC_64K   " up to 64k           : "
+#define ALLOC_128K  " from 64k to 128k    : "
+#define ALLOC_256K  " from 128k to 256k   : "
+#define ALLOC_512K  " from 256k to 512k   : "
+#define ALLOC_1024K " from 512k to 1024k  : "
+#define ALLOC_2048K " from 1024k to 2048k : "
+#define ALLOC_4096K " from 2048k to 4096k : "
+#define ALLOC_8192K " from 4096k to 8192k : "
+#define ALLOC_MORE  " >8192k              : "
+#define ALLOC_MAX   " max size            : "
+#define SEPARATION_LINE "---------------------------------------------------"
+
+/* Multiplier */
+#define KBYTES 1024
+
+/* Error messages */
+#define ERR_MSG "ERROR: "
+#define ERR_MSG_A ERR_MSG "Report array empty"
+#define ERR_MSG_F ERR_MSG "Failed to open file "
+#define ERR_MSG_O ERR_MSG "Unknown or invalid option "
+#define ERR_MSG_NF "No other calls found"
+
+/* Return codes */
+#define EXIT_0 0	//Normal exit
+#define EXIT_1 1	//Report array empty
+#define EXIT_2 2	//Failed to open file
+#define EXIT_3 3	//Unknown or invalid option
+
+#include <cstdlib>	/* For std::exit */
+#include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
+#include <fstream>
+#include <ostream>	/* For std::ostream */
+#include <sstream>      /* For std::ostringstream */
+#include <utility>	/* For std::move */
+#include <string>
+#include <algorithm>	/* For std::transform, std::min_element, std::max_element */
+#include <array>
+#include <vector>
+#include <iterator>	/* For std::next */
+
+namespace {
+
+/* Write by default; create file if not exists */
+class FileForReadWrite {
+public:
+	std::fstream fd;
+	FileForReadWrite(const std::string& name,
+			std::ios_base::openmode mode = std::ios_base::binary|std::ios_base::out)
+			: fd(std::fstream(name, mode)), m_fname(name), m_fmode(mode) {};
+	~FileForReadWrite() { fd.close(); }
+private:
+	std::string m_fname;
+	std::ios_base::openmode m_fmode;
+};
+
+class AsyncWriter {
+public:
+	AsyncWriter(std::ostream &s = std::cout):m_stream(s) {}
+	template <typename T>
+	AsyncWriter& operator<<(T const& t) noexcept {
+		m_st << t;
+		return *this;
+	}
+	AsyncWriter& operator<<(std::ostream&(*f)(std::ostream&)) noexcept {
+		m_st << f;
+		return *this;
+	}
+	~AsyncWriter() { m_stream << m_st.str(); }
+private:
+	std::ostringstream m_st;
+	std::ostream &m_stream;
+};
+
+class Help {
+public:
+	friend std::ostream& operator<<(std::ostream& os, const Help& o) {
+		return os << "Arguments:" << std::endl
+			<< o.m_l1 << std::endl
+			<< o.m_o2 << std::endl
+			<< o.m_v3 << std::endl
+			<< o.m_h4 << std::endl;
+	}
+private:
+	const std::string m_l1 = HELP_LOG;
+	const std::string m_o2 = HELP_OUT;
+	const std::string m_v3 = HELP_VER;
+	const std::string m_h4 = HELP_HELP;
+};
+
+class MemloggerReport {
+public:
+	bool m_OutputConsole;
+	std::string m_OutputFile;
+
+	void processArgs(int argc, char* argv[]);
+	void processData();
+	void printReportTotal(AsyncWriter& p_stream);
+
+	static MemloggerReport& GetInstance() {
+		static MemloggerReport inst;
+		return inst;
+	}
+
+	MemloggerReport(MemloggerReport &other) = delete;
+	void operator=(const MemloggerReport &) = delete;
+
+private:
+	MemloggerReport() : m_OutputConsole(true), m_OutputFile(DEFAULT_OUTPUT_FILE), m_LogFile(DEFAULT_LOG_FILE) {}
+
+	std::string m_LogFile;
+
+	using m_Counters = struct m_Counters {
+		std::string memory_function;
+		std::size_t allc_64k;
+		std::size_t allc_128k;
+		std::size_t allc_256k;
+		std::size_t allc_512k;
+		std::size_t allc_1024k;
+		std::size_t allc_2048k;
+		std::size_t allc_4096k;
+		std::size_t allc_8192k;
+		std::size_t allc_more;
+		std::size_t allc_max;	/* Peak allocation size */
+		long start, stop;	/* Time interval in epoch */
+	};
+
+	std::array<m_Counters, ARRAY_SIZE> m_CounterArray;
+
+	const std::string m_c_delim { DELIMITER };
+
+	static constexpr std::size_t m_num_64K = 64 * KBYTES;
+	static constexpr std::size_t m_num_128K = 128 * KBYTES;
+	static constexpr std::size_t m_num_256K = 256 * KBYTES;
+	static constexpr std::size_t m_num_512K = 512 * KBYTES;
+	static constexpr std::size_t m_num_1024K = 1024 * KBYTES;
+	static constexpr std::size_t m_num_2048K = 2048 * KBYTES;
+	static constexpr std::size_t m_num_4096K = 4096 * KBYTES;
+	static constexpr std::size_t m_num_8192K = 8192 * KBYTES;
+
+	void fillArrayEntry(std::string&& p_fname, const std::size_t p_value, const long p_timestamp);
+	void printReport(AsyncWriter& p_stream, const std::size_t p_idx);
+	long computeTotalLoggingTime();
+	std::size_t sumCounters(const std::size_t p_idx);
+};
+
+}	/* namespace */
