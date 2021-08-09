@@ -39,9 +39,9 @@ void MemloggerReport::fillArrayEntry(std::string&& p_fname, const std::size_t p_
 		++m_CounterArray[v_array_line].allc_8192k;
 	else if (p_value > m_num_8192K) {
 		++m_CounterArray[v_array_line].allc_more;
-		if (p_value > m_CounterArray[v_array_line].allc_max)
-			m_CounterArray[v_array_line].allc_max = p_value;
 	}
+	if (p_value > m_CounterArray[v_array_line].allc_max)
+		m_CounterArray[v_array_line].allc_max = p_value;
 }
 
 void MemloggerReport::processData()
