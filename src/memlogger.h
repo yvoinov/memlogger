@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <chrono>
+#include <array>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
@@ -34,8 +35,8 @@
 
 namespace {
 
-static char v_buffer[OUTPUT_BUFFER_SIZE];	/* Static buffer for output to avoid malloc */
-static char v_static_alloc_buffer[STATIC_ALLOC_BUFFER_SIZE];
+static std::array<char, OUTPUT_BUFFER_SIZE> v_buffer;	/* Static buffer for output to avoid malloc */
+static std::array<char , STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
 static std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false }, v_IOMalloc { false };
 
 class AdaptiveSpinMutex {
@@ -102,7 +103,7 @@ class MemoryLoggerFunctions {
 					return;					/* Terminate execution; will segfault here */
 				}
 			v_innerCalloc.store(false, std::memory_order_release);
-			std::setbuf(stderr, v_buffer);
+			std::setbuf(stderr, v_buffer.data());
 		};
 
 		std::atomic<bool>& m_lock;

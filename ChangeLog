@@ -134,3 +134,7 @@ FIX: Minor wix with malloc function ptr argument.
 07-19-2021
 ==========
 IMPROVEMENT: Added max size feature.
+
+08-09-2021
+==========
+IMPROVEMENT: Replaced C-array to std::array.

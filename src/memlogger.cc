@@ -33,7 +33,7 @@ extern "C" {
 void *malloc(std::size_t size)
 {
 	if (v_IOMalloc.load(std::memory_order_acquire))		/* IO malloc hack */
-		return v_static_alloc_buffer;
+		return v_static_alloc_buffer.data();
 	if (!v_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		MemoryLoggerFunctions::GetInstance().protectedWrite(FUNC_1, size);
 	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
@@ -50,7 +50,7 @@ void *realloc(void *ptr, std::size_t size)
 void *calloc(std::size_t n, std::size_t size)
 {
 	if (v_innerCalloc.load(std::memory_order_acquire))	/* Dirty hack to stop recursion with dlsym inner calloc call */
-		return v_static_alloc_buffer;
+		return v_static_alloc_buffer.data();
 	v_innerMalloc.store(true, std::memory_order_release);
 	MemoryLoggerFunctions::GetInstance().protectedWrite(FUNC_3, n * size);
 	return v_innerMalloc.store(false, std::memory_order_release),
