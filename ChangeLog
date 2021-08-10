@@ -140,3 +140,10 @@ IMPROVEMENT: Added max size feature.
 IMPROVEMENT: Replaced C-array to std::array.
 IMPROVEMENT: Max size feature now count over all logged allocations.
 FIX: Segfault on mutex_lock_impl() calls and similar.
+
+08-10-2021
+==========
+IMPROVEMENT: Do not log calloc() inner malloc() calls.
+IMPROVEMENT: Performance malloc() internal processing.
+FIX: Wrong counting if allocations fit one epoch tick.
+FIX: Deadlock on __cxa_guard_acquire.

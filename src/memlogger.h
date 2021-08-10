@@ -6,7 +6,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring> // For std::memset
 #include <chrono>
 #include <array>
 #include <atomic>
@@ -24,6 +23,7 @@
 #endif
 
 #define OUTPUT_BUFFER_SIZE 4096
+#define STATIC_ALLOC_BUFFER_SIZE 32
 
 /* Memory functions names */
 #define FUNC_1 "malloc"
@@ -36,6 +36,7 @@
 namespace {
 
 static std::array<char, OUTPUT_BUFFER_SIZE> v_buffer;	/* Static buffer for output to avoid malloc */
+static std::array<char, STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
 static std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false }, v_IOMalloc { false };
 
 class AdaptiveSpinMutex {

@@ -104,9 +104,11 @@ void MemloggerReport::printReport(AsyncWriter& p_stream, const std::size_t p_idx
 	p_stream << m_CounterArray[p_idx].memory_function << ALLOC_MORE << m_CounterArray[p_idx].allc_more << std::endl;
 	p_stream << m_CounterArray[p_idx].memory_function << ALLOC_MAX << m_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
 	p_stream << SEPARATION_LINE << std::endl;
-	if (m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start != 0 && sumCounters(p_idx) != 0)
-		p_stream << sumCounters(p_idx) / (m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start)
-			<< " " << m_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
+	const std::ptrdiff_t c_time_diff = m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start;
+	if (c_time_diff != 0 && sumCounters(p_idx) != 0)
+		p_stream << sumCounters(p_idx) / c_time_diff << " " << m_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
+	else if (c_time_diff == 0 && sumCounters(p_idx) != 0)	/* If allocations fit one epoch tick */
+		p_stream << sumCounters(p_idx) << " " << m_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
 	else
 		p_stream << "0 " << m_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE << std::endl;
