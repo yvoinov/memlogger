@@ -6,21 +6,24 @@ by the nature of memory allocations in accordance with the size of the chunks.
 
 Accordingly, only functions that directly allocate memory are logged.
 
-Memlogger  consists  of  two components: a very simple logging library preloaded
-with a dynamic loader, and a log processor.
+Memlogger  now  implemented  as  only shared library. It produces instant report
+immediately after logging completion with O(1) complexity. No more log processor
+required.
 
-Log  processing  is  performed  in one pass. Each entry contains the name of the
-allocation  function  and  the  size  of  the requested memory in bytes. The log
-processor  counts  the number of allocation requests of each type, in accordance
-with the entry into the given bucket size - i.e. 0-64 kb, 64-128 kb, 128-256 kb,
-and so on.
-
-The  resulting  report  is  a simple table, grouped by allocation function, with
-call counter values for each bucket.
+Log   processing  is  now performed directly in library. Library contains global
+shared array. Each entry contains the name of the allocation  function, size  of
+the  requested memory in bytes, start/stop epoch timestamp. The report, produces
+by  library,  contains  the  number  of  allocation  requests  of  each type, in
+accordance  with the entry into the given bucket size - i.e. 0-64 kb, 64-128 kb,
+128-256  kb, and so on. Also it contains average allocation calls per second and
+logging session elapsed time.
 
 This  data  allows  you  to get an idea of the memory allocation profile for the
 application  and  can  be used to select the optimal parameters for the external
 memory allocator to achieve maximum performance.
+
+Generally  speaking, such statistics helps you define appropriate chunk size for
+chunk-based allocator in accordance with best-fit strategy.
 
 Build and installation
 ======================
@@ -42,14 +45,7 @@ then
 # make install-strip
 
 Installation  prefix  by  default is /usr/local. Logging library libmemlogger.so
-will  install  into  $PREFIX/lib;  log processor, memlogger-report, will install
-into $PREFIX/bin.
-
-Configuration options:
-
---enable-static-libs - This options configure memlogger-report statically.
-                       Useful on systems with different and incompatible
-                       libstdc++ runtimes.
+will  install  into  $PREFIX/lib.
 
 Using memlogger
 ===============
@@ -92,107 +88,73 @@ building memlogger of the appropriate bit size):
 
 # export LD_PRELOAD=libmemlogger.so
 
-To  write  allocations to the log, you need to start your application as follows
-(interactively or similarly as a service):
+Logging  session  runs  (for  foreground processes) till Ctrl+C pressed, or till
+SIGTERM/SIGINT send to logged process.
 
-# your_program_name 2>memory.log
-
-Then allow your program or application to run for a while to accumulate relevant
-data.
-
-Note: The log is saved in the current directory by default.
-
-Also you  can use logger this manner to preload, start and redirect log to file:
-
-# LD_PRELOAD=libmemlogger.so your_program_name 2>memory.log
+After that, report will be output to STDOUT by default.
 
 Note: Some platforms uses  LD_PRELOAD_32/LD_PRELOAD_64/LDR_PRELOAD/LDR_PRELOAD64
 environment variables instead.
+
 --------------------------------------------------------------------------------
-Note:  Please  keep  in  mind  that logging is carried out in STDERR by default.
-To  log  allocations to log file directly, just specify filename via environment
-variable before starting the profiled program:
+Note:  To  produce  report  to  log  file  directly,  just  specify filename via
+environment variable before starting the profiled program:
 
 # export MEMLOGGER_LOG_FILENAME=/tmp/memory.log
 
 When  permission  denied  or  file  cannot be created (or path does not exists),
-following occurs:
+following occurs (example):
 
 Cannot open log file /1/memory3.log
-Segmentation Fault (core dumped)
---------------------------------------------------------------------------------
-
-Raw log contains the follows:
-
-malloc:72704:1607278434
-malloc:160:1607278434
-malloc:160:1607278434
-malloc:2:1607278434
-malloc:40:1607278434
-malloc:7:1607278434
-malloc:3:1607278434
-malloc:40:1607278434
-malloc:5:1607278434
-malloc:3:1607278434
-malloc:40:1607278434
-malloc:5:1607278434
-malloc:6:1607278434
-...
-
-where first number is the size of the allocation, the second is epoch timestamp.
-
-Once you have finished accumulating raw data, you are ready to process it.
-
-First of all, unset LD_PRELOAD, if exported.
-
-To process the data, run the log processor as follows:
-
-# memlogger-report -lmemory.log
-
-Option -l specifies source raw log.
-
-Log  processor  by  default  will output result to STDOUT. To save result to the
-file, use -f option:
-
-# memlogger-report -lmemory.log -fmemory_alloc_report.txt
 
 Note: If target file exists, it will be overwritten.
+--------------------------------------------------------------------------------
 
 The result will be as follows:
 
-# memlogger-report -lmemory.log
-malloc up to 64k           : 14501901
-malloc from 64k to 128k    : 75
-malloc from 128k to 256k   : 659
-malloc from 256k to 512k   : 75
-malloc from 512k to 1024k  : 6
-malloc from 1024k to 2048k : 6
-malloc from 2048k to 4096k : 111
-malloc from 4096k to 8192k : 37
-malloc >8192k              : 67
-malloc max size            : 240836k
+Memory allocations report
+===================================================
+malloc up to 64k           : 43199
+malloc from 64k to 128k    : 1
+malloc from 128k to 256k   : 0
+malloc from 256k to 512k   : 0
+malloc from 512k to 1024k  : 0
+malloc from 1024k to 2048k : 0
+malloc from 2048k to 4096k : 0
+malloc from 4096k to 8192k : 0
+malloc >8192k              : 0
+malloc max size            : 71k
 ---------------------------------------------------
-183581 malloc calls/sec
+960 malloc calls/sec
 ---------------------------------------------------
-No other calls found
-Elapsed time: 79 sec
-...
+realloc up to 64k           : 6
+realloc from 64k to 128k    : 0
+realloc from 128k to 256k   : 0
+realloc from 256k to 512k   : 0
+realloc from 512k to 1024k  : 0
+realloc from 1024k to 2048k : 0
+realloc from 2048k to 4096k : 0
+realloc from 4096k to 8192k : 0
+realloc >8192k              : 0
+realloc max size            : 1k
+---------------------------------------------------
+6 realloc calls/sec
+---------------------------------------------------
+calloc up to 64k           : 1047
+calloc from 64k to 128k    : 0
+calloc from 128k to 256k   : 1
+calloc from 256k to 512k   : 0
+calloc from 512k to 1024k  : 0
+calloc from 1024k to 2048k : 0
+calloc from 2048k to 4096k : 0
+calloc from 4096k to 8192k : 0
+calloc >8192k              : 0
+calloc max size            : 182k
+---------------------------------------------------
+1048 calloc calls/sec
+---------------------------------------------------
+Elapsed time: 45 sec
 
 where  the  numbers  show the number of calls to the corresponding function with
-the  size  of  the sice in the range of the corresponding bucket. "Elapsed time"
-shows total logging time.
-
-Log processor arguments
-=======================
-
-Log processor command line arguments are:
-
--l<full log file name> - set log file. Default ./memory.log
--f<full output file name> - set output file. Default ./memory_alloc_report.log
--v - show version and exit
--h|-? - show this help and exit
-
-Option -l should always be specified.
-
-Note:  Option -f can contain no filename; when specified without it uses default
-for result saving.
+the   size  in the range of the corresponding bucket. "Elapsed time" shows total
+logging time.

@@ -5,14 +5,14 @@
 #
 # Process this file with autoconf to produce a configure script.
 
-m4_define([VERSION_MAJOR],[1])
-m4_define([VERSION_MINOR],[5])
-m4_define([VERSION_MICRO],[8])
+m4_define([VERSION_MAJOR],[2])
+m4_define([VERSION_MINOR],[0])
+m4_define([VERSION_MICRO],[0])
 
 AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
-MEMLOGGER_CURRENT=1
-MEMLOGGER_REVISION=12
+MEMLOGGER_CURRENT=2
+MEMLOGGER_REVISION=0
 MEMLOGGER_AGE=0
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -27,6 +27,7 @@ MEMLOGGER_AGE=0
 # 1.0.10 had 1:10:0
 # 1.0.11 had 1:11:0
 # 1.0.12 had 1:12:0
+# 2.0.0 had 2:0:0
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -52,7 +53,7 @@ AC_SUBST(MEMLOGGER_AGE)
 
 AC_CONFIG_AUX_DIR(cfgaux)
 AC_CONFIG_MACRO_DIRS([m4])
-AC_CONFIG_FILES([Makefile src/Makefile src/memlogger-report.h])
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([1.16 subdir-objects])
@@ -148,25 +149,6 @@ if test x"$ac_cv_lto_supported" = xno; then
   AC_MSG_NOTICE([LTO/Link optimization not supported])
 fi
 
-dnl Static runtime libs linking feature (GCC/Clang only)
-AC_ARG_ENABLE([static_libs],
-    AS_HELP_STRING([--enable-static-libs], [Enable static runtime libgcc/libstdc++ linking for reporting tool]))
-
-STATIC_LIBS=""
-
-AS_IF([test ! -z "$enable_static_libs"], [
-  AS_IF([test "$ax_cv_cxx_compiler_vendor" = "sun"], [AC_MSG_ERROR(Option --enable-static-libs requires GCC/Clang!)])
-  dnl Do the stuff needed for enabling the feature
-  # Because c++ can point to either g++ or clang++, we're must do additional OS check
-  if test ! -z `uname -s | $EGREP -o -E 'BSD'`; then
-    STATIC_LIBS="$STATIC_LIBS -static"
-  else
-    STATIC_LIBS="$STATIC_LIBS -static-libgcc -static-libstdc++"
-  fi
-])
-AC_MSG_NOTICE([static_libs enabled: ${enable_static_libs:=no}])
-AM_CONDITIONAL([STATIC_LIBS], [test "x$enable_static_libs" = xyes])
-
 dnl Checks for header files.
 AC_CHECK_HEADERS([dlfcn.h], [], [],
      [[#ifdef HAVE_DLFCN_H
@@ -176,5 +158,4 @@ AC_CHECK_HEADERS([dlfcn.h], [], [],
 
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)
-AC_SUBST(STATIC_LIBS)
 AC_OUTPUT

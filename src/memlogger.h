@@ -4,13 +4,17 @@
   #error This program needs at least a C++11 compliant compiler
 #endif
 
-#include <cstdio>
-#include <cstdlib>
+#include <csignal>
+#include <cstdlib>	/* For std::exit, std::getenv */
 #include <chrono>
 #include <array>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <algorithm>	/* For std::min_element, std::max_element */
+#include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
+#include <fstream>
+#include <ostream>	/* For std::ostream */
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -22,8 +26,10 @@
 #include <dlfcn.h>
 #endif
 
-#define OUTPUT_BUFFER_SIZE 4096
 #define STATIC_ALLOC_BUFFER_SIZE 32
+
+/* Counters array size; for 3 functions */
+#define ARRAY_SIZE 3
 
 /* Memory functions names */
 #define FUNC_1 "malloc"
@@ -33,11 +39,65 @@
 /* Fields delimiter */
 #define DELIMITER ":"
 
+/* Report literals */
+#define REPORT_HEADING "Memory allocations report"
+#define SEPARATION_LINE_1 "==================================================="
+#define ALLOC_64K   " up to 64k           : "
+#define ALLOC_128K  " from 64k to 128k    : "
+#define ALLOC_256K  " from 128k to 256k   : "
+#define ALLOC_512K  " from 256k to 512k   : "
+#define ALLOC_1024K " from 512k to 1024k  : "
+#define ALLOC_2048K " from 1024k to 2048k : "
+#define ALLOC_4096K " from 2048k to 4096k : "
+#define ALLOC_8192K " from 4096k to 8192k : "
+#define ALLOC_MORE  " >8192k              : "
+#define ALLOC_MAX   " max size            : "
+#define SEPARATION_LINE_2 "---------------------------------------------------"
+
+/* Multiplier */
+#define KBYTES 1024
+
+/* Error messages */
+#define ERR_MSG "ERROR: "
+#define ERR_MSG_A ERR_MSG "Report array empty"
+#define ERR_MSG_F ERR_MSG "Failed to open file "
+#define ERR_MSG_NF "No other calls found"
+
+/* Return codes */
+#define EXIT_0 0	//Normal exit
+#define EXIT_1 1	//Report array empty
+
 namespace {
 
-static std::array<char, OUTPUT_BUFFER_SIZE> v_buffer;	/* Static buffer for output to avoid malloc */
 static std::array<char, STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
-static std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false }, v_IOMalloc { false };
+static std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false };
+
+using Counters = struct Counters {
+	std::string memory_function;
+	std::size_t allc_64k;
+	std::size_t allc_128k;
+	std::size_t allc_256k;
+	std::size_t allc_512k;
+	std::size_t allc_1024k;
+	std::size_t allc_2048k;
+	std::size_t allc_4096k;
+	std::size_t allc_8192k;
+	std::size_t allc_more;
+	std::size_t allc_max;	/* Peak allocation size */
+	long start, stop;	/* Time interval in epoch */
+	std::atomic<bool> lock;
+};
+
+std::array<Counters, ARRAY_SIZE> v_CounterArray;
+
+static constexpr std::size_t c_num_64K = 64 * KBYTES;
+static constexpr std::size_t c_num_128K = 128 * KBYTES;
+static constexpr std::size_t c_num_256K = 256 * KBYTES;
+static constexpr std::size_t c_num_512K = 512 * KBYTES;
+static constexpr std::size_t c_num_1024K = 1024 * KBYTES;
+static constexpr std::size_t c_num_2048K = 2048 * KBYTES;
+static constexpr std::size_t c_num_4096K = 4096 * KBYTES;
+static constexpr std::size_t c_num_8192K = 8192 * KBYTES;
 
 class AdaptiveSpinMutex {
 public:
@@ -79,8 +139,10 @@ class MemoryLoggerFunctions {
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */
 
-		template <typename S, typename T>
-		void protectedWrite(S p_function, T p_size);
+		long Now();
+
+		template <typename S, typename T, typename L>
+		void fillArrayEntry(S&& p_fname, const T p_value, const L p_timestamp);
 
 		static MemoryLoggerFunctions& GetInstance() {
 			static MemoryLoggerFunctions inst;
@@ -91,27 +153,64 @@ class MemoryLoggerFunctions {
 		void operator=(const MemoryLoggerFunctions &) = delete;
 
 	private:
-		MemoryLoggerFunctions() : m_lock(m_output_lock) {
+		MemoryLoggerFunctions() {
 			v_innerCalloc.store(true, std::memory_order_release);
 			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
 			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
-			char* fname = std::getenv("MEMLOGGER_LOG_FILENAME");	/* Get logfile name from environment if specified */
-			if (fname)
-				if (!::freopen(fname, "w", stderr)) {		/* Redirect stderr to logfile */
-					std::fprintf(stdout, "%s%s\n", "Cannot open log file ", fname);
-					return;					/* Terminate execution; will segfault here */
-				}
 			v_innerCalloc.store(false, std::memory_order_release);
-			std::setbuf(stderr, v_buffer.data());
 		};
-
-		std::atomic<bool>& m_lock;
-		static std::atomic<bool> m_output_lock;
-
-		long Now();
 };
 
-std::atomic<bool> MemoryLoggerFunctions::m_output_lock { false };	/* Avoid linking error 'Undefined first referenced symbol' */
+class OnLoadUnload {
+	public:
+		OnLoadUnload() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_OutputConsole(true) {
+			std::signal(SIGINT, signal_handler);
+			std::signal(SIGHUP, signal_handler);
+			std::signal(SIGTERM, signal_handler);
+			if (m_fname) {
+				m_OutputFile = std::string(m_fname);
+				m_OutputConsole = false;
+				m_fd = std::ofstream(m_OutputFile, std::ios_base::trunc|std::ios_base::out);
+				if (!m_fd.is_open()) {
+					std::cerr << ERR_MSG_F + m_OutputFile << std::endl;
+					return;	/* Throw exception here */
+				}
+			}
+		}
+
+		~OnLoadUnload() { printReportOnExit(); }
+
+	private:
+		char* m_fname;
+		bool m_OutputConsole;
+		std::string m_OutputFile;
+		std::ofstream m_fd;
+
+		void printReportOnExit()
+		{
+			if (m_OutputConsole) {
+				printReportTotal();
+			} else {
+				printReportTotal(m_fd);
+				m_fd.close();
+			}
+		}
+
+		static void signal_handler(int signum)
+		{
+			OnLoadUnload inst;
+			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) {
+				inst.printReportOnExit();
+				std::exit(EXIT_0);
+			}
+		}
+
+		std::size_t sumCounters(const std::size_t p_idx);
+		void printReport(const std::size_t p_idx, std::ostream &p_stream = std::cout);
+		long computeTotalLoggingTime();
+
+		void printReportTotal(std::ostream &p_stream = std::cout);
+} onLoadUnload;
 
 }	/* namespace */

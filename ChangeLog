@@ -147,3 +147,8 @@ IMPROVEMENT: Do not log calloc() inner malloc() calls.
 IMPROVEMENT: Performance malloc() internal processing.
 FIX: Wrong counting if allocations fit one epoch tick.
 FIX: Deadlock on __cxa_guard_acquire.
+
+06-05-2022
+==========
+IMPROVEMENT: Completely reworked; memlogger-report log processor no more requires. Instant report with O(1) complexity.
+IMPROVEMENT: Reduced counter array locking. Huge refactoring and optimization.
