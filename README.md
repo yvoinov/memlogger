@@ -91,7 +91,9 @@ Note:  To  produce  report  to  log  file  directly,  just  specify filename via
 When  permission  denied  or  file  cannot be created (or path does not exists),
 following occurs (example):
 
+```sh
 Cannot open log file /1/memory3.log
+```
 
 Note: If target file exists, it will be overwritten.
 
