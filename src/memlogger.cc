@@ -122,7 +122,7 @@ void OnLoadUnload::printReportTotal(std::ostream &p_stream)
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (v_CounterArray.size() > 0) {
 		for (std::size_t i = 0; i < v_CounterArray.size(); ++i) {
-			if (!v_CounterArray[i].memory_function == 0)
+			if (!(v_CounterArray[i].memory_function == 0))
 				printReport(i, p_stream);
 			else p_stream << ERR_MSG_NF << std::endl;
 		}

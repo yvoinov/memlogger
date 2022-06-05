@@ -69,8 +69,8 @@
 
 namespace {
 
-static std::array<char, STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
-static std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false };
+std::array<char, STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
+std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false };
 
 using Counters = struct Counters {
 	std::size_t memory_function;
@@ -90,14 +90,14 @@ using Counters = struct Counters {
 
 std::array<Counters, ARRAY_SIZE> v_CounterArray;
 
-static constexpr std::size_t c_num_64K = 64 * KBYTES;
-static constexpr std::size_t c_num_128K = 128 * KBYTES;
-static constexpr std::size_t c_num_256K = 256 * KBYTES;
-static constexpr std::size_t c_num_512K = 512 * KBYTES;
-static constexpr std::size_t c_num_1024K = 1024 * KBYTES;
-static constexpr std::size_t c_num_2048K = 2048 * KBYTES;
-static constexpr std::size_t c_num_4096K = 4096 * KBYTES;
-static constexpr std::size_t c_num_8192K = 8192 * KBYTES;
+constexpr std::size_t c_num_64K = 64 * KBYTES;
+constexpr std::size_t c_num_128K = 128 * KBYTES;
+constexpr std::size_t c_num_256K = 256 * KBYTES;
+constexpr std::size_t c_num_512K = 512 * KBYTES;
+constexpr std::size_t c_num_1024K = 1024 * KBYTES;
+constexpr std::size_t c_num_2048K = 2048 * KBYTES;
+constexpr std::size_t c_num_4096K = 4096 * KBYTES;
+constexpr std::size_t c_num_8192K = 8192 * KBYTES;
 
 class AdaptiveSpinMutex {
 public:
