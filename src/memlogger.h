@@ -31,10 +31,14 @@
 /* Counters array size; for 3 functions */
 #define ARRAY_SIZE 3
 
-/* Memory functions names */
+/* Memory functions names and values */
 #define FUNC_1 "malloc"
 #define FUNC_2 "realloc"
 #define FUNC_3 "calloc"
+
+#define FUNC_1_VALUE_1 1
+#define FUNC_2_VALUE_2 2
+#define FUNC_3_VALUE_3 3
 
 /* Fields delimiter */
 #define DELIMITER ":"
