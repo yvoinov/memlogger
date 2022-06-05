@@ -159,3 +159,4 @@ FIX: clang++: warning: -ldl: 'linker' input unused.
 06-06-2022
 ==========
 IMPROVEMENT: Refactored fillArrayEntry().
+IMPROVEMENT: Refactored class MemoryLoggerFunctions.

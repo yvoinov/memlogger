@@ -155,19 +155,9 @@ class MemoryLoggerFunctions {
 		MemoryLoggerFunctions(MemoryLoggerFunctions &other) = delete;
 		void operator=(const MemoryLoggerFunctions &) = delete;
 
+		~MemoryLoggerFunctions() { printReportOnExit(); }
 	private:
-		MemoryLoggerFunctions() {
-			v_innerCalloc.store(true, std::memory_order_release);
-			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
-			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
-			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
-			v_innerCalloc.store(false, std::memory_order_release);
-		};
-};
-
-class OnLoadUnload {
-	public:
-		OnLoadUnload() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_OutputConsole(true) {
+		MemoryLoggerFunctions() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_OutputConsole(true) {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
@@ -180,11 +170,13 @@ class OnLoadUnload {
 					return;	/* Throw exception here */
 				}
 			}
-		}
+			v_innerCalloc.store(true, std::memory_order_release);
+			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
+			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
+			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
+			v_innerCalloc.store(false, std::memory_order_release);
+		};
 
-		~OnLoadUnload() { printReportOnExit(); }
-
-	private:
 		char* m_fname;
 		bool m_OutputConsole;
 		std::string m_OutputFile;
@@ -202,7 +194,7 @@ class OnLoadUnload {
 
 		static void signal_handler(int signum)
 		{
-			OnLoadUnload inst;
+			MemoryLoggerFunctions inst;
 			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) {
 				inst.printReportOnExit();
 				std::exit(EXIT_0);
@@ -215,6 +207,6 @@ class OnLoadUnload {
 		long computeTotalLoggingTime();
 
 		void printReportTotal(std::ostream &p_stream = std::cout);
-} onLoadUnload;
+};
 
 }	/* namespace */

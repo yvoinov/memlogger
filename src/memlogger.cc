@@ -49,7 +49,7 @@ void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::s
 		v_CounterArray[p_idx - 1].allc_max = p_value;
 }
 
-std::size_t OnLoadUnload::sumCounters(const std::size_t p_idx)
+std::size_t MemoryLoggerFunctions::sumCounters(const std::size_t p_idx)
 {
 	std::size_t v_sum = 0;
 	v_sum += v_CounterArray[p_idx].allc_64k;
@@ -64,7 +64,7 @@ std::size_t OnLoadUnload::sumCounters(const std::size_t p_idx)
 	return v_sum;
 }
 
-std::string OnLoadUnload::decodeMemFunc(const std::size_t p_idx)
+std::string MemoryLoggerFunctions::decodeMemFunc(const std::size_t p_idx)
 {
 	switch (p_idx) {
 		case 0:
@@ -82,7 +82,7 @@ std::string OnLoadUnload::decodeMemFunc(const std::size_t p_idx)
 	}
 }
 
-void OnLoadUnload::printReport(const std::size_t p_idx, std::ostream &p_stream)
+void MemoryLoggerFunctions::printReport(const std::size_t p_idx, std::ostream &p_stream)
 {
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << v_CounterArray[p_idx].allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << v_CounterArray[p_idx].allc_128k << std::endl;
@@ -105,13 +105,13 @@ void OnLoadUnload::printReport(const std::size_t p_idx, std::ostream &p_stream)
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
-long OnLoadUnload::computeTotalLoggingTime()
+long MemoryLoggerFunctions::computeTotalLoggingTime()
 {
 	return *std::max_element(&v_CounterArray[0].stop, &v_CounterArray[0].stop + (v_CounterArray.size() - 1)) -
 		*std::min_element(&v_CounterArray[0].start, &v_CounterArray[0].start + (v_CounterArray.size() - 1));
 }
 
-void OnLoadUnload::printReportTotal(std::ostream &p_stream)
+void MemoryLoggerFunctions::printReportTotal(std::ostream &p_stream)
 {
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
