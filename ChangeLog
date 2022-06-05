@@ -152,3 +152,4 @@ FIX: Deadlock on __cxa_guard_acquire.
 ==========
 IMPROVEMENT: Completely reworked; memlogger-report log processor no more requires. Instant report with O(1) complexity.
 IMPROVEMENT: Reduced counter array locking. Huge refactoring and optimization.
+FIX: Hang on __futex_abstimed_wait_common () from /usr/lib/libc.so.6 on Linux.

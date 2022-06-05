@@ -73,7 +73,7 @@ static std::array<char, STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
 static std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false };
 
 using Counters = struct Counters {
-	std::string memory_function;
+	std::size_t memory_function;
 	std::size_t allc_64k;
 	std::size_t allc_128k;
 	std::size_t allc_256k;
@@ -141,8 +141,7 @@ class MemoryLoggerFunctions {
 
 		long Now();
 
-		template <typename S, typename T, typename L>
-		void fillArrayEntry(S&& p_fname, const T p_value, const L p_timestamp);
+		void fillArrayEntry(const std::size_t p_idx, const std::size_t p_value, const long p_timestamp);
 
 		static MemoryLoggerFunctions& GetInstance() {
 			static MemoryLoggerFunctions inst;
@@ -207,6 +206,7 @@ class OnLoadUnload {
 		}
 
 		std::size_t sumCounters(const std::size_t p_idx);
+		std::string decodeMemFunc(const std::size_t p_idx);
 		void printReport(const std::size_t p_idx, std::ostream &p_stream = std::cout);
 		long computeTotalLoggingTime();
 

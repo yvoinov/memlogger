@@ -13,18 +13,17 @@ inline long MemoryLoggerFunctions::Now()
 	return c_dtn.count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den;
 }
 
-template <typename S, typename T, typename L>
-void MemoryLoggerFunctions::fillArrayEntry(S&& p_fname, const T p_value, const L p_timestamp)
+void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::size_t p_value, const long p_timestamp)
 {
-	T v_array_line = 0;						/* Choose appropriate array line */
-	if (p_fname == std::string(FUNC_2)) v_array_line = 1;
-	else if (p_fname == std::string(FUNC_3)) v_array_line = 2;
+	std::size_t v_array_line = 0;					/* Choose appropriate array line */
+	if (p_idx == 2) v_array_line = 1;
+	else if (p_idx == 3) v_array_line = 2;
 
 	AdaptiveSpinMutex spmux(v_CounterArray[v_array_line].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);              	/* Take row-level spinlock here */
 
-	if (v_CounterArray[v_array_line].memory_function.empty())	/* Write function if not yet */
-		v_CounterArray[v_array_line].memory_function = p_fname;
+	if (v_CounterArray[v_array_line].memory_function == 0)	/* Write function if not yet */
+		v_CounterArray[v_array_line].memory_function = p_idx;
 
 	if (v_CounterArray[v_array_line].start == 0)			/* Save timestamp; let's inline it */
 		v_CounterArray[v_array_line].start = p_timestamp;
@@ -69,26 +68,45 @@ std::size_t OnLoadUnload::sumCounters(const std::size_t p_idx)
 	return v_sum;
 }
 
+std::string OnLoadUnload::decodeMemFunc(const std::size_t p_idx)
+{
+	switch (p_idx) {
+		case 0:
+			return std::string(FUNC_1);
+			break;
+		case 1:
+			return std::string(FUNC_2);
+			break;
+		case 2:
+			return std::string(FUNC_3);
+			break;
+		default:
+			return std::string("");
+			break;
+	}
+}
+
+
 void OnLoadUnload::printReport(const std::size_t p_idx, std::ostream &p_stream)
 {
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_64K << v_CounterArray[p_idx].allc_64k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_128K << v_CounterArray[p_idx].allc_128k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_256K << v_CounterArray[p_idx].allc_256k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_512K << v_CounterArray[p_idx].allc_512k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_1024K << v_CounterArray[p_idx].allc_1024k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_2048K << v_CounterArray[p_idx].allc_2048k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_4096K << v_CounterArray[p_idx].allc_4096k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_8192K << v_CounterArray[p_idx].allc_8192k << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_MORE << v_CounterArray[p_idx].allc_more << std::endl;
-	p_stream << v_CounterArray[p_idx].memory_function << ALLOC_MAX << v_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << v_CounterArray[p_idx].allc_64k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << v_CounterArray[p_idx].allc_128k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << v_CounterArray[p_idx].allc_256k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_512K << v_CounterArray[p_idx].allc_512k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_1024K << v_CounterArray[p_idx].allc_1024k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_2048K << v_CounterArray[p_idx].allc_2048k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_4096K << v_CounterArray[p_idx].allc_4096k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_8192K << v_CounterArray[p_idx].allc_8192k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_MORE << v_CounterArray[p_idx].allc_more << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << v_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 	const std::ptrdiff_t c_time_diff = v_CounterArray[p_idx].stop - v_CounterArray[p_idx].start;
 	if (c_time_diff != 0 && sumCounters(p_idx) != 0)
-		p_stream << sumCounters(p_idx) / c_time_diff << " " << v_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
+		p_stream << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	else if (c_time_diff == 0 && sumCounters(p_idx) != 0)	/* If allocations fit one epoch tick */
-		p_stream << sumCounters(p_idx) << " " << v_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
+		p_stream << sumCounters(p_idx) << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	else
-		p_stream << "0 " << v_CounterArray[p_idx].memory_function << " calls/sec" << std::endl;
+		p_stream << "0 " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
@@ -104,7 +122,7 @@ void OnLoadUnload::printReportTotal(std::ostream &p_stream)
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (v_CounterArray.size() > 0) {
 		for (std::size_t i = 0; i < v_CounterArray.size(); ++i) {
-			if (!v_CounterArray[i].memory_function.empty())
+			if (!v_CounterArray[i].memory_function == 0)
 				printReport(i, p_stream);
 			else p_stream << ERR_MSG_NF << std::endl;
 		}
@@ -122,7 +140,7 @@ extern "C" {
 void *malloc(std::size_t size)
 {
 	if (!v_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive or IO malloc calls */
-		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1, size, MemoryLoggerFunctions::GetInstance().Now());
+		MemoryLoggerFunctions::GetInstance().fillArrayEntry(1, size, MemoryLoggerFunctions::GetInstance().Now());
 	if (v_innerMalloc.load(std::memory_order_acquire))
 		v_innerMalloc.store(false, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
@@ -130,7 +148,7 @@ void *malloc(std::size_t size)
 
 void *realloc(void *ptr, std::size_t size)
 {
-	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_2, size, MemoryLoggerFunctions::GetInstance().Now());
+	MemoryLoggerFunctions::GetInstance().fillArrayEntry(2, size, MemoryLoggerFunctions::GetInstance().Now());
 	v_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Realloc(ptr, size);
 }
@@ -139,7 +157,7 @@ void *calloc(std::size_t n, std::size_t size)
 {
 	if (v_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 		return v_static_alloc_buffer.data();
-	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_3, n * size, MemoryLoggerFunctions::GetInstance().Now());
+	MemoryLoggerFunctions::GetInstance().fillArrayEntry(3, n * size, MemoryLoggerFunctions::GetInstance().Now());
 	v_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Calloc(n, size);
 }
