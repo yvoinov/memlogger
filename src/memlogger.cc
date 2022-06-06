@@ -16,12 +16,12 @@ inline long MemoryLoggerFunctions::Now()
 void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::size_t p_value, const long p_timestamp)
 {
 	AdaptiveSpinMutex spmux(v_CounterArray[p_idx - 1].lock);
-	std::lock_guard<AdaptiveSpinMutex> lock(spmux);              	/* Take row-level spinlock here */
+	std::lock_guard<AdaptiveSpinMutex> lock(spmux);         /* Take row-level spinlock here */
 
-	if (v_CounterArray[p_idx - 1].memory_function == 0)		/* Write function if not yet */
+	if (v_CounterArray[p_idx - 1].memory_function == 0)	/* Write function if not yet */
 		v_CounterArray[p_idx - 1].memory_function = p_idx;
 
-	if (v_CounterArray[p_idx - 1].start == 0)			/* Save timestamp; let's inline it */
+	if (v_CounterArray[p_idx - 1].start == 0)		/* Save timestamp; let's inline it */
 		v_CounterArray[p_idx - 1].start = p_timestamp;
 	else if (v_CounterArray[p_idx - 1].stop == 0 || v_CounterArray[p_idx - 1].stop < p_timestamp)
 		v_CounterArray[p_idx - 1].stop = p_timestamp;
@@ -134,7 +134,7 @@ extern "C" {
 
 void *malloc(std::size_t size)
 {
-	if (!v_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive or IO malloc calls */
+	if (!v_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1_VALUE_1, size, MemoryLoggerFunctions::GetInstance().Now());
 	if (v_innerMalloc.load(std::memory_order_acquire))
 		v_innerMalloc.store(false, std::memory_order_release);
