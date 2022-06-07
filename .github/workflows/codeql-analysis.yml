@@ -78,4 +78,5 @@ jobs:
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: ./archive/refs/tags/2.0.2.zip ./archive/refs/tags/2.0.2.tar.gz
+        path: ${{ github.workspace }}
+        files: ./refs/tags/2.0.2.zip ./refs/tags/2.0.2.tar.gz
