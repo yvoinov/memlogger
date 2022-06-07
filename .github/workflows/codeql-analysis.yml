@@ -73,11 +73,10 @@ jobs:
 
     # Auto update-release.
     # https://github.com/johnwbyrd/update-release
-##      uses: johnwbyrd/update-release@v1.0.0
-    - name: Update Release
-      uses: IsaacShelton/update-existing-release@v1.3.0
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        files: src/memlogger.h src/memlogger.cc README.md README
-        release: Version 2.0.2
-        tag: 2.0.2
+##    - name: Update Release
+##      uses: IsaacShelton/update-existing-release@v1.3.0
+##      with:
+##        token: ${{ secrets.GITHUB_TOKEN }}
+##        files: src/memlogger.h src/memlogger.cc README.md README
+##        release: Version 2.0.2
+##        tag: 2.0.2
