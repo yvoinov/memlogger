@@ -72,7 +72,7 @@ jobs:
       uses: github/codeql-action/analyze@v2
 
     # Auto update-release.
-    # https://github.com/marketplace/actions/update-existing-release
+    # https://github.com/johnwbyrd/update-release
     - name: Update Release
       uses: johnwbyrd/update-release@v1.0.0
       with:
