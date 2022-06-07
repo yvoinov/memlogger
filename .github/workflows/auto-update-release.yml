@@ -1,3 +1,6 @@
+# Auto update-release.
+# https://github.com/marketplace/actions/update-existing-release
+
 name: "AutoUpdateRelease"
 
 on:
@@ -9,8 +12,6 @@ on:
 
 jobs:
     steps:
-    # Auto update-release.
-    # https://github.com/marketplace/actions/update-existing-release
     - name: update-existing-release
       uses: IsaacShelton/update-existing-release@v1.3.0
       with:
