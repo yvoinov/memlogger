@@ -177,14 +177,14 @@ class MemoryLoggerFunctions {
 				printReportTotal();
 			} else {
 				g_innerMalloc.store(true, std::memory_order_release);
-				std::string m_OutputFile = std::string(m_fname);
-				std::ofstream m_fd = std::ofstream(m_OutputFile, std::ios_base::trunc|std::ios_base::out);
-				if (!m_fd.is_open()) {
-					std::cerr << ERR_MSG_F + m_OutputFile << std::endl;
+				std::string v_OutputFile = std::string(m_fname);
+				std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
+				if (!v_fd.is_open()) {
+					std::cerr << ERR_MSG_F + v_OutputFile << std::endl;
 					return;
 				}
-				printReportTotal(m_fd);
-				m_fd.close();
+				printReportTotal(v_fd);
+				v_fd.close();
 			}
 		}
 
