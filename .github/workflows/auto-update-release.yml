@@ -1,8 +1,5 @@
 # Auto update-release.
 # https://github.com/marketplace/actions/update-existing-release
-
-name: "AutoUpdateRelease"
-
 on:
   push:
     branches: [ main ]
