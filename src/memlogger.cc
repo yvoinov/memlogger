@@ -15,52 +15,52 @@ inline long MemoryLoggerFunctions::Now()
 
 void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::size_t p_value, const long p_timestamp)
 {
-	AdaptiveSpinMutex spmux(v_CounterArray[p_idx - 1].lock);
+	AdaptiveSpinMutex spmux(g_CounterArray[p_idx - 1].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);         /* Take row-level spinlock here */
 
-	if (v_CounterArray[p_idx - 1].memory_function == 0)	/* Write function if not yet */
-		v_CounterArray[p_idx - 1].memory_function = p_idx;
+	if (g_CounterArray[p_idx - 1].memory_function == 0)	/* Write function if not yet */
+		g_CounterArray[p_idx - 1].memory_function = p_idx;
 
-	if (v_CounterArray[p_idx - 1].start == 0)		/* Save timestamp; let's inline it */
-		v_CounterArray[p_idx - 1].start = p_timestamp;
-	else if (v_CounterArray[p_idx - 1].stop == 0 || v_CounterArray[p_idx - 1].stop < p_timestamp)
-		v_CounterArray[p_idx - 1].stop = p_timestamp;
+	if (g_CounterArray[p_idx - 1].start == 0)		/* Save timestamp; let's inline it */
+		g_CounterArray[p_idx - 1].start = p_timestamp;
+	else if (g_CounterArray[p_idx - 1].stop == 0 || g_CounterArray[p_idx - 1].stop < p_timestamp)
+		g_CounterArray[p_idx - 1].stop = p_timestamp;
 
 	if (p_value > 0 && p_value <= c_num_64K)
-		++v_CounterArray[p_idx - 1].allc_64k;
+		++g_CounterArray[p_idx - 1].allc_64k;
 	else if (p_value > c_num_64K && p_value <= c_num_128K)
-		++v_CounterArray[p_idx - 1].allc_128k;
+		++g_CounterArray[p_idx - 1].allc_128k;
 	else if (p_value > c_num_128K && p_value <= c_num_256K)
-		++v_CounterArray[p_idx - 1].allc_256k;
+		++g_CounterArray[p_idx - 1].allc_256k;
 	else if (p_value > c_num_256K && p_value <= c_num_512K)
-		++v_CounterArray[p_idx - 1].allc_512k;
+		++g_CounterArray[p_idx - 1].allc_512k;
 	else if (p_value > c_num_512K && p_value <= c_num_1024K)
-		++v_CounterArray[p_idx - 1].allc_1024k;
+		++g_CounterArray[p_idx - 1].allc_1024k;
 	else if (p_value > c_num_1024K && p_value <= c_num_2048K)
-		++v_CounterArray[p_idx - 1].allc_2048k;
+		++g_CounterArray[p_idx - 1].allc_2048k;
 	else if (p_value > c_num_2048K && p_value <= c_num_4096K)
-		++v_CounterArray[p_idx - 1].allc_4096k;
+		++g_CounterArray[p_idx - 1].allc_4096k;
 	else if (p_value > c_num_4096K && p_value <= c_num_8192K)
-		++v_CounterArray[p_idx - 1].allc_8192k;
+		++g_CounterArray[p_idx - 1].allc_8192k;
 	else if (p_value > c_num_8192K) {
-		++v_CounterArray[p_idx - 1].allc_more;
+		++g_CounterArray[p_idx - 1].allc_more;
 	}
-	if (p_value > v_CounterArray[p_idx - 1].allc_max)
-		v_CounterArray[p_idx - 1].allc_max = p_value;
+	if (p_value > g_CounterArray[p_idx - 1].allc_max)
+		g_CounterArray[p_idx - 1].allc_max = p_value;
 }
 
 std::size_t MemoryLoggerFunctions::sumCounters(const std::size_t p_idx)
 {
 	std::size_t v_sum = 0;
-	v_sum += v_CounterArray[p_idx].allc_64k;
-	v_sum += v_CounterArray[p_idx].allc_128k;
-	v_sum += v_CounterArray[p_idx].allc_256k;
-	v_sum += v_CounterArray[p_idx].allc_512k;
-	v_sum += v_CounterArray[p_idx].allc_1024k;
-	v_sum += v_CounterArray[p_idx].allc_2048k;
-	v_sum += v_CounterArray[p_idx].allc_4096k;
-	v_sum += v_CounterArray[p_idx].allc_8192k;
-	v_sum += v_CounterArray[p_idx].allc_more;
+	v_sum += g_CounterArray[p_idx].allc_64k;
+	v_sum += g_CounterArray[p_idx].allc_128k;
+	v_sum += g_CounterArray[p_idx].allc_256k;
+	v_sum += g_CounterArray[p_idx].allc_512k;
+	v_sum += g_CounterArray[p_idx].allc_1024k;
+	v_sum += g_CounterArray[p_idx].allc_2048k;
+	v_sum += g_CounterArray[p_idx].allc_4096k;
+	v_sum += g_CounterArray[p_idx].allc_8192k;
+	v_sum += g_CounterArray[p_idx].allc_more;
 	return v_sum;
 }
 
@@ -84,18 +84,18 @@ std::string MemoryLoggerFunctions::decodeMemFunc(const std::size_t p_idx)
 
 void MemoryLoggerFunctions::printReport(const std::size_t p_idx, std::ostream &p_stream)
 {
-	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << v_CounterArray[p_idx].allc_64k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << v_CounterArray[p_idx].allc_128k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << v_CounterArray[p_idx].allc_256k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_512K << v_CounterArray[p_idx].allc_512k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_1024K << v_CounterArray[p_idx].allc_1024k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_2048K << v_CounterArray[p_idx].allc_2048k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_4096K << v_CounterArray[p_idx].allc_4096k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_8192K << v_CounterArray[p_idx].allc_8192k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_MORE << v_CounterArray[p_idx].allc_more << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << v_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << g_CounterArray[p_idx].allc_64k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << g_CounterArray[p_idx].allc_128k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << g_CounterArray[p_idx].allc_256k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_512K << g_CounterArray[p_idx].allc_512k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_1024K << g_CounterArray[p_idx].allc_1024k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_2048K << g_CounterArray[p_idx].allc_2048k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_4096K << g_CounterArray[p_idx].allc_4096k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_8192K << g_CounterArray[p_idx].allc_8192k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_MORE << g_CounterArray[p_idx].allc_more << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << g_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
-	const std::ptrdiff_t c_time_diff = v_CounterArray[p_idx].stop - v_CounterArray[p_idx].start;
+	const std::ptrdiff_t c_time_diff = g_CounterArray[p_idx].stop - g_CounterArray[p_idx].start;
 	if (c_time_diff != 0 && sumCounters(p_idx) != 0)
 		p_stream << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	else if (c_time_diff == 0 && sumCounters(p_idx) != 0)	/* If allocations fit one epoch tick */
@@ -107,17 +107,17 @@ void MemoryLoggerFunctions::printReport(const std::size_t p_idx, std::ostream &p
 
 long MemoryLoggerFunctions::computeTotalLoggingTime()
 {
-	return *std::max_element(&v_CounterArray[0].stop, &v_CounterArray[0].stop + (v_CounterArray.size() - 1)) -
-		*std::min_element(&v_CounterArray[0].start, &v_CounterArray[0].start + (v_CounterArray.size() - 1));
+	return *std::max_element(&g_CounterArray[0].stop, &g_CounterArray[0].stop + (g_CounterArray.size() - 1)) -
+		*std::min_element(&g_CounterArray[0].start, &g_CounterArray[0].start + (g_CounterArray.size() - 1));
 }
 
 void MemoryLoggerFunctions::printReportTotal(std::ostream &p_stream)
 {
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
-	if (v_CounterArray.size() > 0) {
-		for (std::size_t i = 0; i < v_CounterArray.size(); ++i) {
-			if (!(v_CounterArray[i].memory_function == 0))
+	if (g_CounterArray.size() > 0) {
+		for (std::size_t i = 0; i < g_CounterArray.size(); ++i) {
+			if (!(g_CounterArray[i].memory_function == 0))
 				printReport(i, p_stream);
 			else p_stream << ERR_MSG_NF << std::endl;
 		}

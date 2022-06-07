@@ -93,7 +93,7 @@ using Counters = struct Counters {
 	std::atomic<bool> lock;
 };
 
-std::array<Counters, ARRAY_SIZE> v_CounterArray;
+std::array<Counters, ARRAY_SIZE> g_CounterArray;
 
 constexpr std::size_t c_num_64K = 64 * KBYTES;
 constexpr std::size_t c_num_128K = 128 * KBYTES;
