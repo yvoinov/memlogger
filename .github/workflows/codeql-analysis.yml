@@ -78,5 +78,4 @@ jobs:
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        path: ${{ github.workspace }}
         files: ./2.0.2.zip ./2.0.2.tar.gz
