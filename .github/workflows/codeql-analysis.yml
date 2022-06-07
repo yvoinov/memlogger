@@ -69,15 +69,15 @@ jobs:
     #   make release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
 
 
     # Auto update-release.
     # https://github.com/marketplace/actions/update-release
-    - name: Update Release
-      uses: johnwbyrd/update-release@v1.0.0
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        files: /yvoinov/memlogger/archive/refs/tags/2.0.2.zip /yvoinov/memlogger/archive/refs/tags/2.0.2.tar.gz
+    #- name: Update Release
+    #  uses: johnwbyrd/update-release@v1.0.0
+    #  with:
+    #    token: ${{ secrets.GITHUB_TOKEN }}
+    #    files: /yvoinov/memlogger/archive/refs/tags/2.0.2.zip /yvoinov/memlogger/archive/refs/tags/2.0.2.tar.gz
 
 
