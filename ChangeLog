@@ -160,3 +160,8 @@ FIX: clang++: warning: -ldl: 'linker' input unused.
 ==========
 IMPROVEMENT: Refactored fillArrayEntry().
 IMPROVEMENT: Refactored class MemoryLoggerFunctions.
+
+06-07-2022
+==========
+FIX: Deadlock on __cxa_guard_acquire regression on file operation.
+

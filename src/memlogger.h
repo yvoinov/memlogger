@@ -73,8 +73,8 @@
 
 namespace {
 
-std::array<char, STATIC_ALLOC_BUFFER_SIZE> v_static_alloc_buffer;
-std::atomic<bool> v_innerMalloc { false }, v_innerCalloc { false };
+std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
+std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
 using Counters = struct Counters {
 	std::size_t memory_function;
@@ -157,36 +157,33 @@ class MemoryLoggerFunctions {
 
 		~MemoryLoggerFunctions() { printReportOnExit(); }
 	private:
-		MemoryLoggerFunctions() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_OutputConsole(true) {
+		MemoryLoggerFunctions() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")) {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
-			if (m_fname) {
-				m_OutputFile = std::string(m_fname);
-				m_OutputConsole = false;
-				m_fd = std::ofstream(m_OutputFile, std::ios_base::trunc|std::ios_base::out);
-				if (!m_fd.is_open()) {
-					std::cerr << ERR_MSG_F + m_OutputFile << std::endl;
-					return;	/* Throw exception here */
-				}
-			}
-			v_innerCalloc.store(true, std::memory_order_release);
+			g_innerCalloc.store(true, std::memory_order_release);
 			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
 			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
-			v_innerCalloc.store(false, std::memory_order_release);
+			g_innerCalloc.store(false, std::memory_order_release);
 		};
 
 		char* m_fname;
-		bool m_OutputConsole;
 		std::string m_OutputFile;
 		std::ofstream m_fd;
 
 		void printReportOnExit()
 		{
-			if (m_OutputConsole) {
+			if (!m_fname) {
 				printReportTotal();
 			} else {
+				g_innerMalloc.store(true, std::memory_order_release);
+				m_OutputFile = std::string(m_fname);
+				m_fd = std::ofstream(m_OutputFile, std::ios_base::trunc|std::ios_base::out);
+				if (!m_fd.is_open()) {
+					std::cerr << ERR_MSG_F + m_OutputFile << std::endl;
+					return;	/* Throw exception here */
+				}
 				printReportTotal(m_fd);
 				m_fd.close();
 			}
@@ -194,9 +191,8 @@ class MemoryLoggerFunctions {
 
 		static void signal_handler(int signum)
 		{
-			MemoryLoggerFunctions inst;
 			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) {
-				inst.printReportOnExit();
+				MemoryLoggerFunctions::GetInstance().printReportOnExit();
 				std::exit(EXIT_0);
 			}
 		}

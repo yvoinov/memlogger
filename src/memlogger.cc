@@ -134,26 +134,26 @@ extern "C" {
 
 void *malloc(std::size_t size)
 {
-	if (!v_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
+	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1_VALUE_1, size, MemoryLoggerFunctions::GetInstance().Now());
-	if (v_innerMalloc.load(std::memory_order_acquire))
-		v_innerMalloc.store(false, std::memory_order_release);
+	if (g_innerMalloc.load(std::memory_order_acquire))
+		g_innerMalloc.store(false, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
 }
 
 void *realloc(void *ptr, std::size_t size)
 {
 	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_2_VALUE_2, size, MemoryLoggerFunctions::GetInstance().Now());
-	v_innerMalloc.store(true, std::memory_order_release);
+	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Realloc(ptr, size);
 }
 
 void *calloc(std::size_t n, std::size_t size)
 {
-	if (v_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
-		return v_static_alloc_buffer.data();
+	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
+		return g_static_alloc_buffer.data();
 	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_3_VALUE_3, n * size, MemoryLoggerFunctions::GetInstance().Now());
-	v_innerMalloc.store(true, std::memory_order_release);
+	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Calloc(n, size);
 }
 

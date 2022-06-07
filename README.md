@@ -95,6 +95,8 @@ following occurs (example):
 Cannot open log file /1/memory3.log
 ```
 
+Please note on some platform current directory can have no permission to write. Choose writable directory to save reports.
+
 Note: If target file exists, it will be overwritten.
 
 The result will be as follows:
