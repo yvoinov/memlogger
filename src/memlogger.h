@@ -11,6 +11,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <string>
 #include <algorithm>	/* For std::min_element, std::max_element */
 #include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
 #include <fstream>
@@ -169,8 +170,6 @@ class MemoryLoggerFunctions {
 		};
 
 		char* m_fname;
-		std::string m_OutputFile;
-		std::ofstream m_fd;
 
 		void printReportOnExit()
 		{
@@ -178,11 +177,11 @@ class MemoryLoggerFunctions {
 				printReportTotal();
 			} else {
 				g_innerMalloc.store(true, std::memory_order_release);
-				m_OutputFile = std::string(m_fname);
-				m_fd = std::ofstream(m_OutputFile, std::ios_base::trunc|std::ios_base::out);
+				std::string m_OutputFile = std::string(m_fname);
+				std::ofstream m_fd = std::ofstream(m_OutputFile, std::ios_base::trunc|std::ios_base::out);
 				if (!m_fd.is_open()) {
 					std::cerr << ERR_MSG_F + m_OutputFile << std::endl;
-					return;	/* Throw exception here */
+					return;
 				}
 				printReportTotal(m_fd);
 				m_fd.close();

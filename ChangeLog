@@ -165,3 +165,7 @@ IMPROVEMENT: Refactored class MemoryLoggerFunctions.
 ==========
 FIX: Deadlock on __cxa_guard_acquire regression on file operation.
 
+06-08-2022
+==========
+IMPROVEMENT: Made m_OutputFile, m_fd local.
+
