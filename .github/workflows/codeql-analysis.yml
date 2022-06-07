@@ -73,8 +73,8 @@ jobs:
 
     # Auto update-release.
     # https://github.com/marketplace/actions/update-existing-release
-    - name: update-existing-release
-      uses: IsaacShelton/update-existing-release@v1.3.0
+    - name: Update Release
+    uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         files: src/memlogger.h src/memlogger.cc README.md
