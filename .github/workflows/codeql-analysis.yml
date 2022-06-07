@@ -78,4 +78,4 @@ jobs:
       uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        files: /yvoinov/memlogger/archive/refs/tags/2.0.2.zip /yvoinov/memlogger/archive/refs/tags/2.0.2.tar.gz
+        files: ./archive/refs/tags/2.0.2.zip ./archive/refs/tags/2.0.2.tar.gz
