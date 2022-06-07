@@ -75,7 +75,7 @@ jobs:
     # Auto update-release.
     # https://github.com/marketplace/actions/update-release
     - name: Update Release
-    uses: johnwbyrd/update-release@v1.0.0
+      uses: johnwbyrd/update-release@v1.0.0
       with:
         token: ${{ secrets.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 }}
         asset: ./2.0.2.zip ./2.0.2.tar.gz
