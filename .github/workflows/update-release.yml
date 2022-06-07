@@ -2,5 +2,4 @@
   uses: johnwbyrd/update-release@v1
   with:
     token: ${{ secrets.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 }}
-    asset: ./2.0.2.zip 
-	asset: ./2.0.2.tar.gz
+    asset: ./2.0.2.zip ./2.0.2.tar.gz
