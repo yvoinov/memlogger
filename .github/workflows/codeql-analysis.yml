@@ -79,4 +79,5 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         files: src/memlogger.h src/memlogger.cc README.md README
+        release: Version 2.0.2
         tag: 2.0.2
