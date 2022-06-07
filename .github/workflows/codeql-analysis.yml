@@ -79,4 +79,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         path: ${{ github.workspace }}
-        files: ./refs/tags/2.0.2.zip ./refs/tags/2.0.2.tar.gz
+        files: ./2.0.2.zip ./2.0.2.tar.gz
