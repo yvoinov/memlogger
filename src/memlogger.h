@@ -77,33 +77,6 @@ namespace {
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
-using Counters = struct Counters {
-	std::size_t memory_function;
-	std::size_t allc_64k;
-	std::size_t allc_128k;
-	std::size_t allc_256k;
-	std::size_t allc_512k;
-	std::size_t allc_1024k;
-	std::size_t allc_2048k;
-	std::size_t allc_4096k;
-	std::size_t allc_8192k;
-	std::size_t allc_more;
-	std::size_t allc_max;	/* Peak allocation size */
-	long start, stop;	/* Time interval in epoch */
-	std::atomic<bool> lock;
-};
-
-std::array<Counters, ARRAY_SIZE> g_CounterArray;
-
-constexpr std::size_t c_num_64K = 64 * KBYTES;
-constexpr std::size_t c_num_128K = 128 * KBYTES;
-constexpr std::size_t c_num_256K = 256 * KBYTES;
-constexpr std::size_t c_num_512K = 512 * KBYTES;
-constexpr std::size_t c_num_1024K = 1024 * KBYTES;
-constexpr std::size_t c_num_2048K = 2048 * KBYTES;
-constexpr std::size_t c_num_4096K = 4096 * KBYTES;
-constexpr std::size_t c_num_8192K = 8192 * KBYTES;
-
 class AdaptiveSpinMutex {
 public:
 	AdaptiveSpinMutex(std::atomic<bool>& v_lock) : m_lock(v_lock) {};
@@ -169,6 +142,33 @@ class MemoryLoggerFunctions {
 			g_innerCalloc.store(false, std::memory_order_release);
 		};
 
+		using Counters = struct Counters {
+			std::size_t memory_function;
+			std::size_t allc_64k;
+			std::size_t allc_128k;
+			std::size_t allc_256k;
+			std::size_t allc_512k;
+			std::size_t allc_1024k;
+			std::size_t allc_2048k;
+			std::size_t allc_4096k;
+			std::size_t allc_8192k;
+			std::size_t allc_more;
+			std::size_t allc_max;	/* Peak allocation size */
+			long start, stop;	/* Time interval in epoch */
+			std::atomic<bool> lock;
+		};
+
+		std::array<Counters, ARRAY_SIZE> m_CounterArray;
+
+		static constexpr std::size_t m_c_num_64K { 64 * KBYTES };
+		static constexpr std::size_t m_c_num_128K { 128 * KBYTES };
+		static constexpr std::size_t m_c_num_256K { 256 * KBYTES };
+		static constexpr std::size_t m_c_num_512K { 512 * KBYTES };
+		static constexpr std::size_t m_c_num_1024K { 1024 * KBYTES };
+		static constexpr std::size_t m_c_num_2048K { 2048 * KBYTES };
+		static constexpr std::size_t m_c_num_4096K { 4096 * KBYTES };
+		static constexpr std::size_t m_c_num_8192K { 8192 * KBYTES };
+
 		char* m_fname;
 
 		void printReportOnExit()
@@ -200,7 +200,6 @@ class MemoryLoggerFunctions {
 		std::string decodeMemFunc(const std::size_t p_idx);
 		void printReport(const std::size_t p_idx, std::ostream &p_stream = std::cout);
 		long computeTotalLoggingTime();
-
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
 

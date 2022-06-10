@@ -169,3 +169,6 @@ FIX: Deadlock on __cxa_guard_acquire regression on file operation.
 ==========
 IMPROVEMENT: Made m_OutputFile, m_fd local.
 
+06-11-2022
+==========
+IMPROVEMENT: Globals refactoring.
