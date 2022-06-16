@@ -41,8 +41,9 @@
 #define FUNC_2_VALUE_2 2
 #define FUNC_3_VALUE_3 3
 
-/* Fields delimiter */
-#define DELIMITER ":"
+#define FUNC_1_ARR_IDX_1 FUNC_1_VALUE_1 - 1
+#define FUNC_2_ARR_IDX_2 FUNC_2_VALUE_2 - 1
+#define FUNC_3_ARR_IDX_3 FUNC_3_VALUE_3 - 1
 
 /* Report literals */
 #define REPORT_HEADING "Memory allocations report"
@@ -117,9 +118,7 @@ class MemoryLoggerFunctions {
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */
 
-		long Now();
-
-		void fillArrayEntry(const std::size_t p_idx, const std::size_t p_value, const long p_timestamp);
+		void fillArrayEntry(const std::size_t p_idx, const std::size_t p_value);
 
 		static MemoryLoggerFunctions& GetInstance() {
 			static MemoryLoggerFunctions inst;
@@ -170,6 +169,8 @@ class MemoryLoggerFunctions {
 		static constexpr std::size_t m_c_num_8192K { 8192 * KBYTES };
 
 		char* m_fname;
+
+		long Now();
 
 		void printReportOnExit()
 		{

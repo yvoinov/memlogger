@@ -172,3 +172,8 @@ IMPROVEMENT: Made m_OutputFile, m_fd local.
 06-11-2022
 ==========
 IMPROVEMENT: Globals refactoring.
+
+06-17-2022
+==========
+IMPROVEMENT: fillArrayEntry() refactoring. Now() made private.
+FIX: Unnesessary defines deleted.
