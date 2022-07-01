@@ -177,3 +177,7 @@ IMPROVEMENT: Globals refactoring.
 ==========
 IMPROVEMENT: fillArrayEntry() refactoring. Now() made private.
 FIX: Unnesessary defines deleted.
+
+07-01-2022
+==========
+IMPROVEMENT: Made globals class members.

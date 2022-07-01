@@ -75,9 +75,6 @@
 
 namespace {
 
-std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
-std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
-
 class AdaptiveSpinMutex {
 public:
 	AdaptiveSpinMutex(std::atomic<bool>& v_lock) : m_lock(v_lock) {};
@@ -110,6 +107,9 @@ private:
 
 class MemoryLoggerFunctions {
 	public:
+		std::array<char, STATIC_ALLOC_BUFFER_SIZE> m_static_alloc_buffer;
+		std::atomic<bool> m_innerMalloc { false }, m_innerCalloc { false };
+
 		using voidPtr = void*;
 		using func_t = voidPtr (*)(std::size_t);		/* func_t Type 1: malloc */
 		using func2_t = voidPtr (*)(voidPtr, std::size_t);	/* func2_t Type 2: realloc */
@@ -134,11 +134,11 @@ class MemoryLoggerFunctions {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
-			g_innerCalloc.store(true, std::memory_order_release);
+			m_innerCalloc.store(true, std::memory_order_release);
 			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
 			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
-			g_innerCalloc.store(false, std::memory_order_release);
+			m_innerCalloc.store(false, std::memory_order_release);
 		};
 
 		using Counters = struct Counters {
@@ -177,7 +177,7 @@ class MemoryLoggerFunctions {
 			if (!m_fname) {
 				printReportTotal();
 			} else {
-				g_innerMalloc.store(true, std::memory_order_release);
+				m_innerMalloc.store(true, std::memory_order_release);
 				std::string v_OutputFile = std::string(m_fname);
 				std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
 				if (!v_fd.is_open()) {

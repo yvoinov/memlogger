@@ -136,27 +136,30 @@ extern "C" {
 
 void *malloc(std::size_t size)
 {
-	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
-		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1_ARR_IDX_1, size);
-	if (g_innerMalloc.load(std::memory_order_acquire))
-		g_innerMalloc.store(false, std::memory_order_release);
-	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
+	MemoryLoggerFunctions& mlf = MemoryLoggerFunctions::GetInstance();
+	if (!mlf.m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
+		mlf.fillArrayEntry(FUNC_1_ARR_IDX_1, size);
+	if (mlf.m_innerMalloc.load(std::memory_order_acquire))
+		mlf.m_innerMalloc.store(false, std::memory_order_release);
+	return mlf.m_Malloc(size);
 }
 
 void *realloc(void *ptr, std::size_t size)
 {
-	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_2_ARR_IDX_2, size);
-	g_innerMalloc.store(true, std::memory_order_release);
-	return MemoryLoggerFunctions::GetInstance().m_Realloc(ptr, size);
+	MemoryLoggerFunctions& mlf = MemoryLoggerFunctions::GetInstance();
+	mlf.fillArrayEntry(FUNC_2_ARR_IDX_2, size);
+	mlf.m_innerMalloc.store(true, std::memory_order_release);
+	return mlf.m_Realloc(ptr, size);
 }
 
 void *calloc(std::size_t n, std::size_t size)
 {
-	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
-		return g_static_alloc_buffer.data();
-	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_3_ARR_IDX_3, n * size);
-	g_innerMalloc.store(true, std::memory_order_release);
-	return MemoryLoggerFunctions::GetInstance().m_Calloc(n, size);
+	MemoryLoggerFunctions& mlf = MemoryLoggerFunctions::GetInstance();
+	if (mlf.m_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
+		return mlf.m_static_alloc_buffer.data();
+	mlf.fillArrayEntry(FUNC_3_ARR_IDX_3, n * size);
+	mlf.m_innerMalloc.store(true, std::memory_order_release);
+	return mlf.m_Calloc(n, size);
 }
 
 }// extern C
