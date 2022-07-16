@@ -135,9 +135,9 @@ class MemoryLoggerFunctions {
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
 			m_innerCalloc.store(true, std::memory_order_release);
-			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
-			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
-			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
+			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
+			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
+			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
 			m_innerCalloc.store(false, std::memory_order_release);
 		};
 
