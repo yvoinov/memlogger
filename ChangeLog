@@ -181,3 +181,7 @@ FIX: Unnesessary defines deleted.
 07-01-2022
 ==========
 IMPROVEMENT: Made globals class members.
+
+07-16-2022
+==========
+FIX: Minor code style fix.
