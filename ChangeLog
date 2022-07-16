@@ -185,3 +185,7 @@ IMPROVEMENT: Made globals class members.
 07-16-2022
 ==========
 FIX: Minor code style fix.
+
+07-17-2022
+==========
+IMPROVEMENT: Added rounding up allocation sizes up to a whole page of OS memory to make more accuracy.

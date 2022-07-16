@@ -6,6 +6,18 @@
 
 namespace {
 
+inline std::size_t& MemoryLoggerFunctions::get_page_size()
+{
+	static std::size_t pagesize { 0 };
+	if (!pagesize) pagesize = std::size_t(sysconf(_SC_PAGE_SIZE));
+	return pagesize;
+}
+
+inline std::size_t MemoryLoggerFunctions::roundup_to_page_size(const std::size_t p_size)
+{
+	return p_size + (get_page_size() - p_size % get_page_size());
+}
+
 /* Return current time in seconds since epoch */
 inline long MemoryLoggerFunctions::Now()
 {
@@ -15,6 +27,7 @@ inline long MemoryLoggerFunctions::Now()
 
 void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::size_t p_value)
 {
+	const std::size_t v_value = roundup_to_page_size(p_value);
 	const long c_timestamp = Now();
 
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
@@ -28,27 +41,27 @@ void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::s
 	else if (m_CounterArray[p_idx].stop == 0 || m_CounterArray[p_idx].stop < c_timestamp)
 		m_CounterArray[p_idx].stop = c_timestamp;
 
-	if (p_value > 0 && p_value <= m_c_num_64K)
+	if (v_value > 0 && v_value <= m_c_num_64K)
 		++m_CounterArray[p_idx].allc_64k;
-	else if (p_value > m_c_num_64K && p_value <= m_c_num_128K)
+	else if (v_value > m_c_num_64K && v_value <= m_c_num_128K)
 		++m_CounterArray[p_idx].allc_128k;
-	else if (p_value > m_c_num_128K && p_value <= m_c_num_256K)
+	else if (v_value > m_c_num_128K && v_value <= m_c_num_256K)
 		++m_CounterArray[p_idx].allc_256k;
-	else if (p_value > m_c_num_256K && p_value <= m_c_num_512K)
+	else if (v_value > m_c_num_256K && v_value <= m_c_num_512K)
 		++m_CounterArray[p_idx].allc_512k;
-	else if (p_value > m_c_num_512K && p_value <= m_c_num_1024K)
+	else if (v_value > m_c_num_512K && v_value <= m_c_num_1024K)
 		++m_CounterArray[p_idx].allc_1024k;
-	else if (p_value > m_c_num_1024K && p_value <= m_c_num_2048K)
+	else if (v_value > m_c_num_1024K && v_value <= m_c_num_2048K)
 		++m_CounterArray[p_idx].allc_2048k;
-	else if (p_value > m_c_num_2048K && p_value <= m_c_num_4096K)
+	else if (v_value > m_c_num_2048K && v_value <= m_c_num_4096K)
 		++m_CounterArray[p_idx].allc_4096k;
-	else if (p_value > m_c_num_4096K && p_value <= m_c_num_8192K)
+	else if (v_value > m_c_num_4096K && v_value <= m_c_num_8192K)
 		++m_CounterArray[p_idx].allc_8192k;
-	else if (p_value > m_c_num_8192K) {
+	else if (v_value > m_c_num_8192K) {
 		++m_CounterArray[p_idx].allc_more;
 	}
-	if (p_value > m_CounterArray[p_idx].allc_max)
-		m_CounterArray[p_idx].allc_max = p_value;
+	if (v_value > m_CounterArray[p_idx].allc_max)
+		m_CounterArray[p_idx].allc_max = v_value;
 }
 
 std::size_t MemoryLoggerFunctions::sumCounters(const std::size_t p_idx)

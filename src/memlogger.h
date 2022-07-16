@@ -27,6 +27,12 @@
 #include <dlfcn.h>
 #endif
 
+#if !HAVE_UNISTD_H
+#error Require unistd.h to build
+#else
+#include <unistd.h>
+#endif
+
 #define STATIC_ALLOC_BUFFER_SIZE 32
 
 /* Counters array size; for 3 functions */
@@ -169,6 +175,10 @@ class MemoryLoggerFunctions {
 		static constexpr std::size_t m_c_num_8192K { 8192 * KBYTES };
 
 		char* m_fname;
+
+		std::size_t& get_page_size();
+
+		std::size_t roundup_to_page_size(const std::size_t p_size);
 
 		long Now();
 
