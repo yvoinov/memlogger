@@ -201,10 +201,7 @@ class MemoryLoggerFunctions {
 
 		static void signal_handler(int signum)
 		{
-			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) {
-				MemoryLoggerFunctions::GetInstance().printReportOnExit();
-				std::exit(EXIT_0);
-			}
+			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) std::exit(EXIT_0);
 		}
 
 		std::size_t sumCounters(const std::size_t p_idx);

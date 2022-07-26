@@ -189,3 +189,7 @@ FIX: Minor code style fix.
 07-17-2022
 ==========
 IMPROVEMENT: Added rounding up allocation sizes up to a whole page of OS memory to make more accuracy.
+
+07-26-2022
+==========
+FIX: Removed unnesessary function call from signal_handler().
