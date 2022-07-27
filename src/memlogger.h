@@ -187,7 +187,6 @@ class MemoryLoggerFunctions {
 			if (!m_fname) {
 				printReportTotal();
 			} else {
-				m_innerMalloc.store(true, std::memory_order_release);
 				std::string v_OutputFile = std::string(m_fname);
 				std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
 				if (!v_fd.is_open()) {

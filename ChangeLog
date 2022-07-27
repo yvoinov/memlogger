@@ -193,3 +193,7 @@ IMPROVEMENT: Added rounding up allocation sizes up to a whole page of OS memory 
 07-26-2022
 ==========
 FIX: Removed unnesessary function call from signal_handler().
+
+07-27-2022
+==========
+IMPROVEMENT: Removed unnesessary code.
