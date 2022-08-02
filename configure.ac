@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[8])
+m4_define([VERSION_MICRO],[9])
 
 AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
 MEMLOGGER_CURRENT=2
-MEMLOGGER_REVISION=8
+MEMLOGGER_REVISION=9
 MEMLOGGER_AGE=0
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -36,6 +36,7 @@ MEMLOGGER_AGE=0
 # 2.0.6 had 2:6:0
 # 2.0.7 had 2:7:0
 # 2.0.8 had 2:8:0
+# 2.0.9 had 2:9:0
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -128,15 +129,27 @@ else
   fi
 fi
 
-dnl Do the stuff needed for compiler-specific optimization
+dnl Do the stuff needed for compiler-specific optimization/platform settings
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xtarget"`; then
-    CXXFLAGS="$CXXFLAGS -native"
+  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
+    CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xprefetch_level"`; then
-    CXXFLAGS="$CXXFLAGS -xprefetch_level=3"
+  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-mt"`; then
+    CXXFLAGS="$CXXFLAGS -mt=yes"
+  fi
+  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xtarget"`; then
+   CXXFLAGS="$CXXFLAGS -xtarget=generic"
   fi
 else
+  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "thread"`; then
+    CXXFLAGS="$CXXFLAGS -pthread"
+    if test "$ax_cv_cxx_compiler_vendor" = "clang"; then
+      CXXFLAGS="$CXXFLAGS -stdlib=libc++"
+      LDFLAGS="$LDFLAGS -lpthread"
+    else
+     LDFLAGS="$LDFLAGS -pthread"
+    fi
+  fi
   if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-mtune"`; then
     CXXFLAGS="$CXXFLAGS -mtune=native"
   fi

@@ -16,6 +16,7 @@
 #include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
 #include <fstream>
 #include <ostream>	/* For std::ostream */
+#include <thread>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -51,6 +52,8 @@
 #define FUNC_2_ARR_IDX_2 (FUNC_2_VALUE_2 - 1)
 #define FUNC_3_ARR_IDX_3 (FUNC_3_VALUE_3 - 1)
 
+#define TIMER_INTERVAL 1
+
 /* Report literals */
 #define REPORT_HEADING "Memory allocations report"
 #define SEPARATION_LINE_1 "==================================================="
@@ -80,6 +83,9 @@
 #define EXIT_1 1	//Report array empty
 
 namespace {
+
+std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
+std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
 class AdaptiveSpinMutex {
 public:
@@ -113,9 +119,6 @@ private:
 
 class MemoryLoggerFunctions {
 	public:
-		std::array<char, STATIC_ALLOC_BUFFER_SIZE> m_static_alloc_buffer;
-		std::atomic<bool> m_innerMalloc { false }, m_innerCalloc { false };
-
 		using voidPtr = void*;
 		using func_t = voidPtr (*)(std::size_t);		/* func_t Type 1: malloc */
 		using func2_t = voidPtr (*)(voidPtr, std::size_t);	/* func2_t Type 2: realloc */
@@ -125,6 +128,7 @@ class MemoryLoggerFunctions {
 		func3_t m_Calloc;	/* Arg type 3 */
 
 		void fillArrayEntry(const std::size_t p_idx, const std::size_t p_value);
+		void computePeakAlloc();
 
 		static MemoryLoggerFunctions& GetInstance() {
 			static MemoryLoggerFunctions inst;
@@ -140,11 +144,11 @@ class MemoryLoggerFunctions {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
-			m_innerCalloc.store(true, std::memory_order_release);
+			g_innerCalloc.store(true, std::memory_order_release);
 			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
 			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
-			m_innerCalloc.store(false, std::memory_order_release);
+			g_innerCalloc.store(false, std::memory_order_release);
 		}
 
 		using Counters = struct Counters {
@@ -159,6 +163,7 @@ class MemoryLoggerFunctions {
 			std::size_t allc_8192k;
 			std::size_t allc_more;
 			std::size_t allc_max;	/* Peak allocation size */
+			std::size_t peak_allc_s;/* Peak allocations per second */
 			long start, stop;	/* Time interval in epoch */
 			std::atomic<bool> lock;
 		};
@@ -209,5 +214,19 @@ class MemoryLoggerFunctions {
 		long computeTotalLoggingTime();
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
+
+class OnLoadInit {
+	public:
+		OnLoadInit() {
+			m_timer = std::thread([&] { while (m_running) {
+							std::this_thread::sleep_for(std::chrono::seconds(TIMER_INTERVAL));
+							MemoryLoggerFunctions::GetInstance().computePeakAlloc();
+									} });
+		}
+		~OnLoadInit() { m_running.store(false, std::memory_order_release); m_timer.join(); }
+	private:
+		std::thread m_timer;
+		std::atomic<bool> m_running { true };
+} onLoadInit;
 
 }	/* namespace */

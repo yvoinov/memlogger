@@ -197,3 +197,9 @@ FIX: Removed unnesessary function call from signal_handler().
 07-27-2022
 ==========
 IMPROVEMENT: Removed unnesessary code.
+
+08-03-2022
+==========
+IMPROVEMENT: Max peak allocations per second added.
+FIX: Regression introduced in 2.0.5.
+FIX: Some minor bugs.

@@ -25,6 +25,21 @@ inline long MemoryLoggerFunctions::Now()
 	return c_dtn.count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den;
 }
 
+std::size_t MemoryLoggerFunctions::sumCounters(const std::size_t p_idx)
+{
+	std::size_t v_sum = 0;
+	v_sum += m_CounterArray[p_idx].allc_64k;
+	v_sum += m_CounterArray[p_idx].allc_128k;
+	v_sum += m_CounterArray[p_idx].allc_256k;
+	v_sum += m_CounterArray[p_idx].allc_512k;
+	v_sum += m_CounterArray[p_idx].allc_1024k;
+	v_sum += m_CounterArray[p_idx].allc_2048k;
+	v_sum += m_CounterArray[p_idx].allc_4096k;
+	v_sum += m_CounterArray[p_idx].allc_8192k;
+	v_sum += m_CounterArray[p_idx].allc_more;
+	return v_sum;
+}
+
 void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::size_t p_value)
 {
 	const std::size_t v_value = roundup_to_page_size(p_value);
@@ -33,12 +48,12 @@ void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::s
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);         /* Take row-level spinlock here */
 
-	if (m_CounterArray[p_idx].memory_function == 0)	/* Write function if not yet */
+	if (!m_CounterArray[p_idx].memory_function)	/* Write function if not yet */
 		m_CounterArray[p_idx].memory_function = p_idx + 1;	/* Function code is p_idx + 1 */
 
-	if (m_CounterArray[p_idx].start == 0)		/* Save timestamp; let's inline it */
+	if (!m_CounterArray[p_idx].start)		/* Save timestamp; let's inline it */
 		m_CounterArray[p_idx].start = c_timestamp;
-	else if (m_CounterArray[p_idx].stop == 0 || m_CounterArray[p_idx].stop < c_timestamp)
+	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
 		m_CounterArray[p_idx].stop = c_timestamp;
 
 	if (v_value > 0 && v_value <= m_c_num_64K)
@@ -57,26 +72,22 @@ void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::s
 		++m_CounterArray[p_idx].allc_4096k;
 	else if (v_value > m_c_num_4096K && v_value <= m_c_num_8192K)
 		++m_CounterArray[p_idx].allc_8192k;
-	else if (v_value > m_c_num_8192K) {
+	else if (v_value > m_c_num_8192K)
 		++m_CounterArray[p_idx].allc_more;
-	}
+
 	if (v_value > m_CounterArray[p_idx].allc_max)
 		m_CounterArray[p_idx].allc_max = v_value;
 }
 
-std::size_t MemoryLoggerFunctions::sumCounters(const std::size_t p_idx)
+void MemoryLoggerFunctions::computePeakAlloc()
 {
-	std::size_t v_sum = 0;
-	v_sum += m_CounterArray[p_idx].allc_64k;
-	v_sum += m_CounterArray[p_idx].allc_128k;
-	v_sum += m_CounterArray[p_idx].allc_256k;
-	v_sum += m_CounterArray[p_idx].allc_512k;
-	v_sum += m_CounterArray[p_idx].allc_1024k;
-	v_sum += m_CounterArray[p_idx].allc_2048k;
-	v_sum += m_CounterArray[p_idx].allc_4096k;
-	v_sum += m_CounterArray[p_idx].allc_8192k;
-	v_sum += m_CounterArray[p_idx].allc_more;
-	return v_sum;
+	for (std::size_t i = 0; i < m_CounterArray.size(); ++i) {
+		AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+		const std::size_t c_sum = sumCounters(i);
+		if (c_sum - m_CounterArray[i].peak_allc_s > m_CounterArray[i].peak_allc_s)
+			m_CounterArray[i].peak_allc_s = c_sum - m_CounterArray[i].peak_allc_s;
+	}
 }
 
 std::string MemoryLoggerFunctions::decodeMemFunc(const std::size_t p_idx)
@@ -111,12 +122,13 @@ void MemoryLoggerFunctions::printReport(const std::size_t p_idx, std::ostream &p
 	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << m_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 	const std::ptrdiff_t c_time_diff = m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start;
-	if (c_time_diff != 0 && sumCounters(p_idx) != 0)
-		p_stream << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
-	else if (c_time_diff == 0 && sumCounters(p_idx) != 0)	/* If allocations fit one epoch tick */
-		p_stream << sumCounters(p_idx) << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
+	if (c_time_diff && sumCounters(p_idx))
+		p_stream << "Avg " << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
+	else if (!c_time_diff && sumCounters(p_idx))	/* If allocations fit one epoch tick */
+		p_stream << "Avg " << sumCounters(p_idx) << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	else
 		p_stream << "0 " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
+	p_stream << "Max " << m_CounterArray[p_idx].peak_allc_s << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
@@ -149,30 +161,27 @@ extern "C" {
 
 void *malloc(std::size_t size)
 {
-	MemoryLoggerFunctions& mlf = MemoryLoggerFunctions::GetInstance();
-	if (!mlf.m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
-		mlf.fillArrayEntry(FUNC_1_ARR_IDX_1, size);
-	if (mlf.m_innerMalloc.load(std::memory_order_acquire))
-		mlf.m_innerMalloc.store(false, std::memory_order_release);
-	return mlf.m_Malloc(size);
+	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
+		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1_ARR_IDX_1, size);
+	if (g_innerMalloc.load(std::memory_order_acquire))
+		g_innerMalloc.store(false, std::memory_order_release);
+	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
 }
 
 void *realloc(void *ptr, std::size_t size)
 {
-	MemoryLoggerFunctions& mlf = MemoryLoggerFunctions::GetInstance();
-	mlf.fillArrayEntry(FUNC_2_ARR_IDX_2, size);
-	mlf.m_innerMalloc.store(true, std::memory_order_release);
-	return mlf.m_Realloc(ptr, size);
+	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_2_ARR_IDX_2, size);
+	g_innerMalloc.store(true, std::memory_order_release);
+	return MemoryLoggerFunctions::GetInstance().m_Realloc(ptr, size);
 }
 
 void *calloc(std::size_t n, std::size_t size)
 {
-	MemoryLoggerFunctions& mlf = MemoryLoggerFunctions::GetInstance();
-	if (mlf.m_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
-		return mlf.m_static_alloc_buffer.data();
-	mlf.fillArrayEntry(FUNC_3_ARR_IDX_3, n * size);
-	mlf.m_innerMalloc.store(true, std::memory_order_release);
-	return mlf.m_Calloc(n, size);
+	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
+		return g_static_alloc_buffer.data();
+	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_3_ARR_IDX_3, n * size);
+	g_innerMalloc.store(true, std::memory_order_release);
+	return MemoryLoggerFunctions::GetInstance().m_Calloc(n, size);
 }
 
 }// extern C
