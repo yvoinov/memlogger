@@ -65,8 +65,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
-       CXX=g++
-       ./configure
+       ./configure CXX=g++
        make all
 
     - name: Perform CodeQL Analysis
