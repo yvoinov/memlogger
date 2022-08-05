@@ -4,7 +4,9 @@
   #error This program needs at least a C++11 compliant compiler
 #endif
 
+#ifdef __cplusplus
 #include <csignal>
+#endif
 #include <cstdlib>	/* For std::exit, std::getenv */
 #include <chrono>
 #include <array>
