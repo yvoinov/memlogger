@@ -4,8 +4,8 @@
   #error This program needs at least a C++11 compliant compiler
 #endif
 
-#include <cstdlib>	/* For std::exit, std::getenv */
 #include <csignal>
+#include <cstdlib>	/* For std::exit, std::getenv */
 #include <chrono>
 #include <array>
 #include <atomic>
