@@ -48,10 +48,7 @@ void MemoryLoggerFunctions::fillArrayEntry(const std::size_t p_idx, const std::s
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);         /* Take row-level spinlock here */
 
-	if (!m_CounterArray[p_idx].memory_function)	/* Write function if not yet */
-		m_CounterArray[p_idx].memory_function = p_idx + 1;	/* Function code is p_idx + 1 */
-
-	if (!m_CounterArray[p_idx].start)		/* Save timestamp; let's inline it */
+	if (!m_CounterArray[p_idx].start)			/* Save timestamp; let's inline it */
 		m_CounterArray[p_idx].start = c_timestamp;
 	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
 		m_CounterArray[p_idx].stop = c_timestamp;
@@ -93,13 +90,13 @@ void MemoryLoggerFunctions::computePeakAlloc()
 std::string MemoryLoggerFunctions::decodeMemFunc(const std::size_t p_idx)
 {
 	switch (p_idx) {
-		case FUNC_1_ARR_IDX_1:
+		case FUNC_1_VALUE_1:
 			return std::string(FUNC_1);
 			break;
-		case FUNC_2_ARR_IDX_2:
+		case FUNC_2_VALUE_2:
 			return std::string(FUNC_2);
 			break;
-		case FUNC_3_ARR_IDX_3:
+		case FUNC_3_VALUE_3:
 			return std::string(FUNC_3);
 			break;
 		default:
@@ -144,7 +141,7 @@ void MemoryLoggerFunctions::printReportTotal(std::ostream &p_stream)
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (m_CounterArray.size() > 0) {
 		for (std::size_t i = 0; i < m_CounterArray.size(); ++i) {
-			if (!(m_CounterArray[i].memory_function == 0))
+			if (!(m_CounterArray[i].start == 0))	/* If no memory calls registered, start is empty */
 				printReport(i, p_stream);
 			else p_stream << ERR_MSG_NF << std::endl;
 		}
@@ -162,7 +159,7 @@ extern "C" {
 void *malloc(std::size_t size)
 {
 	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
-		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1_ARR_IDX_1, size);
+		MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_1_VALUE_1, size);
 	if (g_innerMalloc.load(std::memory_order_acquire))
 		g_innerMalloc.store(false, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Malloc(size);
@@ -170,7 +167,7 @@ void *malloc(std::size_t size)
 
 void *realloc(void *ptr, std::size_t size)
 {
-	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_2_ARR_IDX_2, size);
+	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_2_VALUE_2, size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Realloc(ptr, size);
 }
@@ -179,9 +176,9 @@ void *calloc(std::size_t n, std::size_t size)
 {
 	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 		return g_static_alloc_buffer.data();
-	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_3_ARR_IDX_3, n * size);
+	MemoryLoggerFunctions::GetInstance().fillArrayEntry(FUNC_3_VALUE_3, n * size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions::GetInstance().m_Calloc(n, size);
 }
 
-}// extern C
+}	// extern C

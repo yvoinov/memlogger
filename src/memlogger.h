@@ -15,7 +15,6 @@
 #include <algorithm>	/* For std::min_element, std::max_element */
 #include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
 #include <fstream>
-#include <ostream>	/* For std::ostream */
 #include <thread>
 
 #ifndef _GNU_SOURCE
@@ -44,13 +43,11 @@
 #define FUNC_2 "realloc"
 #define FUNC_3 "calloc"
 
-#define FUNC_1_VALUE_1 1
-#define FUNC_2_VALUE_2 2
-#define FUNC_3_VALUE_3 3
-
-#define FUNC_1_ARR_IDX_1 (FUNC_1_VALUE_1 - 1)
-#define FUNC_2_ARR_IDX_2 (FUNC_2_VALUE_2 - 1)
-#define FUNC_3_ARR_IDX_3 (FUNC_3_VALUE_3 - 1)
+/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
+/* Done to avoid allocations during initialization to prevent cxa_guard_acquire deadlock */
+#define FUNC_1_VALUE_1 0
+#define FUNC_2_VALUE_2 1
+#define FUNC_3_VALUE_3 2
 
 #define TIMER_INTERVAL 1
 
@@ -120,10 +117,10 @@ private:
 class MemoryLoggerFunctions {
 	public:
 		using voidPtr = void*;
-		using func_t = voidPtr (*)(std::size_t);		/* func_t Type 1: malloc */
+		using func1_t = voidPtr (*)(std::size_t);		/* func_t Type 1: malloc */
 		using func2_t = voidPtr (*)(voidPtr, std::size_t);	/* func2_t Type 2: realloc */
 		using func3_t = voidPtr (*)(std::size_t, std::size_t);	/* func3_t Type 3: calloc */
-		func_t m_Malloc;	/* Arg type 1 */
+		func1_t m_Malloc;	/* Arg type 1 */
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */
 
@@ -145,14 +142,13 @@ class MemoryLoggerFunctions {
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
 			g_innerCalloc.store(true, std::memory_order_release);
-			m_Malloc = reinterpret_cast<func_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
+			m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
 			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
 			g_innerCalloc.store(false, std::memory_order_release);
 		}
 
 		using Counters = struct Counters {
-			std::size_t memory_function;
 			std::size_t allc_64k;
 			std::size_t allc_128k;
 			std::size_t allc_256k;
