@@ -210,4 +210,4 @@ IMPROVEMENT: Refactoring.
 
 08-12-2022
 ==========
-IMPROVEMENT: Replaced sleep_for() to confitional variable wait to prevent delay on exit.
+IMPROVEMENT: Replaced sleep_for() to conditional variable wait to prevent delay on exit.
