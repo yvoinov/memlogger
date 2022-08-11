@@ -207,3 +207,7 @@ FIX: Some minor bugs.
 08-09-2022
 ==========
 IMPROVEMENT: Refactoring.
+
+08-12-2022
+==========
+IMPROVEMENT: Replaced sleep_for() to confitional variable wait to prevent delay on exit.
