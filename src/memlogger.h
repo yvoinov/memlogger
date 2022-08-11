@@ -214,15 +214,22 @@ class MemoryLoggerFunctions {
 class OnLoadInit {
 	public:
 		OnLoadInit() {
-			m_timer = std::thread([&] { while (m_running) {
-							std::this_thread::sleep_for(std::chrono::seconds(TIMER_INTERVAL));
-							MemoryLoggerFunctions::GetInstance().computePeakAlloc();
-									} });
+			m_timer = std::thread([&] { while (m_running.load(std::memory_order_acquire)) {
+							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
+							if (m_conditional_lock.wait_until(tlock, std::chrono::steady_clock::now() + std::chrono::seconds(TIMER_INTERVAL)) == std::cv_status::timeout)
+								MemoryLoggerFunctions::GetInstance().computePeakAlloc();
+						}
+			});
 		}
-		~OnLoadInit() { m_running.store(false, std::memory_order_release); m_timer.join(); }
+		~OnLoadInit() { m_running.store(false, std::memory_order_release);
+				m_conditional_lock.notify_one();
+				m_timer.join();
+		}
 	private:
 		std::thread m_timer;
 		std::atomic<bool> m_running { true };
+		std::condition_variable m_conditional_lock;
+		std::mutex m_conditional_mutex;
 } onLoadInit;
 
 }	/* namespace */
