@@ -13,8 +13,9 @@
 #include <mutex>
 #include <string>
 #include <algorithm>	/* For std::min_element, std::max_element */
-#include <iostream>	/* For std::cin, std::cout, std::ostream, std::ios, std::flush */
+#include <iostream>	/* For std::cout, std::ostream, std::ios */
 #include <fstream>
+#include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
 
 #ifndef _GNU_SOURCE
@@ -185,9 +186,9 @@ class MemoryLoggerFunctions {
 
 		void printReportOnExit()
 		{
-			if (!m_fname) {
+			if (!m_fname)
 				printReportTotal();
-			} else {
+			else {
 				std::string v_OutputFile = std::string(m_fname);
 				std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
 				if (!v_fd.is_open()) {

@@ -211,3 +211,7 @@ IMPROVEMENT: Refactoring.
 08-12-2022
 ==========
 IMPROVEMENT: Replaced sleep_for() to conditional variable wait to prevent delay on exit.
+
+08-13-2022
+==========
+IMPROVEMENT: Added hh:mm:ss elapsed time format.

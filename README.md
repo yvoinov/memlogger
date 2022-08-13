@@ -104,21 +104,21 @@ The result will be as follows:
 ```
 Memory allocations report
 ===================================================
-malloc up to 64k           : 10306
-malloc from 64k to 128k    : 1
-malloc from 128k to 256k   : 0
-malloc from 256k to 512k   : 0
+malloc up to 64k           : 9725
+malloc from 64k to 128k    : 7
+malloc from 128k to 256k   : 1
+malloc from 256k to 512k   : 14
 malloc from 512k to 1024k  : 0
 malloc from 1024k to 2048k : 0
 malloc from 2048k to 4096k : 0
 malloc from 4096k to 8192k : 0
 malloc >8192k              : 0
-malloc max size            : 72k
+malloc max size            : 380k
 ---------------------------------------------------
-Avg 41 malloc calls/sec
-Max 5154 malloc calls/sec
+Avg 1624 malloc calls/sec
+Max 7103 malloc calls/sec
 ---------------------------------------------------
-realloc up to 64k           : 6
+realloc up to 64k           : 76
 realloc from 64k to 128k    : 0
 realloc from 128k to 256k   : 0
 realloc from 256k to 512k   : 0
@@ -127,27 +127,26 @@ realloc from 1024k to 2048k : 0
 realloc from 2048k to 4096k : 0
 realloc from 4096k to 8192k : 0
 realloc >8192k              : 0
-realloc max size            : 4k
+realloc max size            : 40k
 ---------------------------------------------------
-Avg 6 realloc calls/sec
-Max 3 realloc calls/sec
+Avg 38 realloc calls/sec
+Max 48 realloc calls/sec
 ---------------------------------------------------
-calloc up to 64k           : 1051
+calloc up to 64k           : 490
 calloc from 64k to 128k    : 0
-calloc from 128k to 256k   : 3
+calloc from 128k to 256k   : 0
 calloc from 256k to 512k   : 0
 calloc from 512k to 1024k  : 0
 calloc from 1024k to 2048k : 0
 calloc from 2048k to 4096k : 0
 calloc from 4096k to 8192k : 0
 calloc >8192k              : 0
-calloc max size            : 184k
+calloc max size            : 8k
 ---------------------------------------------------
-Avg 13 calloc calls/sec
-Max 527 calloc calls/sec
+Avg 490 calloc calls/sec
+Max 490 calloc calls/sec
 ---------------------------------------------------
-Elapsed time: 251 sec
+Elapsed time: 6 seconds (00:00:06)
 ```
 
 where the numbers show the number of calls to the corresponding function with the size in the range of the corresponding bucket. "Elapsed time" shows total logging time. Max allocations represents peak allocations per second value.
-

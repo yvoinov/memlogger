@@ -145,7 +145,13 @@ void MemoryLoggerFunctions::printReportTotal(std::ostream &p_stream)
 				printReport(i, p_stream);
 			else p_stream << ERR_MSG_NF << std::endl;
 		}
-		p_stream << "Elapsed time: " << computeTotalLoggingTime() << " sec" << std::endl;
+		const long c_sec = computeTotalLoggingTime();
+		const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
+		p_stream << "Elapsed time: " << c_sec << " seconds ("
+		<< std::setw(2) << std::setfill('0') << std::chrono::duration_cast<std::chrono::hours>(c_sec2).count() << ":"
+		<< std::setw(2) << std::setfill('0') << std::chrono::duration_cast<std::chrono::minutes>(c_sec2).count() % 60 << ":"
+		<< std::setw(2) << std::setfill('0') << c_sec2.count() % 60 << ")"
+		<< std::endl;
 	} else {
 		std::cerr << ERR_MSG_A << std::endl;
 		std::exit(EXIT_1);
