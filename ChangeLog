@@ -219,3 +219,7 @@ IMPROVEMENT: Added hh:mm:ss elapsed time format.
 10-20-2022
 ==========
 IMPROVEMENT: Added spurious wakeups protection.
+
+10-22-2022
+==========
+IMPROVEMENT: AdaptiveSpinMutex improved.
