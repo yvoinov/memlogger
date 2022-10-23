@@ -96,18 +96,18 @@ public:
 
 		while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
 			++v_spin_count;
-			if (v_spin_count < m_spin_pred * 2) continue;
+			if (v_spin_count < m_spin_pred << 1) continue;	/* m_spin_pred << 1 is eq m_spin_pred * 2 */
 			std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-			m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [] { return false; });
+			m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !m_lock.load(std::memory_order_relaxed); });
 		}
 
-		m_spin_pred += (v_spin_count - m_spin_pred) / 8;
+		m_spin_pred += (v_spin_count - m_spin_pred) >> 3;	/* x >> 3 is eq x / 8 */
 	}
 
 	void unlock() noexcept {
 		m_lock.store(false, std::memory_order_release);
+		m_conditional_lock.notify_one();
 	}
-
 private:
 	std::atomic<bool>& m_lock;
 	std::atomic<std::size_t> m_spin_pred { 0 };
