@@ -217,9 +217,9 @@ class OnLoadInit {
 		OnLoadInit() {
 			m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
 							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-							if (m_conditional_lock.wait_until(tlock, std::chrono::steady_clock::now() + std::chrono::seconds(TIMER_INTERVAL),
+							if (m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
 								[this]() { return !m_running.load(std::memory_order_acquire); }))
-								MemoryLoggerFunctions::GetInstance().computePeakAlloc();
+									MemoryLoggerFunctions::GetInstance().computePeakAlloc();
 						}
 			});
 		}

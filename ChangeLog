@@ -223,3 +223,7 @@ IMPROVEMENT: Added spurious wakeups protection.
 10-22-2022
 ==========
 IMPROVEMENT: AdaptiveSpinMutex improved.
+
+10-26-2022
+==========
+IMPROVEMENT: Replaced wait_until to wait_for in timer thread.
