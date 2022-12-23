@@ -178,7 +178,7 @@ class MemoryLoggerFunctions {
 
 		char* m_fname;
 
-		std::size_t& get_page_size();
+		std::size_t get_page_size();
 
 		std::size_t roundup_to_page_size(const std::size_t p_size);
 

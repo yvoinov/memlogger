@@ -6,7 +6,7 @@
 
 namespace {
 
-inline std::size_t& MemoryLoggerFunctions::get_page_size()
+inline std::size_t MemoryLoggerFunctions::get_page_size()
 {
 	static std::size_t pagesize { 0 };
 	if (!pagesize) pagesize = std::size_t(sysconf(_SC_PAGE_SIZE));
