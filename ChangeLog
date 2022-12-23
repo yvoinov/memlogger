@@ -231,3 +231,4 @@ IMPROVEMENT: Replaced wait_until to wait_for in timer thread.
 12-23-2022
 ==========
 IMPROVEMENT: Removed unnesessary return by reference.
+IMPROVEMENT: Refactoring - templated main classes.

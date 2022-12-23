@@ -85,6 +85,7 @@ namespace {
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
+template <typename T = std::size_t>
 class AdaptiveSpinMutex {
 public:
 	AdaptiveSpinMutex(std::atomic<bool>& v_lock) : m_lock(v_lock) {};
@@ -92,7 +93,7 @@ public:
 	~AdaptiveSpinMutex() = default;
 
 	void lock() noexcept {
-		std::size_t v_spin_count { 0 };
+		T v_spin_count { 0 };
 
 		while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
 			++v_spin_count;
@@ -110,22 +111,23 @@ public:
 	}
 private:
 	std::atomic<bool>& m_lock;
-	std::atomic<std::size_t> m_spin_pred { 0 };
+	std::atomic<T> m_spin_pred { 0 };
 	std::mutex m_conditional_mutex;
 	std::condition_variable m_conditional_lock;
 };
 
+template <typename T = std::size_t>
 class MemoryLoggerFunctions {
 	public:
 		using voidPtr = void*;
-		using func1_t = voidPtr (*)(std::size_t);		/* func1_t Type 1: malloc */
-		using func2_t = voidPtr (*)(voidPtr, std::size_t);	/* func2_t Type 2: realloc */
-		using func3_t = voidPtr (*)(std::size_t, std::size_t);	/* func3_t Type 3: calloc */
+		using func1_t = voidPtr (*)(T);		/* func1_t Type 1: malloc */
+		using func2_t = voidPtr (*)(voidPtr, T);/* func2_t Type 2: realloc */
+		using func3_t = voidPtr (*)(T, T);	/* func3_t Type 3: calloc */
 		func1_t m_Malloc;	/* Arg type 1 */
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */
 
-		void fillArrayEntry(const std::size_t p_idx, const std::size_t p_value);
+		void fillArrayEntry(const T p_idx, const T p_value);
 		void computePeakAlloc();
 
 		static MemoryLoggerFunctions& GetInstance() {
@@ -150,37 +152,37 @@ class MemoryLoggerFunctions {
 		}
 
 		using Counters = struct Counters {
-			std::size_t allc_64k;
-			std::size_t allc_128k;
-			std::size_t allc_256k;
-			std::size_t allc_512k;
-			std::size_t allc_1024k;
-			std::size_t allc_2048k;
-			std::size_t allc_4096k;
-			std::size_t allc_8192k;
-			std::size_t allc_more;
-			std::size_t allc_max;	/* Peak allocation size */
-			std::size_t peak_allc_s;/* Peak allocations per second */
+			T allc_64k;
+			T allc_128k;
+			T allc_256k;
+			T allc_512k;
+			T allc_1024k;
+			T allc_2048k;
+			T allc_4096k;
+			T allc_8192k;
+			T allc_more;
+			T allc_max;		/* Peak allocation size */
+			T peak_allc_s;		/* Peak allocations per second */
 			long start, stop;	/* Time interval in epoch */
 			std::atomic<bool> lock;
 		};
 
 		std::array<Counters, ARRAY_SIZE> m_CounterArray;
 
-		static constexpr std::size_t m_c_num_64K { 64 * KBYTES };
-		static constexpr std::size_t m_c_num_128K { 128 * KBYTES };
-		static constexpr std::size_t m_c_num_256K { 256 * KBYTES };
-		static constexpr std::size_t m_c_num_512K { 512 * KBYTES };
-		static constexpr std::size_t m_c_num_1024K { 1024 * KBYTES };
-		static constexpr std::size_t m_c_num_2048K { 2048 * KBYTES };
-		static constexpr std::size_t m_c_num_4096K { 4096 * KBYTES };
-		static constexpr std::size_t m_c_num_8192K { 8192 * KBYTES };
+		static constexpr T m_c_num_64K { 64 * KBYTES };
+		static constexpr T m_c_num_128K { 128 * KBYTES };
+		static constexpr T m_c_num_256K { 256 * KBYTES };
+		static constexpr T m_c_num_512K { 512 * KBYTES };
+		static constexpr T m_c_num_1024K { 1024 * KBYTES };
+		static constexpr T m_c_num_2048K { 2048 * KBYTES };
+		static constexpr T m_c_num_4096K { 4096 * KBYTES };
+		static constexpr T m_c_num_8192K { 8192 * KBYTES };
 
 		char* m_fname;
 
 		std::size_t get_page_size();
 
-		std::size_t roundup_to_page_size(const std::size_t p_size);
+		std::size_t roundup_to_page_size(const T p_size);
 
 		long Now();
 
@@ -205,9 +207,9 @@ class MemoryLoggerFunctions {
 			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) std::exit(EXIT_0);
 		}
 
-		std::size_t sumCounters(const std::size_t p_idx);
-		std::string decodeMemFunc(const std::size_t p_idx);
-		void printReport(const std::size_t p_idx, std::ostream &p_stream = std::cout);
+		std::size_t sumCounters(const T p_idx);
+		std::string decodeMemFunc(const T p_idx);
+		void printReport(const T p_idx, std::ostream &p_stream = std::cout);
 		long computeTotalLoggingTime();
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
@@ -219,7 +221,7 @@ class OnLoadInit {
 							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
 							if (m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
 								[this]() { return !m_running.load(std::memory_order_acquire); }))
-									MemoryLoggerFunctions::GetInstance().computePeakAlloc();
+									MemoryLoggerFunctions<>::GetInstance().computePeakAlloc();
 						}
 			});
 		}
