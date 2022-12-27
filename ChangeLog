@@ -232,3 +232,7 @@ IMPROVEMENT: Replaced wait_until to wait_for in timer thread.
 ==========
 IMPROVEMENT: Removed unnesessary return by reference.
 IMPROVEMENT: Refactoring - templated main classes.
+
+12-27-2022
+==========
+IMPROVEMENT: Refactoring.
