@@ -239,8 +239,9 @@ IMPROVEMENT: Refactoring.
 
 01-03-2023
 ==========
-IMPROVEMENT: Refactoring - made class AdaptiveSpinMutex internal.
+IMPROVEMENT: Refactoring - made class AdaptiveSpinMutex inner.
 
 01-03-2023
 ==========
-IMPROVEMENT: More refactoring - define internal class outside main class body.
+IMPROVEMENT: More refactoring - the inner class is defined outside the body of the main class.
+
