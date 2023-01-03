@@ -244,4 +244,3 @@ IMPROVEMENT: Refactoring - made class AdaptiveSpinMutex inner.
 01-03-2023
 ==========
 IMPROVEMENT: More refactoring - the inner class is defined outside the body of the main class.
-
