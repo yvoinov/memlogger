@@ -50,8 +50,8 @@ void MemoryLoggerFunctions<T>::fillArrayEntry(const T p_idx, const T p_value)
 	const T v_value = roundup_to_page_size(p_value);
 	const long c_timestamp = Now();
 
-	AdaptiveSpinMutex<T> spmux(m_CounterArray[p_idx].lock);
-	std::lock_guard<AdaptiveSpinMutex<T>> lock(spmux);	/* Take row-level spinlock here */
+	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
+	std::lock_guard<AdaptiveSpinMutex> lock(spmux);	/* Take row-level spinlock here */
 
 	if (!m_CounterArray[p_idx].start)			/* Save timestamp; let's inline it */
 		m_CounterArray[p_idx].start = c_timestamp;
@@ -85,8 +85,8 @@ template <typename T>
 void MemoryLoggerFunctions<T>::computePeakAlloc()
 {
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
-		AdaptiveSpinMutex<T> spmux(m_CounterArray[i].lock);
-		std::lock_guard<AdaptiveSpinMutex<T>> lock(spmux);
+		AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 		const T c_sum = sumCounters(i);
 		if (c_sum - m_CounterArray[i].peak_allc_s > m_CounterArray[i].peak_allc_s)
 			m_CounterArray[i].peak_allc_s = c_sum - m_CounterArray[i].peak_allc_s;

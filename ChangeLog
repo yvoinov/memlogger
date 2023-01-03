@@ -236,3 +236,7 @@ IMPROVEMENT: Refactoring - templated main classes.
 12-27-2022
 ==========
 IMPROVEMENT: Refactoring.
+
+01-03-2023
+==========
+IMPROVEMENT: Refactoring - made class AdaptiveSpinMutex internal.
