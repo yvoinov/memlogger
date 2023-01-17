@@ -84,12 +84,12 @@ namespace {
 
 using uInt_t = std::size_t;
 
+std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
+std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
+
 template <typename T = uInt_t>
 class MemoryLoggerFunctions {
 	public:
-		std::array<char, STATIC_ALLOC_BUFFER_SIZE> m_static_alloc_buffer;
-		std::atomic<bool> m_innerMalloc { false }, m_innerCalloc { false };
-
 		using voidPtr_t = void*;
 		using func1_t = voidPtr_t (*)(T);		/* func1_t Type 1: malloc */
 		using func2_t = voidPtr_t (*)(voidPtr_t, T);	/* func2_t Type 2: realloc */
@@ -117,11 +117,11 @@ class MemoryLoggerFunctions {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
-			m_innerCalloc.store(true, std::memory_order_release);
+			g_innerCalloc.store(true, std::memory_order_release);
 			m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
 			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
-			m_innerCalloc.store(false, std::memory_order_release);
+			g_innerCalloc.store(false, std::memory_order_release);
 		}
 
 		using Counters = struct Counters {
