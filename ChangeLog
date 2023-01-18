@@ -248,3 +248,12 @@ IMPROVEMENT: More refactoring - the inner class is defined outside the body of t
 01-17-2023
 ==========
 FIX: Partially rollback change 2.0.16 due to can cause deadlock on some OSes.
+
+01-18-2023
+==========
+IMPROVEMENT: Refactoring.
+IMPROVEMENT: Added periodically flush allocation report on disk when MEMLOGGER_LOG_FILENAME is specified.
+IMPROVEMENT: Reduced data array locking.
+IMPROVEMENT: Renamed shown peak values name.
+FIX: Wrong peak values counting.
+FIX: Peak values computing.

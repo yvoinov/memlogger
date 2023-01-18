@@ -113,14 +113,17 @@ void MemoryLoggerFunctions<T>::fillArrayEntry(const T p_idx, const T p_value)
 }
 
 template <typename T>
-void MemoryLoggerFunctions<T>::computePeakAlloc()
+void MemoryLoggerFunctions<T>::computePeakValue()
 {
+	T c_sum;
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
-		AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
-		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-		const T c_sum = sumCounters(i);
-		if (c_sum - m_CounterArray[i].peak_allc_s > m_CounterArray[i].peak_allc_s)
-			m_CounterArray[i].peak_allc_s = c_sum - m_CounterArray[i].peak_allc_s;
+		{
+			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+			c_sum = sumCounters(i);
+		}
+		if (c_sum - m_PeakValueArray[i] > m_PeakValueArray[i])
+			m_PeakValueArray[i] = c_sum - m_PeakValueArray[i];
 	}
 }
 
@@ -164,7 +167,7 @@ void MemoryLoggerFunctions<T>::printReport(const T p_idx, std::ostream &p_stream
 		p_stream << "Avg " << sumCounters(p_idx) << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	else
 		p_stream << "0 " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
-	p_stream << "Max " << m_CounterArray[p_idx].peak_allc_s << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
+	p_stream << "Peak " << m_PeakValueArray[p_idx] << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
@@ -199,11 +202,27 @@ void MemoryLoggerFunctions<T>::printReportTotal(std::ostream &p_stream)
 	}
 }
 
-}	/* namespace */
+template <typename T>
+void MemoryLoggerFunctions<T>::printReport()
+{
+	if (!m_fname)
+		printReportTotal();
+	else {
+		g_innerMalloc.store(true, std::memory_order_release);
+		std::string v_OutputFile = std::string(m_fname);
+		std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
+		if (!v_fd.is_open()) {
+			std::cerr << ERR_MSG_F + v_OutputFile << std::endl;
+			return;
+		}
+		printReportTotal(v_fd);
+		v_fd.close();
+		g_innerMalloc.store(false, std::memory_order_release);
+	}
+}
 
-extern "C" {
-
-void *malloc(std::size_t size)
+template <typename T>
+inline void *malloc_mf_impl(T size)
 {
 	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_1_VALUE_1, size);
@@ -212,20 +231,41 @@ void *malloc(std::size_t size)
 	return MemoryLoggerFunctions<>::GetInstance().m_Malloc(size);
 }
 
-void *realloc(void *ptr, std::size_t size)
+template <typename P, typename T>
+inline void *realloc_mf_impl(P ptr, T size)
 {
 	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_2_VALUE_2, size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions<>::GetInstance().m_Realloc(ptr, size);
 }
 
-void *calloc(std::size_t n, std::size_t size)
+template <typename T>
+inline void *calloc_mf_impl(T n, T size)
 {
 	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 		return g_static_alloc_buffer.data();
 	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_3_VALUE_3, n * size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions<>::GetInstance().m_Calloc(n, size);
+}
+
+}	/* namespace */
+
+extern "C" {
+
+void *malloc(std::size_t size)
+{
+	return malloc_mf_impl(size);
+}
+
+void *realloc(void *ptr, std::size_t size)
+{
+	return realloc_mf_impl(ptr, size);
+}
+
+void *calloc(std::size_t n, std::size_t size)
+{
+	return calloc_mf_impl(n, size);
 }
 
 }	/* extern C */

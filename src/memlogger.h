@@ -91,6 +91,7 @@ template <typename T = uInt_t>
 class MemoryLoggerFunctions {
 	public:
 		using voidPtr_t = void*;
+
 		using func1_t = voidPtr_t (*)(T);		/* func1_t Type 1: malloc */
 		using func2_t = voidPtr_t (*)(voidPtr_t, T);	/* func2_t Type 2: realloc */
 		using func3_t = voidPtr_t (*)(T, T);		/* func3_t Type 3: calloc */
@@ -99,7 +100,11 @@ class MemoryLoggerFunctions {
 		func3_t m_Calloc;	/* Arg type 3 */
 
 		void fillArrayEntry(const T p_idx, const T p_value);
-		void computePeakAlloc();
+		void computePeakValue();
+
+		char* m_fname;
+
+		void printReport();
 
 		static MemoryLoggerFunctions& GetInstance() {
 			static MemoryLoggerFunctions inst;
@@ -109,7 +114,7 @@ class MemoryLoggerFunctions {
 		MemoryLoggerFunctions(MemoryLoggerFunctions &other) = delete;
 		void operator=(const MemoryLoggerFunctions &) = delete;
 
-		~MemoryLoggerFunctions() { printReportOnExit(); }
+		~MemoryLoggerFunctions() { printReport(); }
 	private:
 		class AdaptiveSpinMutex;
 
@@ -134,13 +139,13 @@ class MemoryLoggerFunctions {
 			T allc_4096k;
 			T allc_8192k;
 			T allc_more;
-			T allc_max;		/* Peak allocation size */
-			T peak_allc_s;		/* Peak allocations per second */
+			T allc_max;		/* Max allocation size */
 			long start, stop;	/* Time interval in epoch */
 			std::atomic<bool> lock;
 		};
 
 		std::array<Counters, ARRAY_SIZE> m_CounterArray;
+		std::array<T, ARRAY_SIZE> m_PeakValueArray;	/* Peak allocations per second array */
 
 		static constexpr T m_c_num_64K { 64 * KBYTES };
 		static constexpr T m_c_num_128K { 128 * KBYTES };
@@ -151,29 +156,9 @@ class MemoryLoggerFunctions {
 		static constexpr T m_c_num_4096K { 4096 * KBYTES };
 		static constexpr T m_c_num_8192K { 8192 * KBYTES };
 
-		char* m_fname;
-
 		std::size_t get_page_size();
-
 		std::size_t roundup_to_page_size(const T p_size);
-
 		long Now();
-
-		void printReportOnExit()
-		{
-			if (!m_fname)
-				printReportTotal();
-			else {
-				std::string v_OutputFile = std::string(m_fname);
-				std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
-				if (!v_fd.is_open()) {
-					std::cerr << ERR_MSG_F + v_OutputFile << std::endl;
-					return;
-				}
-				printReportTotal(v_fd);
-				v_fd.close();
-			}
-		}
 
 		static void signal_handler(int signum)
 		{
@@ -192,9 +177,12 @@ class OnLoadInit {
 		OnLoadInit() {
 			m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
 							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-							if (m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
-								[this]() { return !m_running.load(std::memory_order_acquire); }))
-									MemoryLoggerFunctions<>::GetInstance().computePeakAlloc();
+							if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
+								[this]() { return !m_running.load(std::memory_order_acquire); })) {
+									MemoryLoggerFunctions<>::GetInstance().computePeakValue();
+									if (MemoryLoggerFunctions<>::GetInstance().m_fname)
+										MemoryLoggerFunctions<>::GetInstance().printReport();
+							}
 						}
 			});
 		}

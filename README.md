@@ -116,7 +116,7 @@ malloc >8192k              : 0
 malloc max size            : 380k
 ---------------------------------------------------
 Avg 1624 malloc calls/sec
-Max 7103 malloc calls/sec
+Peak 7103 malloc calls/sec
 ---------------------------------------------------
 realloc up to 64k           : 76
 realloc from 64k to 128k    : 0
@@ -130,7 +130,7 @@ realloc >8192k              : 0
 realloc max size            : 40k
 ---------------------------------------------------
 Avg 38 realloc calls/sec
-Max 48 realloc calls/sec
+Peak 48 realloc calls/sec
 ---------------------------------------------------
 calloc up to 64k           : 490
 calloc from 64k to 128k    : 0
@@ -144,7 +144,7 @@ calloc >8192k              : 0
 calloc max size            : 8k
 ---------------------------------------------------
 Avg 490 calloc calls/sec
-Max 490 calloc calls/sec
+Peak 490 calloc calls/sec
 ---------------------------------------------------
 Elapsed time: 6 seconds (00:00:06)
 ```
