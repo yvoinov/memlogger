@@ -226,7 +226,7 @@ inline void *malloc_mf_impl(T size)
 {
 	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_1_VALUE_1, size);
-	if (g_innerMalloc.load(std::memory_order_acquire))
+	else
 		g_innerMalloc.store(false, std::memory_order_release);
 	return MemoryLoggerFunctions<>::GetInstance().m_Malloc(size);
 }

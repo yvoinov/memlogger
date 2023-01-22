@@ -257,3 +257,7 @@ IMPROVEMENT: Reduced data array locking.
 IMPROVEMENT: Renamed shown peak values name.
 FIX: Wrong peak values counting.
 FIX: Peak values computing.
+
+01-22-2023
+==========
+IMPROVEMENT: malloc_mf_impl() micro-optimization.
