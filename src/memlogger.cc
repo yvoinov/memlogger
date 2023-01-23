@@ -131,18 +131,14 @@ template <typename T>
 std::string MemoryLoggerFunctions<T>::decodeMemFunc(const T p_idx)
 {
 	switch (p_idx) {
-		case FUNC_1_VALUE_1:
-			return std::string(FUNC_1);
-			break;
-		case FUNC_2_VALUE_2:
+		case Func_values::malloc_fvalue:
+			return std::string(FUNC_1);	/* Break non-requires when return uses */
+		case Func_values::realloc_fvalue:
 			return std::string(FUNC_2);
-			break;
-		case FUNC_3_VALUE_3:
+		case Func_values::calloc_fvalue:
 			return std::string(FUNC_3);
-			break;
 		default:
 			return std::string("");
-			break;
 	}
 }
 
@@ -225,7 +221,7 @@ template <typename T>
 inline void *malloc_mf_impl(T size)
 {
 	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
-		MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_1_VALUE_1, size);
+		MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(Func_values::malloc_fvalue, size);
 	else
 		g_innerMalloc.store(false, std::memory_order_release);
 	return MemoryLoggerFunctions<>::GetInstance().m_Malloc(size);
@@ -234,7 +230,7 @@ inline void *malloc_mf_impl(T size)
 template <typename P, typename T>
 inline void *realloc_mf_impl(P ptr, T size)
 {
-	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_2_VALUE_2, size);
+	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(Func_values::realloc_fvalue, size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions<>::GetInstance().m_Realloc(ptr, size);
 }
@@ -244,7 +240,7 @@ inline void *calloc_mf_impl(T n, T size)
 {
 	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 		return g_static_alloc_buffer.data();
-	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(FUNC_3_VALUE_3, n * size);
+	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(Func_values::calloc_fvalue, n * size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return MemoryLoggerFunctions<>::GetInstance().m_Calloc(n, size);
 }

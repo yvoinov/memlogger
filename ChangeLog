@@ -261,3 +261,8 @@ FIX: Peak values computing.
 01-22-2023
 ==========
 IMPROVEMENT: malloc_mf_impl() micro-optimization.
+
+01-24-2023
+==========
+IMPROVEMENT: Replaced preprocessor defines with enum.
+FIX: Dead code eliminated.

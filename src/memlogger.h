@@ -39,16 +39,10 @@
 /* Counters array size; for 3 functions */
 #define ARRAY_SIZE 3
 
-/* Memory functions names and values */
+/* Memory functions names */
 #define FUNC_1 "malloc"
 #define FUNC_2 "realloc"
 #define FUNC_3 "calloc"
-
-/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
-/* Done to avoid allocations during initialization to prevent cxa_guard_acquire deadlock */
-#define FUNC_1_VALUE_1 0
-#define FUNC_2_VALUE_2 1
-#define FUNC_3_VALUE_3 2
 
 #define TIMER_INTERVAL 1
 
@@ -83,6 +77,9 @@
 namespace {
 
 using uInt_t = std::size_t;
+
+/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
+enum Func_values { malloc_fvalue = 0, realloc_fvalue, calloc_fvalue };
 
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
