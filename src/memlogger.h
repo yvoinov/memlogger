@@ -166,6 +166,7 @@ class MemoryLoggerFunctions {
 		std::string decodeMemFunc(const T p_idx);
 		void printReport(const T p_idx, std::ostream &p_stream = std::cout);
 		long computeTotalLoggingTime();
+		void printElapsedTime(std::ostream &p_stream = std::cout);
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
 
