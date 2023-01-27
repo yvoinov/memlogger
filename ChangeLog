@@ -270,3 +270,4 @@ FIX: Dead code eliminated.
 01-27-2023
 ==========
 IMPROVEMENT: Decompose printReportTotal() function.
+IMPROVEMENT: Memory functions names replaced to constexpr.

@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[21])
+m4_define([VERSION_MICRO],[22])
 
 AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
 MEMLOGGER_CURRENT=2
-MEMLOGGER_REVISION=21
+MEMLOGGER_REVISION=22
 MEMLOGGER_AGE=0
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -49,6 +49,7 @@ MEMLOGGER_AGE=0
 # 2.0.19 had 2:19:0
 # 2.0.20 had 2:20:0
 # 2.0.21 had 2:21:0
+# 2.0.22 had 2:22:0
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary

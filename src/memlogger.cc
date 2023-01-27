@@ -132,11 +132,11 @@ std::string MemoryLoggerFunctions<T>::decodeMemFunc(const T p_idx)
 {
 	switch (p_idx) {
 		case Func_values::malloc_fvalue:
-			return std::string(FUNC_1);	/* Break non-requires when return uses */
+			return std::string(m_c_func1);
 		case Func_values::realloc_fvalue:
-			return std::string(FUNC_2);
+			return std::string(m_c_func2);
 		case Func_values::calloc_fvalue:
-			return std::string(FUNC_3);
+			return std::string(m_c_func3);
 		default:
 			return std::string("");
 	}

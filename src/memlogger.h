@@ -36,14 +36,6 @@
 
 #define STATIC_ALLOC_BUFFER_SIZE 32
 
-/* Counters array size; for 3 functions */
-#define ARRAY_SIZE 3
-
-/* Memory functions names */
-#define FUNC_1 "malloc"
-#define FUNC_2 "realloc"
-#define FUNC_3 "calloc"
-
 #define TIMER_INTERVAL 1
 
 /* Report literals */
@@ -113,18 +105,26 @@ class MemoryLoggerFunctions {
 
 		~MemoryLoggerFunctions() { printReport(); }
 	private:
-		class AdaptiveSpinMutex;
-
 		MemoryLoggerFunctions() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")) {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
 			std::signal(SIGTERM, signal_handler);
 			g_innerCalloc.store(true, std::memory_order_release);
-			m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_1)));
-			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_2)));
-			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, FUNC_3)));
+			m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
+			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
+			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
 			g_innerCalloc.store(false, std::memory_order_release);
 		}
+
+		class AdaptiveSpinMutex;
+
+		/* Memory functions names */
+		static constexpr const char* m_c_func1 = "malloc";
+		static constexpr const char* m_c_func2 = "realloc";
+		static constexpr const char* m_c_func3 = "calloc";
+
+		/* Counters array size; for 3 functions */
+		static constexpr T m_c_array_size = 3;
 
 		using Counters = struct Counters {
 			T allc_64k;
@@ -141,8 +141,8 @@ class MemoryLoggerFunctions {
 			std::atomic<bool> lock;
 		};
 
-		std::array<Counters, ARRAY_SIZE> m_CounterArray;
-		std::array<T, ARRAY_SIZE> m_PeakValueArray;	/* Peak allocations per second array */
+		std::array<Counters, m_c_array_size> m_CounterArray;
+		std::array<T, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
 		static constexpr T m_c_num_64K { 64 * KBYTES };
 		static constexpr T m_c_num_128K { 128 * KBYTES };
