@@ -274,5 +274,6 @@ IMPROVEMENT: Memory functions names replaced to constexpr.
 
 04-02-2023
 ==========
-IMPROVEMENT: Move interposition implementations to class.
-IMPROVEMENT: Added MemoryLoggerFunctions inheritance to simplify calls.
+IMPROVEMENT: Moved interposition implementations to class.
+IMPROVEMENT: Moved enum inside class.
+FIX: Call non-constructed class member.

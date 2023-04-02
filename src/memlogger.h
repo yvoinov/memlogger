@@ -71,9 +71,6 @@ namespace {
 using voidPtr_t = void*;
 using uInt_t = std::size_t;
 
-/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
-enum Func_values { malloc_fvalue = 0, realloc_fvalue, calloc_fvalue };
-
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
@@ -107,7 +104,7 @@ class MemoryLoggerFunctions {
 		void operator=(const MemoryLoggerFunctions &) = delete;
 
 		~MemoryLoggerFunctions() { printReport(); }
-	protected:
+	private:
 		MemoryLoggerFunctions() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")) {
 			std::signal(SIGINT, signal_handler);
 			std::signal(SIGHUP, signal_handler);
@@ -118,8 +115,11 @@ class MemoryLoggerFunctions {
 			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
 			g_innerCalloc.store(false, std::memory_order_release);
 		}
-	private:
+
 		class AdaptiveSpinMutex;
+
+		/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
+		enum Func_values { malloc_fvalue = 0, realloc_fvalue, calloc_fvalue };
 
 		/* Memory functions names */
 		static constexpr const char* m_c_func1 = "malloc";
@@ -173,16 +173,17 @@ class MemoryLoggerFunctions {
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
 
-class OnLoadInit : public MemoryLoggerFunctions<> {
+class OnLoadInit {
 	public:
 		OnLoadInit() {
+			MemoryLoggerFunctions<>& mlf = MemoryLoggerFunctions<>::GetInstance();
 			m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
 							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
 							if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
 								[this]() { return !m_running.load(std::memory_order_acquire); })) {
-									GetInstance().computePeakValue();
-									if (GetInstance().m_fname)
-										GetInstance().printReport();
+									mlf.computePeakValue();
+									if (mlf.m_fname)
+										mlf.printReport();
 							}
 						}
 			});
