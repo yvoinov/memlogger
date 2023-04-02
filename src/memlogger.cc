@@ -1,13 +1,12 @@
 /**
  * Memory allocation calls simple logger
  */
-
 #include "memlogger.h"
 
 namespace {
 
-template <typename T>
-class MemoryLoggerFunctions<T>::AdaptiveSpinMutex {
+template <typename P, typename T>
+class MemoryLoggerFunctions<P, T>::AdaptiveSpinMutex {
 	public:
 		AdaptiveSpinMutex(std::atomic<bool>& v_lock) : m_lock(v_lock) {};
 		AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
@@ -37,30 +36,30 @@ class MemoryLoggerFunctions<T>::AdaptiveSpinMutex {
 		std::condition_variable m_conditional_lock;
 };
 
-template <typename T>
-inline std::size_t MemoryLoggerFunctions<T>::get_page_size()
+template <typename P, typename T>
+inline T MemoryLoggerFunctions<P, T>::get_page_size()
 {
 	static T pagesize { 0 };
 	if (!pagesize) pagesize = T(sysconf(_SC_PAGE_SIZE));
 	return pagesize;
 }
 
-template <typename T>
-inline std::size_t MemoryLoggerFunctions<T>::roundup_to_page_size(const T p_size)
+template <typename P, typename T>
+inline T MemoryLoggerFunctions<P, T>::roundup_to_page_size(const T p_size)
 {
 	return p_size + (get_page_size() - p_size % get_page_size());
 }
 
 /* Return current time in seconds since epoch */
-template <typename T>
-inline long MemoryLoggerFunctions<T>::Now()
+template <typename P, typename T>
+inline long MemoryLoggerFunctions<P, T>::Now()
 {
 	const std::chrono::system_clock::duration c_dtn = std::chrono::system_clock::now().time_since_epoch();
 	return c_dtn.count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den;
 }
 
-template <typename T>
-std::size_t MemoryLoggerFunctions<T>::sumCounters(const T p_idx)
+template <typename P, typename T>
+T MemoryLoggerFunctions<P, T>::sumCounters(const T p_idx)
 {
 	T v_sum = 0;
 	v_sum += m_CounterArray[p_idx].allc_64k;
@@ -75,8 +74,8 @@ std::size_t MemoryLoggerFunctions<T>::sumCounters(const T p_idx)
 	return v_sum;
 }
 
-template <typename T>
-void MemoryLoggerFunctions<T>::fillArrayEntry(const T p_idx, const T p_value)
+template <typename P, typename T>
+void MemoryLoggerFunctions<P, T>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const T v_value = roundup_to_page_size(p_value);
 	const long c_timestamp = Now();
@@ -84,7 +83,7 @@ void MemoryLoggerFunctions<T>::fillArrayEntry(const T p_idx, const T p_value)
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);	/* Take row-level spinlock here */
 
-	if (!m_CounterArray[p_idx].start)			/* Save timestamp; let's inline it */
+	if (!m_CounterArray[p_idx].start)		/* Save timestamp; let's inline it */
 		m_CounterArray[p_idx].start = c_timestamp;
 	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
 		m_CounterArray[p_idx].stop = c_timestamp;
@@ -112,8 +111,8 @@ void MemoryLoggerFunctions<T>::fillArrayEntry(const T p_idx, const T p_value)
 		m_CounterArray[p_idx].allc_max = v_value;
 }
 
-template <typename T>
-void MemoryLoggerFunctions<T>::computePeakValue()
+template <typename P, typename T>
+void MemoryLoggerFunctions<P, T>::computePeakValue()
 {
 	T c_sum;
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
@@ -127,8 +126,8 @@ void MemoryLoggerFunctions<T>::computePeakValue()
 	}
 }
 
-template <typename T>
-std::string MemoryLoggerFunctions<T>::decodeMemFunc(const T p_idx)
+template <typename P, typename T>
+std::string MemoryLoggerFunctions<P, T>::decodeMemFunc(const T p_idx)
 {
 	switch (p_idx) {
 		case Func_values::malloc_fvalue:
@@ -142,8 +141,8 @@ std::string MemoryLoggerFunctions<T>::decodeMemFunc(const T p_idx)
 	}
 }
 
-template <typename T>
-void MemoryLoggerFunctions<T>::printReport(const T p_idx, std::ostream &p_stream)
+template <typename P, typename T>
+void MemoryLoggerFunctions<P, T>::printReport(const T p_idx, std::ostream &p_stream)
 {
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << m_CounterArray[p_idx].allc_128k << std::endl;
@@ -167,15 +166,15 @@ void MemoryLoggerFunctions<T>::printReport(const T p_idx, std::ostream &p_stream
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
-template <typename T>
-long MemoryLoggerFunctions<T>::computeTotalLoggingTime()
+template <typename P, typename T>
+long MemoryLoggerFunctions<P, T>::computeTotalLoggingTime()
 {
 	return *std::max_element(&m_CounterArray[0].stop, &m_CounterArray[0].stop + (m_CounterArray.size() - 1)) -
 		*std::min_element(&m_CounterArray[0].start, &m_CounterArray[0].start + (m_CounterArray.size() - 1));
 }
 
-template <typename T>
-void MemoryLoggerFunctions<T>::printElapsedTime(std::ostream &p_stream)
+template <typename P, typename T>
+void MemoryLoggerFunctions<P, T>::printElapsedTime(std::ostream &p_stream)
 {
 	const long c_sec = computeTotalLoggingTime();
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
@@ -187,8 +186,8 @@ void MemoryLoggerFunctions<T>::printElapsedTime(std::ostream &p_stream)
 	<< std::endl;
 }
 
-template <typename T>
-void MemoryLoggerFunctions<T>::printReportTotal(std::ostream &p_stream)
+template <typename P, typename T>
+void MemoryLoggerFunctions<P, T>::printReportTotal(std::ostream &p_stream)
 {
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
@@ -206,8 +205,8 @@ void MemoryLoggerFunctions<T>::printReportTotal(std::ostream &p_stream)
 	}
 }
 
-template <typename T>
-void MemoryLoggerFunctions<T>::printReport()
+template <typename P, typename T>
+void MemoryLoggerFunctions<P, T>::printReport()
 {
 	if (!m_fname)
 		printReportTotal();
@@ -225,51 +224,51 @@ void MemoryLoggerFunctions<T>::printReport()
 	}
 }
 
-template <typename T>
-inline void *malloc_mf_impl(T size)
+template <typename P, typename T>
+inline P MemoryLoggerFunctions<P, T>::malloc_mf_impl(T size)
 {
 	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
-		MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(Func_values::malloc_fvalue, size);
+		fillArrayEntry(Func_values::malloc_fvalue, size);
 	else
 		g_innerMalloc.store(false, std::memory_order_release);
-	return MemoryLoggerFunctions<>::GetInstance().m_Malloc(size);
+	return m_Malloc(size);
 }
 
 template <typename P, typename T>
-inline void *realloc_mf_impl(P ptr, T size)
+inline P MemoryLoggerFunctions<P, T>::realloc_mf_impl(P ptr, T size)
 {
-	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(Func_values::realloc_fvalue, size);
+	fillArrayEntry(Func_values::realloc_fvalue, size);
 	g_innerMalloc.store(true, std::memory_order_release);
-	return MemoryLoggerFunctions<>::GetInstance().m_Realloc(ptr, size);
+	return m_Realloc(ptr, size);
 }
 
-template <typename T>
-inline void *calloc_mf_impl(T n, T size)
+template <typename P, typename T>
+inline P MemoryLoggerFunctions<P, T>::calloc_mf_impl(T n, T size)
 {
 	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 		return g_static_alloc_buffer.data();
-	MemoryLoggerFunctions<>::GetInstance().fillArrayEntry(Func_values::calloc_fvalue, n * size);
+	fillArrayEntry(Func_values::calloc_fvalue, n * size);
 	g_innerMalloc.store(true, std::memory_order_release);
-	return MemoryLoggerFunctions<>::GetInstance().m_Calloc(n, size);
+	return m_Calloc(n, size);
 }
 
 }	/* namespace */
 
 extern "C" {
 
-void *malloc(std::size_t size)
+voidPtr_t malloc(uInt_t size)
 {
-	return malloc_mf_impl(size);
+	return MemoryLoggerFunctions<>::GetInstance().malloc_mf_impl(size);
 }
 
-void *realloc(void *ptr, std::size_t size)
+voidPtr_t realloc(voidPtr_t ptr, uInt_t size)
 {
-	return realloc_mf_impl(ptr, size);
+	return MemoryLoggerFunctions<>::GetInstance().realloc_mf_impl(ptr, size);
 }
 
-void *calloc(std::size_t n, std::size_t size)
+voidPtr_t calloc(uInt_t n, uInt_t size)
 {
-	return calloc_mf_impl(n, size);
+	return MemoryLoggerFunctions<>::GetInstance().calloc_mf_impl(n, size);
 }
 
 }	/* extern C */

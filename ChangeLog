@@ -271,3 +271,8 @@ FIX: Dead code eliminated.
 ==========
 IMPROVEMENT: Decompose printReportTotal() function.
 IMPROVEMENT: Memory functions names replaced to constexpr.
+
+04-02-2023
+==========
+IMPROVEMENT: Move interposition implementations to class.
+IMPROVEMENT: Added MemoryLoggerFunctions inheritance to simplify calls.
