@@ -277,3 +277,7 @@ IMPROVEMENT: Memory functions names replaced to constexpr.
 IMPROVEMENT: Moved interposition implementations to class.
 IMPROVEMENT: Moved enum inside class.
 FIX: Call non-constructed class member.
+
+04-16-2023
+==========
+FIX: fillArrayEntry() moved to private.

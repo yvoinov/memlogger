@@ -84,11 +84,9 @@ class MemoryLoggerFunctions {
 		func2_t m_Realloc;	/* Arg type 2 */
 		func3_t m_Calloc;	/* Arg type 3 */
 
-		void fillArrayEntry(const T p_idx, const T p_value);
-		void computePeakValue();
-
 		char* m_fname;
 
+		void computePeakValue();
 		void printReport();
 
 		P malloc_mf_impl(T size);
@@ -166,6 +164,7 @@ class MemoryLoggerFunctions {
 		}
 
 		T sumCounters(const T p_idx);
+		void fillArrayEntry(const T p_idx, const T p_value);
 		std::string decodeMemFunc(const T p_idx);
 		void printReport(const T p_idx, std::ostream &p_stream = std::cout);
 		long computeTotalLoggingTime();
