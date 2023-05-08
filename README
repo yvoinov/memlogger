@@ -53,7 +53,7 @@ Using memlogger
 Prerequisites
 -------------
 Most  modern  OS  require  to  permit libraries/path to be used with LD_PRELOAD.
-To run libltalloc, make sure you configured access to installation directory for
+To run libmemlogger, make sure you configured access to installation directory for
 dynamic linker.
 
 Some examples:

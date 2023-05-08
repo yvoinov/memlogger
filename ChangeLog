@@ -281,3 +281,7 @@ FIX: Call non-constructed class member.
 04-16-2023
 ==========
 FIX: fillArrayEntry() moved to private.
+
+04-08-2023
+==========
+FIX: Typo in README.
