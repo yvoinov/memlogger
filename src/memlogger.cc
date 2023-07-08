@@ -8,7 +8,7 @@ namespace {
 template <typename P, typename T>
 class MemoryLoggerFunctions<P, T>::AdaptiveSpinMutex {
 	public:
-		AdaptiveSpinMutex(std::atomic<bool>& v_lock) : m_lock(v_lock) {};
+		AdaptiveSpinMutex(std::atomic<bool>& p_lock) : m_lock(p_lock) {};
 		AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
 		~AdaptiveSpinMutex() = default;
 
