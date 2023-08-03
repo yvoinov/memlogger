@@ -74,7 +74,7 @@ using uInt_t = std::size_t;
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
-template <typename P = voidPtr_t, typename T = uInt_t>
+template <typename P, typename T>
 class MemoryLoggerFunctions {
 	public:
 		using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
@@ -172,10 +172,12 @@ class MemoryLoggerFunctions {
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
 
+using memoryLoggerFunctions_t = MemoryLoggerFunctions<voidPtr_t, uInt_t>;
+
 class OnLoadInit {
 	public:
 		OnLoadInit() {
-			MemoryLoggerFunctions<>& mlf = MemoryLoggerFunctions<>::GetInstance();
+			memoryLoggerFunctions_t& mlf = memoryLoggerFunctions_t::GetInstance();
 			m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
 							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
 							if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),

@@ -289,3 +289,7 @@ FIX: Typo in README.
 07-09-2023
 ==========
 IMPROVEMENT: Rename spinlock CTor parameter.
+
+08-03-2023
+==========
+IMPROVEMENT: Reworked template instantiation.
