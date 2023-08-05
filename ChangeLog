@@ -293,3 +293,7 @@ IMPROVEMENT: Rename spinlock CTor parameter.
 08-03-2023
 ==========
 IMPROVEMENT: Reworked template instantiation.
+
+08-05-2023
+==========
+IMPROVEMENT: Added accumulators type to prevent possible wrap around with long sessions.

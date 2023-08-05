@@ -6,6 +6,7 @@
 
 #include <csignal>
 #include <cstdlib>	/* For std::exit, std::getenv */
+#include <cstdint>	/* For std::uint64_t */
 #include <chrono>
 #include <array>
 #include <atomic>
@@ -70,11 +71,12 @@ namespace {
 
 using voidPtr_t = void*;
 using uInt_t = std::size_t;
+using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
-template <typename P, typename T>
+template <typename P, typename T, typename L>
 class MemoryLoggerFunctions {
 	public:
 		using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
@@ -128,22 +130,22 @@ class MemoryLoggerFunctions {
 		static constexpr T m_c_array_size = 3;
 
 		using Counters = struct Counters {
-			T allc_64k;
-			T allc_128k;
-			T allc_256k;
-			T allc_512k;
-			T allc_1024k;
-			T allc_2048k;
-			T allc_4096k;
-			T allc_8192k;
-			T allc_more;
-			T allc_max;		/* Max allocation size */
+			L allc_64k;
+			L allc_128k;
+			L allc_256k;
+			L allc_512k;
+			L allc_1024k;
+			L allc_2048k;
+			L allc_4096k;
+			L allc_8192k;
+			L allc_more;
+			L allc_max;		/* Max allocation size */
 			long start, stop;	/* Time interval in epoch */
 			std::atomic<bool> lock;
 		};
 
 		std::array<Counters, m_c_array_size> m_CounterArray;
-		std::array<T, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
+		std::array<L, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
 		static constexpr T m_c_num_64K { 64 * KBYTES };
 		static constexpr T m_c_num_128K { 128 * KBYTES };
@@ -163,7 +165,7 @@ class MemoryLoggerFunctions {
 			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) std::exit(EXIT_0);
 		}
 
-		T sumCounters(const T p_idx);
+		L sumCounters(const T p_idx);
 		void fillArrayEntry(const T p_idx, const T p_value);
 		std::string decodeMemFunc(const T p_idx);
 		void printReport(const T p_idx, std::ostream &p_stream = std::cout);
@@ -172,7 +174,7 @@ class MemoryLoggerFunctions {
 		void printReportTotal(std::ostream &p_stream = std::cout);
 };
 
-using memoryLoggerFunctions_t = MemoryLoggerFunctions<voidPtr_t, uInt_t>;
+using memoryLoggerFunctions_t = MemoryLoggerFunctions<voidPtr_t, uInt_t, uLongInt_t>;
 
 class OnLoadInit {
 	public:
