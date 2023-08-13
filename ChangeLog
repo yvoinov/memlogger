@@ -300,6 +300,6 @@ IMPROVEMENT: Added accumulators type to prevent possible wrap around with long s
 
 08-13-2023
 ==========
-IMPROVEMENT: Refactoring - rename main class.
+IMPROVEMENT: Refactoring - renamed main class.
 IMPROVEMENT: Minor locality improvement.
 IMPROVEMENT: Code formatting.
