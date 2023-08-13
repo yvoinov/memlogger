@@ -77,129 +77,129 @@ std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
 std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
 
 template <typename P, typename T, typename L>
-class MemoryLoggerFunctions {
-	public:
-		using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
-		using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
-		using func3_t = P (*)(T, T);	/* func3_t Type 3: calloc */
-		func1_t m_Malloc;	/* Arg type 1 */
-		func2_t m_Realloc;	/* Arg type 2 */
-		func3_t m_Calloc;	/* Arg type 3 */
+class MemoryLogger {
+public:
+	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
+	using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
+	using func3_t = P (*)(T, T);	/* func3_t Type 3: calloc */
+	func1_t m_Malloc;	/* Arg type 1 */
+	func2_t m_Realloc;	/* Arg type 2 */
+	func3_t m_Calloc;	/* Arg type 3 */
 
-		char* m_fname;
+	char* m_fname;
 
-		void computePeakValue();
-		void printReport();
+	void computePeakValue();
+	void printReport();
 
-		P malloc_mf_impl(T size);
-		P realloc_mf_impl(P ptr, T size);
-		P calloc_mf_impl(T n, T size);
+	P malloc_mf_impl(T size);
+	P realloc_mf_impl(P ptr, T size);
+	P calloc_mf_impl(T n, T size);
 
-		static MemoryLoggerFunctions& GetInstance() {
-			static MemoryLoggerFunctions inst;
-			return inst;
-		}
+	static MemoryLogger& GetInstance() {
+		static MemoryLogger inst;
+		return inst;
+	}
 
-		MemoryLoggerFunctions(MemoryLoggerFunctions &other) = delete;
-		void operator=(const MemoryLoggerFunctions &) = delete;
+	MemoryLogger(MemoryLogger &other) = delete;
+	void operator=(const MemoryLogger &) = delete;
 
-		~MemoryLoggerFunctions() { printReport(); }
-	private:
-		MemoryLoggerFunctions() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")) {
-			std::signal(SIGINT, signal_handler);
-			std::signal(SIGHUP, signal_handler);
-			std::signal(SIGTERM, signal_handler);
-			g_innerCalloc.store(true, std::memory_order_release);
-			m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
-			m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
-			m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
-			g_innerCalloc.store(false, std::memory_order_release);
-		}
+	~MemoryLogger() { printReport(); }
+private:
+	MemoryLogger() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")) {
+		std::signal(SIGINT, signal_handler);
+		std::signal(SIGHUP, signal_handler);
+		std::signal(SIGTERM, signal_handler);
+		g_innerCalloc.store(true, std::memory_order_release);
+		m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
+		m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
+		m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
+		g_innerCalloc.store(false, std::memory_order_release);
+	}
 
-		class AdaptiveSpinMutex;
+	class AdaptiveSpinMutex;
 
-		/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
-		enum Func_values { malloc_fvalue = 0, realloc_fvalue, calloc_fvalue };
+	/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
+	enum Func_values { malloc_fvalue = 0, realloc_fvalue, calloc_fvalue };
 
-		/* Memory functions names */
-		static constexpr const char* m_c_func1 = "malloc";
-		static constexpr const char* m_c_func2 = "realloc";
-		static constexpr const char* m_c_func3 = "calloc";
+	/* Memory functions names */
+	static constexpr const char* m_c_func1 = "malloc";
+	static constexpr const char* m_c_func2 = "realloc";
+	static constexpr const char* m_c_func3 = "calloc";
 
-		/* Counters array size; for 3 functions */
-		static constexpr T m_c_array_size = 3;
+	/* Counters array size; for 3 functions */
+	static constexpr T m_c_array_size = 3;
 
-		using Counters = struct Counters {
-			L allc_64k;
-			L allc_128k;
-			L allc_256k;
-			L allc_512k;
-			L allc_1024k;
-			L allc_2048k;
-			L allc_4096k;
-			L allc_8192k;
-			L allc_more;
-			L allc_max;		/* Max allocation size */
-			long start, stop;	/* Time interval in epoch */
-			std::atomic<bool> lock;
-		};
+	using Counters = struct Counters {
+		L allc_64k;
+		L allc_128k;
+		L allc_256k;
+		L allc_512k;
+		L allc_1024k;
+		L allc_2048k;
+		L allc_4096k;
+		L allc_8192k;
+		L allc_more;
+		L allc_max;		/* Max allocation size */
+		long start, stop;	/* Time interval in epoch */
+		std::atomic<bool> lock;
+	};
 
-		std::array<Counters, m_c_array_size> m_CounterArray;
-		std::array<L, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
+	std::array<Counters, m_c_array_size> m_CounterArray;
+	std::array<L, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
-		static constexpr T m_c_num_64K { 64 * KBYTES };
-		static constexpr T m_c_num_128K { 128 * KBYTES };
-		static constexpr T m_c_num_256K { 256 * KBYTES };
-		static constexpr T m_c_num_512K { 512 * KBYTES };
-		static constexpr T m_c_num_1024K { 1024 * KBYTES };
-		static constexpr T m_c_num_2048K { 2048 * KBYTES };
-		static constexpr T m_c_num_4096K { 4096 * KBYTES };
-		static constexpr T m_c_num_8192K { 8192 * KBYTES };
+	static constexpr T m_c_num_64K { 64 * KBYTES };
+	static constexpr T m_c_num_128K { 128 * KBYTES };
+	static constexpr T m_c_num_256K { 256 * KBYTES };
+	static constexpr T m_c_num_512K { 512 * KBYTES };
+	static constexpr T m_c_num_1024K { 1024 * KBYTES };
+	static constexpr T m_c_num_2048K { 2048 * KBYTES };
+	static constexpr T m_c_num_4096K { 4096 * KBYTES };
+	static constexpr T m_c_num_8192K { 8192 * KBYTES };
 
-		T get_page_size();
-		T roundup_to_page_size(const T p_size);
-		long Now();
+	T get_page_size();
+	T roundup_to_page_size(const T p_size);
+	long Now();
 
-		static void signal_handler(int signum)
-		{
-			if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) std::exit(EXIT_0);
-		}
+	static void signal_handler(int signum)
+	{
+		if (signum == SIGINT || signum == SIGHUP || signum == SIGTERM) std::exit(EXIT_0);
+	}
 
-		L sumCounters(const T p_idx);
-		void fillArrayEntry(const T p_idx, const T p_value);
-		std::string decodeMemFunc(const T p_idx);
-		void printReport(const T p_idx, std::ostream &p_stream = std::cout);
-		long computeTotalLoggingTime();
-		void printElapsedTime(std::ostream &p_stream = std::cout);
-		void printReportTotal(std::ostream &p_stream = std::cout);
+	L sumCounters(const T p_idx);
+	void fillArrayEntry(const T p_idx, const T p_value);
+	std::string decodeMemFunc(const T p_idx);
+	void printReport(const T p_idx, std::ostream &p_stream = std::cout);
+	long computeTotalLoggingTime();
+	void printElapsedTime(std::ostream &p_stream = std::cout);
+	void printReportTotal(std::ostream &p_stream = std::cout);
 };
 
-using memoryLoggerFunctions_t = MemoryLoggerFunctions<voidPtr_t, uInt_t, uLongInt_t>;
+using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t>;
 
 class OnLoadInit {
-	public:
-		OnLoadInit() {
-			memoryLoggerFunctions_t& mlf = memoryLoggerFunctions_t::GetInstance();
-			m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
-							std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-							if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
-								[this]() { return !m_running.load(std::memory_order_acquire); })) {
-									mlf.computePeakValue();
-									if (mlf.m_fname)
-										mlf.printReport();
-							}
+public:
+	OnLoadInit() {
+		memoryLogger_t& mli = memoryLogger_t::GetInstance();
+		m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
+						std::unique_lock<std::mutex> tlock(m_conditional_mutex);
+						if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
+							[this]() { return !m_running.load(std::memory_order_acquire); })) {
+								mli.computePeakValue();
+								if (mli.m_fname)
+									mli.printReport();
 						}
-			});
-		}
-		~OnLoadInit() { m_running.store(false, std::memory_order_release);
-				m_conditional_lock.notify_one();
-				m_timer.join();
-		}
-	private:
-		std::thread m_timer;
-		std::atomic<bool> m_running { true };
-		std::condition_variable m_conditional_lock;
-		std::mutex m_conditional_mutex;
+					}
+		});
+	}
+	~OnLoadInit() { m_running.store(false, std::memory_order_release);
+			m_conditional_lock.notify_one();
+			m_timer.join();
+	}
+private:
+	std::thread m_timer;
+	std::atomic<bool> m_running { true };
+	std::condition_variable m_conditional_lock;
+	std::mutex m_conditional_mutex;
 } onLoadInit;
 
 }	/* namespace */
