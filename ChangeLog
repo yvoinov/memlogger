@@ -303,3 +303,7 @@ IMPROVEMENT: Added accumulators type to prevent possible wrap around with long s
 IMPROVEMENT: Refactoring - renamed main class.
 IMPROVEMENT: Minor locality improvement.
 IMPROVEMENT: Code formatting.
+
+08-14-2023
+==========
+FIX: Local accumulators type.

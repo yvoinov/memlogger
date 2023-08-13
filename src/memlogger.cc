@@ -45,7 +45,7 @@ inline T MemoryLogger<P, T, L>::get_page_size()
 }
 
 template <typename P, typename T, typename L>
-inline T MemoryLogger<P, T, L>::roundup_to_page_size(const T p_size)
+inline L MemoryLogger<P, T, L>::roundup_to_page_size(const T p_size)
 {
 	return p_size + (get_page_size() - p_size % get_page_size());
 }
@@ -77,7 +77,7 @@ L MemoryLogger<P, T, L>::sumCounters(const T p_idx)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
 {
-	const T v_value = roundup_to_page_size(p_value);
+	const L c_value = roundup_to_page_size(p_value);
 	const long c_timestamp = Now();
 
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
@@ -88,41 +88,41 @@ void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
 	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
 		m_CounterArray[p_idx].stop = c_timestamp;
 
-	if (v_value > 0 && v_value <= m_c_num_64K)
+	if (c_value > 0 && c_value <= m_c_num_64K)
 		++m_CounterArray[p_idx].allc_64k;
-	else if (v_value > m_c_num_64K && v_value <= m_c_num_128K)
+	else if (c_value > m_c_num_64K && c_value <= m_c_num_128K)
 		++m_CounterArray[p_idx].allc_128k;
-	else if (v_value > m_c_num_128K && v_value <= m_c_num_256K)
+	else if (c_value > m_c_num_128K && c_value <= m_c_num_256K)
 		++m_CounterArray[p_idx].allc_256k;
-	else if (v_value > m_c_num_256K && v_value <= m_c_num_512K)
+	else if (c_value > m_c_num_256K && c_value <= m_c_num_512K)
 		++m_CounterArray[p_idx].allc_512k;
-	else if (v_value > m_c_num_512K && v_value <= m_c_num_1024K)
+	else if (c_value > m_c_num_512K && c_value <= m_c_num_1024K)
 		++m_CounterArray[p_idx].allc_1024k;
-	else if (v_value > m_c_num_1024K && v_value <= m_c_num_2048K)
+	else if (c_value > m_c_num_1024K && c_value <= m_c_num_2048K)
 		++m_CounterArray[p_idx].allc_2048k;
-	else if (v_value > m_c_num_2048K && v_value <= m_c_num_4096K)
+	else if (c_value > m_c_num_2048K && c_value <= m_c_num_4096K)
 		++m_CounterArray[p_idx].allc_4096k;
-	else if (v_value > m_c_num_4096K && v_value <= m_c_num_8192K)
+	else if (c_value > m_c_num_4096K && c_value <= m_c_num_8192K)
 		++m_CounterArray[p_idx].allc_8192k;
-	else if (v_value > m_c_num_8192K)
+	else if (c_value > m_c_num_8192K && c_value < UINT_MAX)
 		++m_CounterArray[p_idx].allc_more;
 
-	if (v_value > m_CounterArray[p_idx].allc_max)
-		m_CounterArray[p_idx].allc_max = v_value;
+	if (c_value > m_CounterArray[p_idx].allc_max && c_value < UINT_MAX)
+		m_CounterArray[p_idx].allc_max = c_value;
 }
 
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::computePeakValue()
 {
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
-		T c_sum { 0 };
+		L v_sum { 0 };
 		{
 			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-			c_sum = sumCounters(i);
+			v_sum = sumCounters(i);
 		}
-		if (c_sum - m_PeakValueArray[i] > m_PeakValueArray[i])
-			m_PeakValueArray[i] = c_sum - m_PeakValueArray[i];
+		if (v_sum - m_PeakValueArray[i] > m_PeakValueArray[i])
+			m_PeakValueArray[i] = v_sum - m_PeakValueArray[i];
 	}
 }
 

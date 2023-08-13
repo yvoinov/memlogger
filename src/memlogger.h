@@ -4,6 +4,7 @@
   #error This program needs at least a C++11 compliant compiler
 #endif
 
+#include <climits>	/* For UINT_MAX */
 #include <csignal>
 #include <cstdlib>	/* For std::exit, std::getenv */
 #include <cstdint>	/* For std::uint64_t */
@@ -157,7 +158,7 @@ private:
 	static constexpr T m_c_num_8192K { 8192 * KBYTES };
 
 	T get_page_size();
-	T roundup_to_page_size(const T p_size);
+	L roundup_to_page_size(const T p_size);
 	long Now();
 
 	static void signal_handler(int signum)
