@@ -119,13 +119,17 @@ private:
 
 	class AdaptiveSpinMutex;
 
-	/* Uses for decode array index to function name; malloc - 0, realloc - 1, calloc - 2 */
-	enum Func_values { malloc_fvalue = 0, realloc_fvalue, calloc_fvalue };
+	/* Uses for decode array index to function name */
+	enum Func_values {
+		malloc_fvalue = 0,
+		realloc_fvalue = 1,
+		calloc_fvalue = 2
+	};
 
 	/* Memory functions names */
-	static constexpr const char* m_c_func1 = "malloc";
-	static constexpr const char* m_c_func2 = "realloc";
-	static constexpr const char* m_c_func3 = "calloc";
+	static constexpr const char* m_c_func1 { "malloc" };
+	static constexpr const char* m_c_func2 { "realloc" };
+	static constexpr const char* m_c_func3 { "calloc" };
 
 	/* Counters array size; for 3 functions */
 	static constexpr T m_c_array_size = 3;
@@ -148,14 +152,14 @@ private:
 	std::array<Counters, m_c_array_size> m_CounterArray;
 	std::array<L, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
-	static constexpr T m_c_num_64K { 64 * KBYTES };
-	static constexpr T m_c_num_128K { 128 * KBYTES };
-	static constexpr T m_c_num_256K { 256 * KBYTES };
-	static constexpr T m_c_num_512K { 512 * KBYTES };
-	static constexpr T m_c_num_1024K { 1024 * KBYTES };
-	static constexpr T m_c_num_2048K { 2048 * KBYTES };
-	static constexpr T m_c_num_4096K { 4096 * KBYTES };
-	static constexpr T m_c_num_8192K { 8192 * KBYTES };
+	static constexpr const T m_c_num_64K { 64 * KBYTES };
+	static constexpr const T m_c_num_128K { 128 * KBYTES };
+	static constexpr const T m_c_num_256K { 256 * KBYTES };
+	static constexpr const T m_c_num_512K { 512 * KBYTES };
+	static constexpr const T m_c_num_1024K { 1024 * KBYTES };
+	static constexpr const T m_c_num_2048K { 2048 * KBYTES };
+	static constexpr const T m_c_num_4096K { 4096 * KBYTES };
+	static constexpr const T m_c_num_8192K { 8192 * KBYTES };
 
 	T get_page_size();
 	L roundup_to_page_size(const T p_size);
@@ -168,7 +172,7 @@ private:
 
 	L sumCounters(const T p_idx);
 	void fillArrayEntry(const T p_idx, const T p_value);
-	std::string decodeMemFunc(const T p_idx);
+	const char* decodeMemFunc(const T p_idx);
 	void printReport(const T p_idx, std::ostream &p_stream = std::cout);
 	long computeTotalLoggingTime();
 	void printElapsedTime(std::ostream &p_stream = std::cout);

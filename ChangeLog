@@ -307,3 +307,8 @@ IMPROVEMENT: Code formatting.
 08-14-2023
 ==========
 FIX: Local accumulators type.
+
+08-15-2023
+==========
+IMPROVEMENT: Refactoring - avoid string CTors in decodeMemFunc().
+IMPROVEMENT: Made enum explicit defined.

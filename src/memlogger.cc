@@ -127,17 +127,17 @@ void MemoryLogger<P, T, L>::computePeakValue()
 }
 
 template <typename P, typename T, typename L>
-std::string MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
+const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 {
 	switch (p_idx) {
 		case Func_values::malloc_fvalue:
-			return std::string(m_c_func1);
+			return m_c_func1;
 		case Func_values::realloc_fvalue:
-			return std::string(m_c_func2);
+			return m_c_func2;
 		case Func_values::calloc_fvalue:
-			return std::string(m_c_func3);
+			return m_c_func3;
 		default:
-			return std::string("");
+			return "";
 	}
 }
 
