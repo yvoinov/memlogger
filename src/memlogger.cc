@@ -52,7 +52,7 @@ inline L MemoryLogger<P, T, L>::roundup_to_page_size(const T p_size)
 
 /* Return current time in seconds since epoch */
 template <typename P, typename T, typename L>
-inline long MemoryLogger<P, T, L>::Now()
+inline std::time_t MemoryLogger<P, T, L>::Now()
 {
 	const std::chrono::system_clock::duration c_dtn = std::chrono::system_clock::now().time_since_epoch();
 	return c_dtn.count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den;
@@ -78,7 +78,7 @@ template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
-	const long c_timestamp = Now();
+	const std::time_t c_timestamp = Now();
 
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);	/* Take row-level spinlock here */
@@ -167,7 +167,7 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream &p_stream)
 }
 
 template <typename P, typename T, typename L>
-long MemoryLogger<P, T, L>::computeTotalLoggingTime()
+std::time_t MemoryLogger<P, T, L>::computeTotalLoggingTime()
 {
 	return *std::max_element(&m_CounterArray[0].stop, &m_CounterArray[0].stop + (m_CounterArray.size() - 1)) -
 		*std::min_element(&m_CounterArray[0].start, &m_CounterArray[0].start + (m_CounterArray.size() - 1));
@@ -176,7 +176,7 @@ long MemoryLogger<P, T, L>::computeTotalLoggingTime()
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printElapsedTime(std::ostream &p_stream)
 {
-	const long c_sec = computeTotalLoggingTime();
+	const std::time_t c_sec = computeTotalLoggingTime();
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
 
 	p_stream << "Elapsed time: " << c_sec << " seconds ("

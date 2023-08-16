@@ -312,3 +312,8 @@ FIX: Local accumulators type.
 ==========
 IMPROVEMENT: Refactoring - avoid string CTors in decodeMemFunc().
 IMPROVEMENT: Made enum explicit defined.
+
+08-16-2023
+==========
+IMPROVEMENT: Made enum unsigned type.
+IMPROVEMENT: Used std::time_t instead long for epoch.

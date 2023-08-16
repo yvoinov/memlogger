@@ -8,6 +8,7 @@
 #include <csignal>
 #include <cstdlib>	/* For std::exit, std::getenv */
 #include <cstdint>	/* For std::uint64_t */
+#include <ctime>	/* For std::time_t */
 #include <chrono>
 #include <array>
 #include <atomic>
@@ -120,10 +121,10 @@ private:
 	class AdaptiveSpinMutex;
 
 	/* Uses for decode array index to function name */
-	enum Func_values {
-		malloc_fvalue = 0,
+	enum Func_values : T {
+		malloc_fvalue  = 0,
 		realloc_fvalue = 1,
-		calloc_fvalue = 2
+		calloc_fvalue  = 2
 	};
 
 	/* Memory functions names */
@@ -145,7 +146,7 @@ private:
 		L allc_8192k;
 		L allc_more;
 		L allc_max;		/* Max allocation size */
-		long start, stop;	/* Time interval in epoch */
+		std::time_t start, stop;	/* Time interval in epoch */
 		std::atomic<bool> lock;
 	};
 
@@ -163,7 +164,7 @@ private:
 
 	T get_page_size();
 	L roundup_to_page_size(const T p_size);
-	long Now();
+	std::time_t Now();
 
 	static void signal_handler(int signum)
 	{
@@ -174,7 +175,7 @@ private:
 	void fillArrayEntry(const T p_idx, const T p_value);
 	const char* decodeMemFunc(const T p_idx);
 	void printReport(const T p_idx, std::ostream &p_stream = std::cout);
-	long computeTotalLoggingTime();
+	std::time_t computeTotalLoggingTime();
 	void printElapsedTime(std::ostream &p_stream = std::cout);
 	void printReportTotal(std::ostream &p_stream = std::cout);
 };
