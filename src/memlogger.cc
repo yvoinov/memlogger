@@ -121,8 +121,9 @@ void MemoryLogger<P, T, L>::computePeakValue()
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 			v_sum = sumCounters(i);
 		}
-		if (v_sum - m_PeakValueArray[i] > m_PeakValueArray[i])
-			m_PeakValueArray[i] = v_sum - m_PeakValueArray[i];
+		if (v_sum - m_PeakValueArray[i].previous > m_PeakValueArray[i].peak)
+			m_PeakValueArray[i].peak = v_sum - m_PeakValueArray[i].previous;
+		m_PeakValueArray[i].previous = v_sum;
 	}
 }
 
@@ -162,7 +163,7 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream &p_stream)
 		p_stream << "Avg " << sumCounters(p_idx) << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	else
 		p_stream << "0 " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
-	p_stream << "Peak " << m_PeakValueArray[p_idx] << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
+	p_stream << "Peak " << m_PeakValueArray[p_idx].peak << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 

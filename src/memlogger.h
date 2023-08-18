@@ -151,7 +151,13 @@ private:
 	};
 
 	std::array<Counters, m_c_array_size> m_CounterArray;
-	std::array<L, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
+
+	using Summary = struct Summary {
+		L previous;
+		L peak;
+	};
+
+	std::array<Summary, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
 	static constexpr const T m_c_num_64K { 64 * KBYTES };
 	static constexpr const T m_c_num_128K { 128 * KBYTES };

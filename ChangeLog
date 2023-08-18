@@ -317,3 +317,7 @@ IMPROVEMENT: Made enum explicit defined.
 ==========
 IMPROVEMENT: Made enum unsigned type.
 IMPROVEMENT: Used std::time_t instead long for epoch.
+
+08-18-2023
+==========
+FIX: Broken computePeakValue().
