@@ -321,3 +321,7 @@ IMPROVEMENT: Used std::time_t instead long for epoch.
 08-18-2023
 ==========
 FIX: Broken computePeakValue().
+
+08-19-2023
+==========
+IMPROVEMENT: Better computeTotalLoggingTime() implementation.
