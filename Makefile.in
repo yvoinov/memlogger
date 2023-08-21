@@ -98,6 +98,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/acinclude/ax_cxx_have_stl.m4 \
 	$(top_srcdir)/acinclude/ax_compiler_vendor.m4 \
 	$(top_srcdir)/acinclude/ax_check_compile_flag.m4 \
+	$(top_srcdir)/acinclude/ax_check_library.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -283,6 +284,8 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBDL_CPPFLAGS = @LIBDL_CPPFLAGS@
+LIBDL_LDFLAGS = @LIBDL_LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -317,6 +320,8 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+_CPPFLAGS = @_CPPFLAGS@
+_LDFLAGS = @_LDFLAGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

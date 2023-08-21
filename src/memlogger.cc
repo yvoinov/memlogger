@@ -18,8 +18,12 @@ class MemoryLogger<P, T, L>::AdaptiveSpinMutex {
 			while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
 				++v_spin_count;
 				if (v_spin_count < m_spin_pred << 1) continue;	/* m_spin_pred << 1 is eq m_spin_pred * 2 */
+				#if !defined(__FreeBSD__)
 				std::unique_lock<std::mutex> tlock(m_conditional_mutex);
 				m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !m_lock.load(std::memory_order_relaxed); });
+				#else
+				std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+				#endif
 			}
 
 			m_spin_pred += (v_spin_count - m_spin_pred) >> 3;	/* x >> 3 is eq x / 8 */
@@ -27,13 +31,17 @@ class MemoryLogger<P, T, L>::AdaptiveSpinMutex {
 
 		void unlock() noexcept {
 			m_lock.store(false, std::memory_order_release);
+			#if !defined(__FreeBSD__)
 			m_conditional_lock.notify_one();
+			#endif
 		}
 	private:
 		std::atomic<bool>& m_lock;
 		std::atomic<T> m_spin_pred { 0 };
+		#if !defined(__FreeBSD__)
 		std::mutex m_conditional_mutex;
 		std::condition_variable m_conditional_lock;
+		#endif
 };
 
 template <typename P, typename T, typename L>
@@ -54,8 +62,8 @@ inline L MemoryLogger<P, T, L>::roundup_to_page_size(const T p_size)
 template <typename P, typename T, typename L>
 inline std::time_t MemoryLogger<P, T, L>::Now()
 {
-	const std::chrono::system_clock::duration c_dtn = std::chrono::system_clock::now().time_since_epoch();
-	return c_dtn.count() * std::chrono::system_clock::period::num / std::chrono::system_clock::period::den;
+	const std::chrono::steady_clock::duration c_dtn = std::chrono::steady_clock::now().time_since_epoch();
+	return c_dtn.count() * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
 }
 
 template <typename P, typename T, typename L>

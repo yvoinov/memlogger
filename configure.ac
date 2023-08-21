@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[34])
+m4_define([VERSION_MICRO],[35])
 
 AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
 MEMLOGGER_CURRENT=2
-MEMLOGGER_REVISION=34
+MEMLOGGER_REVISION=35
 MEMLOGGER_AGE=0
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -62,6 +62,7 @@ MEMLOGGER_AGE=0
 # 2.0.32 had 2:32:0
 # 2.0.33 had 2:33:0
 # 2.0.34 had 2:34:0
+# 2.0.35 had 2:35:0
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -99,6 +100,7 @@ m4_include([acinclude/ax_cxx_namespaces.m4])
 m4_include([acinclude/ax_cxx_have_stl.m4])
 m4_include([acinclude/ax_compiler_vendor.m4])
 m4_include([acinclude/ax_check_compile_flag.m4])
+m4_include([acinclude/ax_check_library.m4])
 
 dnl Detect the canonical host and target build environment
 AC_CANONICAL_HOST
@@ -122,6 +124,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AX_COMPILER_VENDOR
+AX_CHECK_LIBRARY
 
 AC_PROG_EGREP
 if test "x$ac_cv_path_EGREP" = "xno"; then
@@ -195,12 +198,8 @@ if test x"$ac_cv_lto_supported" = xno; then
   AC_MSG_NOTICE([LTO/Link optimization not supported])
 fi
 
-dnl Checks for header files.
-AC_CHECK_HEADERS([dlfcn.h], [], [],
-     [[#ifdef HAVE_DLFCN_H
-     # include <dlfcn.h>
-     #endif
-     ]])
+dnl Check libdl and header
+AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NOTICE([libdl not found])])
 
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)

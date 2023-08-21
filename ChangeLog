@@ -325,3 +325,9 @@ FIX: Broken computePeakValue().
 08-19-2023
 ==========
 IMPROVEMENT: Better computeTotalLoggingTime() implementation.
+
+08-21-2023
+==========
+IMPROVEMENT: Used steady_clock instead system_clock in Now().
+FIX: Second workaround for *BSD compatibility (now FreeBSD only).
+IMPROVEMENT: Added check libdl and set if found.
