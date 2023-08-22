@@ -15,11 +15,12 @@
 #include <condition_variable>
 #include <mutex>
 #include <string>
-#include <algorithm>	/* For std::max_element */
+#include <algorithm>	/* For std::min_element, std::max_element */
 #include <iostream>	/* For std::cout, std::ostream, std::ios */
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
+#include <vector>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE

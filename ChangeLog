@@ -331,3 +331,7 @@ IMPROVEMENT: Better computeTotalLoggingTime() implementation.
 IMPROVEMENT: Used steady_clock instead system_clock in Now().
 FIX: Second workaround for *BSD compatibility (now FreeBSD only).
 IMPROVEMENT: Added check libdl and set if found.
+
+08-22-2023
+==========
+IMPROVEMENT: Best computeTotalLoggingTime() implementation.
