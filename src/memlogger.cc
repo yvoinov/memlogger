@@ -58,7 +58,7 @@ inline L MemoryLogger<P, T, L>::roundup_to_page_size(const T p_size)
 	return p_size + (get_page_size() - p_size % get_page_size());
 }
 
-/* Return current time in seconds since epoch */
+/* Return steady clock since from boot */
 template <typename P, typename T, typename L>
 inline std::time_t MemoryLogger<P, T, L>::Now()
 {
