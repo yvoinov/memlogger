@@ -20,7 +20,6 @@
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
-#include <vector>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE

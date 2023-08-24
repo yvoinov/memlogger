@@ -335,3 +335,11 @@ IMPROVEMENT: Added check libdl and set if found.
 08-22-2023
 ==========
 IMPROVEMENT: Best computeTotalLoggingTime() implementation.
+
+08-23-2023
+==========
+FIX: Comment for Now().
+
+08-24-2023
+==========
+IMPROVEMENT: Used arrays instead vectors in computeTotalLoggingTime().

@@ -178,15 +178,16 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream &p_stream)
 template <typename P, typename T, typename L>
 std::time_t MemoryLogger<P, T, L>::computeTotalLoggingTime()
 {
-	std::vector<std::time_t> v_vec_min, v_vec_max;
+	std::array<std::time_t, m_c_array_size> v_arr_min, v_arr_max;
 
-        for (const auto& c : m_CounterArray) {
-		if (c.start) v_vec_min.emplace_back(c.start);
-		if (c.stop) v_vec_max.emplace_back(c.stop);
-	}
+	for (T i = 0; i < m_CounterArray.size(); ++i) {
+		v_arr_min[i] = m_CounterArray[i].start;
+		v_arr_max[i] = m_CounterArray[i].stop;
+	};
 
-	return *std::max_element(v_vec_max.cbegin(), v_vec_max.cend()) -
-		*std::min_element(v_vec_min.cbegin(), v_vec_min.cend());
+	return *std::max_element(v_arr_max.cbegin(), v_arr_max.cend()) -
+		*std::min_element(v_arr_min.cbegin(), v_arr_min.cend(),
+		[](std::time_t a, std::time_t b) { if (!a) return false; if (!b) return true; return a < b; });
 }
 
 template <typename P, typename T, typename L>
