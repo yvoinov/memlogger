@@ -187,7 +187,7 @@ std::time_t MemoryLogger<P, T, L>::computeTotalLoggingTime()
 
 	return *std::max_element(v_arr_max.cbegin(), v_arr_max.cend()) -
 		*std::min_element(v_arr_min.cbegin(), v_arr_min.cend(),
-		[](std::time_t a, std::time_t b) { if (!a) return false; if (!b) return true; return a < b; });
+		[](std::time_t a, std::time_t b) { if (!a || !b) return false; return a < b; });
 }
 
 template <typename P, typename T, typename L>

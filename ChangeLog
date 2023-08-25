@@ -343,3 +343,8 @@ FIX: Comment for Now().
 08-24-2023
 ==========
 IMPROVEMENT: Used arrays instead vectors in computeTotalLoggingTime().
+
+08-25-2023
+==========
+FIX: min/max_element predicate logic.
+
