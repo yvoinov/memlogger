@@ -146,7 +146,7 @@ private:
 		L allc_8192k;
 		L allc_more;
 		L allc_max;		/* Max allocation size */
-		std::time_t start, stop;	/* Time interval in epoch */
+		std::time_t start, stop;/* Time interval */
 		std::atomic<bool> lock;
 	};
 

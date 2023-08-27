@@ -351,3 +351,8 @@ FIX: min/max_element predicate logic.
 08-27-2023
 ==========
 IMPROVEMENT: Got rid unnesessary size() call.
+
+08-28-2023
+==========
+FIX: Wrong comment.
+
