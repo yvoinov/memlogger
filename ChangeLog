@@ -348,3 +348,6 @@ IMPROVEMENT: Used arrays instead vectors in computeTotalLoggingTime().
 ==========
 FIX: min/max_element predicate logic.
 
+08-27-2023
+==========
+IMPROVEMENT: Got rid unnesessary size() call.

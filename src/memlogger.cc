@@ -180,7 +180,7 @@ std::time_t MemoryLogger<P, T, L>::computeTotalLoggingTime()
 {
 	std::array<std::time_t, m_c_array_size> v_arr_min, v_arr_max;
 
-	for (T i = 0; i < m_CounterArray.size(); ++i) {
+	for (T i = 0; i < m_c_array_size; ++i) {
 		v_arr_min[i] = m_CounterArray[i].start;
 		v_arr_max[i] = m_CounterArray[i].stop;
 	};
