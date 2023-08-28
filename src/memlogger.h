@@ -15,7 +15,6 @@
 #include <condition_variable>
 #include <mutex>
 #include <string>
-#include <algorithm>	/* For std::min_element, std::max_element */
 #include <iostream>	/* For std::cout, std::ostream, std::ios */
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
@@ -107,7 +106,7 @@ public:
 
 	~MemoryLogger() { printReport(); }
 private:
-	MemoryLogger() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")) {
+	MemoryLogger() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_elapsed_start(Now()) {
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
@@ -168,6 +167,8 @@ private:
 	static constexpr const T m_c_num_4096K { 4096 * KBYTES };
 	static constexpr const T m_c_num_8192K { 8192 * KBYTES };
 
+	std::time_t m_elapsed_start;	/* Elapsed time start value */
+
 	T get_page_size();
 	L roundup_to_page_size(const T p_size);
 	std::time_t Now();
@@ -181,7 +182,6 @@ private:
 	void fillArrayEntry(const T p_idx, const T p_value);
 	const char* decodeMemFunc(const T p_idx);
 	void printReport(const T p_idx, std::ostream &p_stream = std::cout);
-	std::time_t computeTotalLoggingTime();
 	void printElapsedTime(std::ostream &p_stream = std::cout);
 	void printReportTotal(std::ostream &p_stream = std::cout);
 };

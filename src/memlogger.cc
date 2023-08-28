@@ -164,36 +164,17 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream &p_stream)
 	p_stream << decodeMemFunc(p_idx) << ALLOC_MORE << m_CounterArray[p_idx].allc_more << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << m_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
-	const std::ptrdiff_t c_time_diff = m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start;
-	if (c_time_diff && sumCounters(p_idx))
-		p_stream << "Avg " << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
-	else if (!c_time_diff && sumCounters(p_idx))		/* If allocations fit one epoch tick */
-		p_stream << "Avg " << sumCounters(p_idx) << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
-	else
-		p_stream << "0 " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
+	const std::ptrdiff_t c_time_diff =
+		!(m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start) ? 1 : m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start;
+	p_stream << "Avg " << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << "Peak " << m_PeakValueArray[p_idx].peak << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
 template <typename P, typename T, typename L>
-std::time_t MemoryLogger<P, T, L>::computeTotalLoggingTime()
-{
-	std::array<std::time_t, m_c_array_size> v_arr_min, v_arr_max;
-
-	for (T i = 0; i < m_c_array_size; ++i) {
-		v_arr_min[i] = m_CounterArray[i].start;
-		v_arr_max[i] = m_CounterArray[i].stop;
-	};
-
-	return *std::max_element(v_arr_max.cbegin(), v_arr_max.cend()) -
-		*std::min_element(v_arr_min.cbegin(), v_arr_min.cend(),
-		[](std::time_t a, std::time_t b) { if (!a || !b) return false; return a < b; });
-}
-
-template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printElapsedTime(std::ostream &p_stream)
 {
-	const std::time_t c_sec = computeTotalLoggingTime();
+	const std::time_t c_sec = Now() - m_elapsed_start;
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
 
 	p_stream << "Elapsed time: " << c_sec << " seconds ("

@@ -356,3 +356,7 @@ IMPROVEMENT: Got rid unnesessary size() call.
 ==========
 FIX: Wrong comment.
 
+08-28-2023
+==========
+IMPROVEMENT: Refactoring - got rid computeTotalLoggingTime() with loops.
+IMPROVEMENT: Refactoring printReport().
