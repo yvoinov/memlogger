@@ -19,6 +19,7 @@
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
+#include <functional>	/* For std::function */
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -38,6 +39,7 @@
 
 #define STATIC_ALLOC_BUFFER_SIZE 32
 
+/* Timer interval in seconds */
 #define TIMER_INTERVAL 1
 
 /* Report literals */
@@ -188,30 +190,33 @@ private:
 
 using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t>;
 
-class OnLoadInit {
+/* Timer class with on-load init */
+/* Intended to run a given block (lambda) on a periodic basis at a given interval */
+class Timer {
 public:
-	OnLoadInit() {
-		memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	Timer(uInt_t p_interval, std::function<void()> p_exec) : m_interval(p_interval), m_exec(p_exec) {
 		m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
 						std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-						if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(TIMER_INTERVAL),
-							[this]() { return !m_running.load(std::memory_order_acquire); })) {
-								mli.computePeakValue();
-								if (mli.m_fname)
-									mli.printReport();
-						}
+						if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(m_interval),
+							[this]() { return !m_running.load(std::memory_order_acquire); }))
+							m_exec();
 					}
 		});
 	}
-	~OnLoadInit() { m_running.store(false, std::memory_order_release);
+	~Timer() { m_running.store(false, std::memory_order_release);
 			m_conditional_lock.notify_one();
 			m_timer.join();
 	}
 private:
+	uInt_t m_interval;
+	std::function<void()> m_exec;
 	std::thread m_timer;
 	std::atomic<bool> m_running { true };
 	std::condition_variable m_conditional_lock;
 	std::mutex m_conditional_mutex;
-} onLoadInit;
+} timer(TIMER_INTERVAL,	[]() {	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+				mli.computePeakValue();
+				if (mli.m_fname)
+					mli.printReport(); });
 
 }	/* namespace */

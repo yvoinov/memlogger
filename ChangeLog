@@ -360,3 +360,7 @@ FIX: Wrong comment.
 ==========
 IMPROVEMENT: Refactoring - got rid computeTotalLoggingTime() with loops.
 IMPROVEMENT: Refactoring printReport().
+
+08-31-2023
+==========
+IMPROVEMENT: Renamed and reworked class OnLoadInit to parametrized Timer.
