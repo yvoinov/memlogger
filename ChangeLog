@@ -364,3 +364,7 @@ IMPROVEMENT: Refactoring printReport().
 08-31-2023
 ==========
 IMPROVEMENT: Renamed and reworked class OnLoadInit to parametrized Timer.
+
+09-04-2023
+==========
+IMPROVEMENT: Timer class made templated too.

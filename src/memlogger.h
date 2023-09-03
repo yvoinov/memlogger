@@ -192,9 +192,10 @@ using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t>;
 
 /* Timer class with on-load init */
 /* Intended to run a given block (lambda) on a periodic basis at a given interval */
+template <typename T, typename F>
 class Timer {
 public:
-	Timer(uInt_t p_interval, std::function<void()> p_exec) : m_interval(p_interval), m_exec(p_exec) {
+	Timer(T p_interval, F p_exec) : m_interval(p_interval), m_exec(p_exec) {
 		m_timer = std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
 						std::unique_lock<std::mutex> tlock(m_conditional_mutex);
 						if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(m_interval),
@@ -208,15 +209,18 @@ public:
 			m_timer.join();
 	}
 private:
-	uInt_t m_interval;
-	std::function<void()> m_exec;
+	T m_interval;
+	F m_exec;
 	std::thread m_timer;
 	std::atomic<bool> m_running { true };
 	std::condition_variable m_conditional_lock;
 	std::mutex m_conditional_mutex;
-} timer(TIMER_INTERVAL,	[]() {	memoryLogger_t& mli = memoryLogger_t::GetInstance();
-				mli.computePeakValue();
-				if (mli.m_fname)
-					mli.printReport(); });
+};
+
+Timer<uInt_t, std::function<void()>> timer(TIMER_INTERVAL,
+						[]() {  memoryLogger_t& mli = memoryLogger_t::GetInstance();
+							mli.computePeakValue();
+							if (mli.m_fname)
+								mli.printReport(); });
 
 }	/* namespace */
