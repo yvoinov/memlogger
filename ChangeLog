@@ -368,3 +368,4 @@ IMPROVEMENT: Renamed and reworked class OnLoadInit to parametrized Timer.
 09-04-2023
 ==========
 IMPROVEMENT: Timer class made templated too.
+IMPROVEMENT: Simplified condition in printReportTotal().

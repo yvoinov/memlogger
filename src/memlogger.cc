@@ -191,7 +191,7 @@ void MemoryLogger<P, T, L>::printReportTotal(std::ostream &p_stream)
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (m_CounterArray.size() > 0) {
 		for (T i = 0; i < m_CounterArray.size(); ++i) {
-			if (!(m_CounterArray[i].start == 0))	/* If no memory calls registered, start is empty */
+			if (m_CounterArray[i].start)	/* If no memory calls registered, start is empty */
 				printReport(i, p_stream);
 			else p_stream << ERR_MSG_NF << std::endl;
 		}
