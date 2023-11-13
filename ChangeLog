@@ -369,3 +369,7 @@ IMPROVEMENT: Renamed and reworked class OnLoadInit to parametrized Timer.
 ==========
 IMPROVEMENT: Timer class made templated too.
 IMPROVEMENT: Simplified condition in printReportTotal().
+
+11-13-2023
+==========
+FIX: Segfault when hangup logging interactive session.
