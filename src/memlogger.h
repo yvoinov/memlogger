@@ -77,7 +77,7 @@ using uInt_t = std::size_t;
 using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 
 std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
-std::atomic<bool> g_innerMalloc { false }, g_innerCalloc { false };
+std::atomic<bool> g_innerMalloc { false };
 
 template <typename P, typename T, typename L>
 class MemoryLogger {
@@ -112,11 +112,9 @@ private:
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
-		g_innerCalloc.store(true, std::memory_order_release);
 		m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
 		m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
 		m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
-		g_innerCalloc.store(false, std::memory_order_release);
 	}
 
 	class AdaptiveSpinMutex;

@@ -243,8 +243,7 @@ inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 {
-	if (g_innerCalloc.load(std::memory_order_acquire))	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
-		return g_static_alloc_buffer.data();
+	if (!m_Calloc) return g_static_alloc_buffer.data();	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 	fillArrayEntry(Func_values::calloc_fvalue, n * size);
 	g_innerMalloc.store(true, std::memory_order_release);
 	return m_Calloc(n, size);
