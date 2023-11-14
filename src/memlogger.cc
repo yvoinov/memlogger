@@ -143,8 +143,10 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 			return m_c_func1;
 		case Func_values::realloc_fvalue:
 			return m_c_func2;
+		#if !defined(__linux__) || defined(COMPAT_LINUX)
 		case Func_values::calloc_fvalue:
 			return m_c_func3;
+		#endif
 		default:
 			return "";
 	}
@@ -209,7 +211,7 @@ void MemoryLogger<P, T, L>::printReport()
 	if (!m_fname)
 		printReportTotal();
 	else {
-		g_innerMalloc.store(true, std::memory_order_release);
+		m_innerMalloc.store(true, std::memory_order_release);
 		std::string v_OutputFile = std::string(m_fname);
 		std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
 		if (!v_fd.is_open()) {
@@ -218,17 +220,17 @@ void MemoryLogger<P, T, L>::printReport()
 		}
 		printReportTotal(v_fd);
 		v_fd.close();
-		g_innerMalloc.store(false, std::memory_order_release);
+		m_innerMalloc.store(false, std::memory_order_release);
 	}
 }
 
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::malloc_mf_impl(T size)
 {
-	if (!g_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
+	if (!m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
 		fillArrayEntry(Func_values::malloc_fvalue, size);
 	else
-		g_innerMalloc.store(false, std::memory_order_release);
+		m_innerMalloc.store(false, std::memory_order_release);
 	return m_Malloc(size);
 }
 
@@ -236,18 +238,20 @@ template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 {
 	fillArrayEntry(Func_values::realloc_fvalue, size);
-	g_innerMalloc.store(true, std::memory_order_release);
+	m_innerMalloc.store(true, std::memory_order_release);
 	return m_Realloc(ptr, size);
 }
 
+#if !defined(__linux__) || defined(COMPAT_LINUX)
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 {
-	if (!m_Calloc) return g_static_alloc_buffer.data();	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
+	if (!m_Calloc) return m_static_alloc_buffer.data();	/* Requires calloc hack to stop recursion during dlsym inner calloc call */
 	fillArrayEntry(Func_values::calloc_fvalue, n * size);
-	g_innerMalloc.store(true, std::memory_order_release);
+	m_innerMalloc.store(true, std::memory_order_release);
 	return m_Calloc(n, size);
 }
+#endif
 
 }	/* namespace */
 
@@ -263,9 +267,11 @@ voidPtr_t realloc(voidPtr_t ptr, uInt_t size)
 	return memoryLogger_t::GetInstance().realloc_mf_impl(ptr, size);
 }
 
+#if !defined(__linux__) || defined(COMPAT_LINUX)
 voidPtr_t calloc(uInt_t n, uInt_t size)
 {
 	return memoryLogger_t::GetInstance().calloc_mf_impl(n, size);
 }
+#endif
 
 }	/* extern C */

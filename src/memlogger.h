@@ -37,6 +37,13 @@
 #include <unistd.h>
 #endif
 
+#if defined(__linux__)
+#include <linux/version.h>
+#	if LINUX_VERSION_CODE >= KERNEL_VERSION(6,0,0)
+#	define COMPAT_LINUX
+#	endif
+#endif
+
 #define STATIC_ALLOC_BUFFER_SIZE 32
 
 /* Timer interval in seconds */
@@ -76,18 +83,20 @@ using voidPtr_t = void*;
 using uInt_t = std::size_t;
 using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 
-std::array<char, STATIC_ALLOC_BUFFER_SIZE> g_static_alloc_buffer;
-std::atomic<bool> g_innerMalloc { false };
-
 template <typename P, typename T, typename L>
 class MemoryLogger {
 public:
 	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
 	using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
+	#if !defined(__linux__) || defined(COMPAT_LINUX)
 	using func3_t = P (*)(T, T);	/* func3_t Type 3: calloc */
+	#endif
+
 	func1_t m_Malloc;	/* Arg type 1 */
 	func2_t m_Realloc;	/* Arg type 2 */
+	#if !defined(__linux__) || defined(COMPAT_LINUX)
 	func3_t m_Calloc;	/* Arg type 3 */
+	#endif
 
 	char* m_fname;
 
@@ -96,7 +105,9 @@ public:
 
 	P malloc_mf_impl(T size);
 	P realloc_mf_impl(P ptr, T size);
+	#if !defined(__linux__) || defined(COMPAT_LINUX)
 	P calloc_mf_impl(T n, T size);
+	#endif
 
 	static MemoryLogger& GetInstance() {
 		static MemoryLogger inst;
@@ -114,25 +125,35 @@ private:
 		std::signal(SIGTERM, signal_handler);
 		m_Malloc = reinterpret_cast<func1_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func1)));
 		m_Realloc = reinterpret_cast<func2_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func2)));
+		#if !defined(__linux__) || defined(COMPAT_LINUX)
 		m_Calloc = reinterpret_cast<func3_t>(reinterpret_cast<std::uintptr_t>(dlsym(RTLD_NEXT, m_c_func3)));
+		#endif
 	}
 
 	class AdaptiveSpinMutex;
 
 	/* Uses for decode array index to function name */
 	enum Func_values : T {
-		malloc_fvalue  = 0,
-		realloc_fvalue = 1,
-		calloc_fvalue  = 2
+		 malloc_fvalue  = 0
+		,realloc_fvalue = 1
+		#if !defined(__linux__) || defined(COMPAT_LINUX)
+		,calloc_fvalue  = 2
+		#endif
 	};
 
 	/* Memory functions names */
 	static constexpr const char* m_c_func1 { "malloc" };
 	static constexpr const char* m_c_func2 { "realloc" };
+	#if !defined(__linux__) || defined(COMPAT_LINUX)
 	static constexpr const char* m_c_func3 { "calloc" };
+	#endif
 
 	/* Counters array size; for 3 functions */
+	#if !defined(__linux__) || defined(COMPAT_LINUX)
 	static constexpr T m_c_array_size = 3;
+	#else
+	static constexpr T m_c_array_size = 2;
+	#endif
 
 	using Counters = struct Counters {
 		L allc_64k;
@@ -168,6 +189,11 @@ private:
 	static constexpr const T m_c_num_8192K { 8192 * KBYTES };
 
 	std::time_t m_elapsed_start;	/* Elapsed time start value */
+
+	#if !defined(__linux__) || defined(COMPAT_LINUX)
+	std::array<char, STATIC_ALLOC_BUFFER_SIZE> m_static_alloc_buffer;
+	#endif
+	std::atomic<bool> m_innerMalloc { false };
 
 	T get_page_size();
 	L roundup_to_page_size(const T p_size);

@@ -373,3 +373,7 @@ IMPROVEMENT: Simplified condition in printReportTotal().
 11-13-2023
 ==========
 FIX: Segfault when hangup logging interactive session.
+
+11-15-2023
+==========
+FIX: __cxa_guard_acquire deadlock on 5.x Linux kernels due to libC issue.
