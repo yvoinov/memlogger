@@ -228,9 +228,7 @@ public:
 				}
 		}).detach();
 	}
-	~Timer() { m_running.store(false, std::memory_order_release);
-		m_conditional_lock.notify_one();
-	}
+	~Timer() { m_running.store(false, std::memory_order_release); m_conditional_lock.notify_one(); }
 private:
 	T m_interval;
 	F m_exec;

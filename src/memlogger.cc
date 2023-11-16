@@ -259,18 +259,21 @@ extern "C" {
 
 voidPtr_t malloc(uInt_t size)
 {
-	return memoryLogger_t::GetInstance().malloc_mf_impl(size);
+	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	return mli.malloc_mf_impl(size);
 }
 
 voidPtr_t realloc(voidPtr_t ptr, uInt_t size)
 {
-	return memoryLogger_t::GetInstance().realloc_mf_impl(ptr, size);
+	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	return mli.realloc_mf_impl(ptr, size);
 }
 
 #if !defined(__linux__) || defined(COMPAT_LINUX)
 voidPtr_t calloc(uInt_t n, uInt_t size)
 {
-	return memoryLogger_t::GetInstance().calloc_mf_impl(n, size);
+	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	return mli.calloc_mf_impl(n, size);
 }
 #endif
 
