@@ -143,7 +143,7 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 			return m_c_func1;
 		case Func_values::realloc_fvalue:
 			return m_c_func2;
-		#if !defined(__linux__) || defined(COMPAT_LINUX)
+		#ifdef COMPAT_OS
 		case Func_values::calloc_fvalue:
 			return m_c_func3;
 		#endif
@@ -242,7 +242,7 @@ inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 	return m_Realloc(ptr, size);
 }
 
-#if !defined(__linux__) || defined(COMPAT_LINUX)
+#ifdef COMPAT_OS
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 {
@@ -269,7 +269,7 @@ voidPtr_t realloc(voidPtr_t ptr, uInt_t size)
 	return mli.realloc_mf_impl(ptr, size);
 }
 
-#if !defined(__linux__) || defined(COMPAT_LINUX)
+#ifdef COMPAT_OS
 voidPtr_t calloc(uInt_t n, uInt_t size)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
