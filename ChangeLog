@@ -386,3 +386,6 @@ IMPROVEMENT: Code style.
 ==========
 IMPROVEMENT: Refactoring - less preprocessor code.
 
+12-05-2023
+==========
+IMPROVEMENT: Replaced calloc() dlsym() hack to mmap() call.

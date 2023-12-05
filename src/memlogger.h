@@ -46,7 +46,9 @@
 #	define COMPAT_OS
 #endif
 
-#define STATIC_ALLOC_BUFFER_SIZE 32
+#ifdef COMPAT_OS
+#include <sys/mman.h>
+#endif
 
 /* Timer interval in seconds */
 #define TIMER_INTERVAL 1
@@ -192,9 +194,6 @@ private:
 
 	std::time_t m_elapsed_start;	/* Elapsed time start value */
 
-	#ifdef COMPAT_OS
-	std::array<char, STATIC_ALLOC_BUFFER_SIZE> m_static_alloc_buffer;
-	#endif
 	std::atomic<bool> m_innerMalloc { false };
 
 	T get_page_size();
