@@ -391,3 +391,7 @@ IMPROVEMENT: Refactoring - less preprocessor code.
 IMPROVEMENT: Replaced calloc() dlsym() hack to mmap() call.
 FIX: mmap() calls just once.
 
+12-16-2023
+==========
+IMPROVEMENT: Replaced enum to enum class.
+

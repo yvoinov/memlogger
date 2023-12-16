@@ -137,11 +137,11 @@ private:
 	class AdaptiveSpinMutex;
 
 	/* Uses for decode array index to function name */
-	enum Func_values : T {
-		 malloc_fvalue  = 0
-		,realloc_fvalue = 1
+	enum class Func_values : T {
+		malloc_fvalue,
+		realloc_fvalue
 		#ifdef COMPAT_OS
-		,calloc_fvalue  = 2
+		,calloc_fvalue
 		#endif
 	};
 

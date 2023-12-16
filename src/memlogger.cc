@@ -138,13 +138,14 @@ void MemoryLogger<P, T, L>::computePeakValue()
 template <typename P, typename T, typename L>
 const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 {
+	
 	switch (p_idx) {
-		case Func_values::malloc_fvalue:
+		case static_cast<T>(Func_values::malloc_fvalue):
 			return m_c_func1;
-		case Func_values::realloc_fvalue:
+		case static_cast<T>(Func_values::realloc_fvalue):
 			return m_c_func2;
 		#ifdef COMPAT_OS
-		case Func_values::calloc_fvalue:
+		case static_cast<T>(Func_values::calloc_fvalue):
 			return m_c_func3;
 		#endif
 		default:
@@ -228,7 +229,7 @@ template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::malloc_mf_impl(T size)
 {
 	if (!m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
-		fillArrayEntry(Func_values::malloc_fvalue, size);
+		fillArrayEntry(static_cast<T>(Func_values::malloc_fvalue), size);
 	else
 		m_innerMalloc.store(false, std::memory_order_release);
 	return m_Malloc(size);
@@ -237,7 +238,7 @@ inline P MemoryLogger<P, T, L>::malloc_mf_impl(T size)
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 {
-	fillArrayEntry(Func_values::realloc_fvalue, size);
+	fillArrayEntry(static_cast<T>(Func_values::realloc_fvalue), size);
 	m_innerMalloc.store(true, std::memory_order_release);
 	return m_Realloc(ptr, size);
 }
@@ -252,7 +253,7 @@ inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 			v_ptr = reinterpret_cast<P>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, n * size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
 		return v_ptr;
 	}
-	fillArrayEntry(Func_values::calloc_fvalue, n * size);
+	fillArrayEntry(static_cast<T>(Func_values::calloc_fvalue), n * size);
 	m_innerMalloc.store(true, std::memory_order_release);
 	return m_Calloc(n, size);
 }
