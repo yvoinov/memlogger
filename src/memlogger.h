@@ -221,27 +221,22 @@ template <typename T, typename F>
 class Timer {
 public:
 	Timer(T p_interval, F p_exec) : m_interval(p_interval), m_exec(p_exec) {
-		std::thread([&]() { while (m_running.load(std::memory_order_relaxed)) {
-					std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-					if (!m_conditional_lock.wait_for(tlock, std::chrono::seconds(m_interval),
-						[this]() { return !m_running.load(std::memory_order_acquire); }))
-						m_exec();
+		std::thread([&]() { for (;;) {
+					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
+					m_exec();
 				}
 		}).detach();
 	}
-	~Timer() { m_running.store(false, std::memory_order_release); m_conditional_lock.notify_one(); }
 private:
 	T m_interval;
 	F m_exec;
-	std::atomic<bool> m_running { true };
-	std::condition_variable m_conditional_lock;
-	std::mutex m_conditional_mutex;
 };
 
 Timer<uInt_t, std::function<void()>> timer(TIMER_INTERVAL,
 						[]() {  memoryLogger_t& mli = memoryLogger_t::GetInstance();
 							mli.computePeakValue();
 							if (mli.m_fname)
-								mli.printReport(); });
+								mli.printReport();
+						});
 
 }	/* namespace */
