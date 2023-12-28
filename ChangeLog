@@ -402,3 +402,7 @@ FIX: Made Timer class compatible with some programs on Debian.
 12-25-2023
 ==========
 FIX: Small includes fix.
+
+12-28-2023
+==========
+FIX: Possible UB.
