@@ -18541,8 +18541,6 @@ if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
   if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
     CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
-elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
-  LDFLAGS="$LDFLAGS -lpthread"
 else
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -pthread" >&5
 printf %s "checking whether C++ compiler accepts -pthread... " >&6; }
@@ -18588,6 +18586,9 @@ fi
   if test x"$ac_cv_pth_supported" = xno; then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: -pthread not supported" >&5
 printf "%s\n" "$as_me: -pthread not supported" >&6;}
+  fi
+  if test "$ax_cv_cxx_compiler_vendor" = "clang"; then
+    CXXFLAGS="$CXXFLAGS -stdlib=libc++"
   fi
 fi
 

@@ -410,3 +410,4 @@ FIX: Possible UB.
 12-31-2023
 ==========
 IMPROVEMENT: Compiler -pthread flag set.
+IMPROVEMENT: Explicit clang stdlib support.
