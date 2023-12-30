@@ -165,14 +165,14 @@ if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
   if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
     CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
+elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
+  CXXFLAGS="$CXXFLAGS -stdlib=libc++"
+  LDFLAGS="$LDFLAGS -lpthread"
 else
   dnl Check -pthread
   AX_CHECK_COMPILE_FLAG([-pthread], [CXXFLAGS="$CXXFLAGS -pthread"; LDFLAGS="$LDFLAGS -pthread -lpthread"; ac_cv_pth_supported=yes], [ac_cv_pth_supported=no], [])
   if test x"$ac_cv_pth_supported" = xno; then
     AC_MSG_NOTICE([-pthread not supported])
-  fi
-  if test "$ax_cv_cxx_compiler_vendor" = "clang"; then
-    CXXFLAGS="$CXXFLAGS -stdlib=libc++"
   fi
 fi
 

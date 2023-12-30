@@ -17,6 +17,7 @@
 #endif
 #include <mutex>
 #include <string>
+#include <ostream>
 #include <iostream>	/* For std::cout, std::ostream, std::ios */
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
