@@ -160,27 +160,18 @@ fi
 
 dnl Do the stuff needed for compiler-specific optimization/platform settings
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
+  CXXFLAGS="$CXXFLAGS -mt=yes"
+  LDFLAGS="$LDFLAGS -mt=yes"
   if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
     CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-mt"`; then
-    CXXFLAGS="$CXXFLAGS -mt=yes"
-  fi
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xtarget"`; then
-   CXXFLAGS="$CXXFLAGS -xtarget=generic"
-  fi
+elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
+  LDFLAGS="$LDFLAGS -lpthread"
 else
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "thread"`; then
-    CXXFLAGS="$CXXFLAGS -pthread"
-    if test "$ax_cv_cxx_compiler_vendor" = "clang"; then
-      CXXFLAGS="$CXXFLAGS -stdlib=libc++"
-      LDFLAGS="$LDFLAGS -lpthread"
-    else
-     LDFLAGS="$LDFLAGS -pthread"
-    fi
-  fi
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-mtune"`; then
-    CXXFLAGS="$CXXFLAGS -mtune=native"
+  dnl Check -pthread
+  AX_CHECK_COMPILE_FLAG([-pthread], [CXXFLAGS="$CXXFLAGS -pthread"; LDFLAGS="$LDFLAGS -pthread -lpthread"; ac_cv_pth_supported=yes], [ac_cv_pth_supported=no], [])
+  if test x"$ac_cv_pth_supported" = xno; then
+    AC_MSG_NOTICE([-pthread not supported])
   fi
 fi
 
@@ -188,7 +179,7 @@ if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
     dnl Check linkopt (Oracle Developer Studio)
     AX_CHECK_COMPILE_FLAG([-xlinkopt], [CXXFLAGS="$CXXFLAGS -xlinkopt=2"; LDFLAGS="$LDFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
-    dnl Check ThinLTO (CLang)
+    dnl Check ThinLTO (clang)
     AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto=thin"; LDFLAGS="$LDFLAGS -flto=thin"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 elif test "$ax_cv_cxx_compiler_vendor" = "gnu"; then
     dnl Check LTO (GCC)
