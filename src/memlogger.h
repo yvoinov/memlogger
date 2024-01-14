@@ -224,20 +224,13 @@ template <typename T, typename F>
 class Timer {
 public:
 	Timer(T p_interval, F p_exec) : m_interval(p_interval), m_exec(p_exec) {
-		m_thread = std::thread([=]() { while (m_running) {
-									std::this_thread::sleep_for(std::chrono::seconds(m_interval));
-									m_exec();
-								}
-					});
-	}
-
-	~Timer() {
-		m_running = false;
-		m_thread.detach();
+		std::thread([=]() { for (;;) {
+					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
+					m_exec();
+				}
+		}).detach();
 	}
 private:
-	bool m_running { true };
-	std::thread m_thread;
 	T m_interval;
 	F m_exec;
 };

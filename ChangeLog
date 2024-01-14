@@ -413,7 +413,3 @@ IMPROVEMENT: Compiler -pthread flag set.
 IMPROVEMENT: Explicit clang stdlib support.
 FIX: Runtime error 'undefined symbol: _ZTINSt3__113basic_ostreamIcNS_11char_traitsIcEEEE' on Fedora/RH.
 FIX: Clang compilation warning.
-
-01-14-2024
-==========
-FIX: Crash on prstat profiling session exit.
