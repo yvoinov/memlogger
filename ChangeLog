@@ -417,3 +417,7 @@ FIX: Clang compilation warning.
 01-14-2024
 ==========
 IMPROVEMENT: Correctly signalling timer thread to end.
+
+01-28-2024
+==========
+IMPROVEMENT: Removed excessive casting.
