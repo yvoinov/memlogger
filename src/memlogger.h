@@ -135,6 +135,7 @@ private:
 		#ifdef COMPAT_OS
 		m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
 		#endif
+		if (!dlerror()) return;	/* If any of dlsym() fails, throw */
 	}
 
 	class AdaptiveSpinMutex;
