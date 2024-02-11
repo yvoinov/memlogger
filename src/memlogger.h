@@ -4,6 +4,10 @@
   #error This program needs at least a C++11 compliant compiler
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "autoconf.h"
+#endif
+
 #include <climits>	/* For UINT_MAX */
 #include <csignal>
 #include <cstdlib>	/* For std::exit, std::getenv */
@@ -50,7 +54,11 @@
 #endif
 
 #ifdef COMPAT_OS
+#if !HAVE_SYS_MMAN_H
+#error Require sys/mman.h to build
+#else
 #include <sys/mman.h>
+#endif
 #endif
 
 /* Timer interval in seconds */

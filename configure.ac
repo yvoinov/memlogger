@@ -91,6 +91,7 @@ AC_SUBST(MEMLOGGER_AGE)
 AC_CONFIG_AUX_DIR(cfgaux)
 AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_HEADERS([src/autoconf.h:src/autoconf.h.in])
 
 AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([1.16 subdir-objects])
@@ -193,6 +194,9 @@ fi
 
 dnl Check libdl and header
 AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NOTICE([libdl not found])])
+
+dnl Check required headers
+AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])])
 
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)

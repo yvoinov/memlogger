@@ -425,3 +425,8 @@ IMPROVEMENT: Removed excessive casting.
 01-30-2024
 ==========
 IMPROVEMENT: Added checking dlerror in ctor.
+
+02-11-2024
+==========
+IMPROVEMENT: Added header check: sys/mman.h
+
