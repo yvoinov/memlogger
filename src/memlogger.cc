@@ -138,7 +138,7 @@ void MemoryLogger<P, T, L>::computePeakValue()
 template <typename P, typename T, typename L>
 const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 {
-	
+
 	switch (p_idx) {
 		case static_cast<T>(Func_values::malloc_fvalue):
 			return m_c_func1;
@@ -247,12 +247,8 @@ inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 {
-	if (!m_Calloc) {	/* Requires calloc replacement to stop recursion during dlsym inner calloc call */
-		static P v_ptr { nullptr };
-		if (!v_ptr)
-			v_ptr = reinterpret_cast<P>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, n * size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
-		return v_ptr;
-	}
+	if (!m_Calloc)	/* Requires calloc replacement to stop recursion during dlsym inner calloc call */
+		return malloc_internal(n * size);
 	fillArrayEntry(static_cast<T>(Func_values::calloc_fvalue), n * size);
 	m_innerMalloc.store(true, std::memory_order_release);
 	return m_Calloc(n, size);

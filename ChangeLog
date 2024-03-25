@@ -430,3 +430,6 @@ IMPROVEMENT: Added checking dlerror in ctor.
 ==========
 IMPROVEMENT: Added header check: sys/mman.h
 
+03-25-2024
+==========
+IMPROVEMENT: Moved mmap() call to private member function.
