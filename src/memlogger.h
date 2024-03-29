@@ -129,8 +129,8 @@ public:
 		return inst;
 	}
 
-	MemoryLogger(MemoryLogger &other) = delete;
-	void operator=(const MemoryLogger &) = delete;
+	MemoryLogger(MemoryLogger& other) = delete;
+	void operator=(const MemoryLogger&) = delete;
 
 	~MemoryLogger() { printReport(); }
 private:
@@ -145,12 +145,6 @@ private:
 		#endif
 		if (!dlerror()) return;	/* If any of dlsym() fails, throw */
 	}
-
-	#ifdef COMPAT_OS
-	P malloc_internal(T p_size) {
-		return reinterpret_cast<P>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, p_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
-	}
-	#endif
 
 	class AdaptiveSpinMutex;
 
@@ -214,6 +208,12 @@ private:
 
 	std::atomic<bool> m_innerMalloc { false };
 
+	#ifdef COMPAT_OS
+	P malloc_internal(T p_size) {
+		return reinterpret_cast<P>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, p_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
+	}
+	#endif
+
 	T get_page_size();
 	L roundup_to_page_size(const T p_size);
 	std::time_t Now();
@@ -226,9 +226,9 @@ private:
 	L sumCounters(const T p_idx);
 	void fillArrayEntry(const T p_idx, const T p_value);
 	const char* decodeMemFunc(const T p_idx);
-	void printReport(const T p_idx, std::ostream &p_stream = std::cout);
-	void printElapsedTime(std::ostream &p_stream = std::cout);
-	void printReportTotal(std::ostream &p_stream = std::cout);
+	void printReport(const T p_idx, std::ostream& p_stream = std::cout);
+	void printElapsedTime(std::ostream& p_stream = std::cout);
+	void printReportTotal(std::ostream& p_stream = std::cout);
 };
 
 using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t>;

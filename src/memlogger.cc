@@ -154,7 +154,7 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 }
 
 template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream &p_stream)
+void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
 {
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << m_CounterArray[p_idx].allc_128k << std::endl;
@@ -175,7 +175,7 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream &p_stream)
 }
 
 template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printElapsedTime(std::ostream &p_stream)
+void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
 {
 	const std::time_t c_sec = Now() - m_elapsed_start;
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
@@ -188,15 +188,21 @@ void MemoryLogger<P, T, L>::printElapsedTime(std::ostream &p_stream)
 }
 
 template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printReportTotal(std::ostream &p_stream)
+void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 {
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (m_CounterArray.size() > 0) {
 		for (T i = 0; i < m_CounterArray.size(); ++i) {
-			if (m_CounterArray[i].start)	/* If no memory calls registered, start is empty */
-				printReport(i, p_stream);
-			else p_stream << ERR_MSG_NF << std::endl;
+			if (m_CounterArray[i].start) {	/* If no memory calls registered, start is empty */
+				if (!m_fname)
+					printReport(i, p_stream);
+				else {
+					AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+					std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+					printReport(i, p_stream);
+				}
+			} else p_stream << ERR_MSG_NF << std::endl;
 		}
 
 		printElapsedTime(p_stream);
