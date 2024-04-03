@@ -45,6 +45,41 @@ class MemoryLogger<P, T, L>::AdaptiveSpinMutex {
 };
 
 template <typename P, typename T, typename L>
+void MemoryLogger<P, T, L>::computePeakValue()
+{
+	for (T i = 0; i < m_CounterArray.size(); ++i) {
+		L v_sum { 0 };
+		{
+			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+			v_sum = sumCounters(i);
+		}
+		if (v_sum - m_PeakValueArray[i].previous > m_PeakValueArray[i].peak)
+			m_PeakValueArray[i].peak = v_sum - m_PeakValueArray[i].previous;
+		m_PeakValueArray[i].previous = v_sum;
+	}
+}
+
+template <typename P, typename T, typename L>
+void MemoryLogger<P, T, L>::printReport()
+{
+	if (!m_fname)
+		printReportTotal();
+	else {
+		m_innerMalloc.store(true, std::memory_order_release);
+		std::string v_OutputFile = std::string(m_fname);
+		std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
+		if (!v_fd.is_open()) {
+			std::cerr << ERR_MSG_F + v_OutputFile << std::endl;
+			return;
+		}
+		printReportTotal(v_fd);
+		v_fd.close();
+		m_innerMalloc.store(false, std::memory_order_release);
+	}
+}
+
+template <typename P, typename T, typename L>
 inline T MemoryLogger<P, T, L>::get_page_size()
 {
 	static T pagesize { 0 };
@@ -117,22 +152,6 @@ void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
 
 	if (c_value > m_CounterArray[p_idx].allc_max && c_value < UINT_MAX)
 		m_CounterArray[p_idx].allc_max = c_value;
-}
-
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::computePeakValue()
-{
-	for (T i = 0; i < m_CounterArray.size(); ++i) {
-		L v_sum { 0 };
-		{
-			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
-			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-			v_sum = sumCounters(i);
-		}
-		if (v_sum - m_PeakValueArray[i].previous > m_PeakValueArray[i].peak)
-			m_PeakValueArray[i].peak = v_sum - m_PeakValueArray[i].previous;
-		m_PeakValueArray[i].previous = v_sum;
-	}
 }
 
 template <typename P, typename T, typename L>
@@ -209,25 +228,6 @@ void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 	} else {
 		std::cerr << ERR_MSG_A << std::endl;
 		std::exit(EXIT_1);
-	}
-}
-
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printReport()
-{
-	if (!m_fname)
-		printReportTotal();
-	else {
-		m_innerMalloc.store(true, std::memory_order_release);
-		std::string v_OutputFile = std::string(m_fname);
-		std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
-		if (!v_fd.is_open()) {
-			std::cerr << ERR_MSG_F + v_OutputFile << std::endl;
-			return;
-		}
-		printReportTotal(v_fd);
-		v_fd.close();
-		m_innerMalloc.store(false, std::memory_order_release);
 	}
 }
 

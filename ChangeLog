@@ -437,3 +437,7 @@ IMPROVEMENT: Move mmap() call to private member function.
 03-29-2024
 ==========
 IMPROVEMENT: The printReportTotal() function made reads the array under a row-level lock while writing to the file at runtime to ensure consistency.
+
+04-03-2024
+==========
+IMPROVEMENT: Some code formatting.
