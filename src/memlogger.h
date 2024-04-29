@@ -129,9 +129,6 @@ public:
 		return inst;
 	}
 
-	MemoryLogger(MemoryLogger& other) = delete;
-	void operator=(const MemoryLogger&) = delete;
-
 	~MemoryLogger() { printReport(); }
 private:
 	MemoryLogger() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_elapsed_start(Now()) {
@@ -145,6 +142,11 @@ private:
 		#endif
 		if (!dlerror()) return;	/* If any of dlsym() fails, throw */
 	}
+
+	MemoryLogger(const MemoryLogger&) = delete;
+	MemoryLogger(MemoryLogger&&) noexcept = delete;
+	MemoryLogger& operator=(const MemoryLogger&) = delete;
+	MemoryLogger& operator=(MemoryLogger&&) noexcept = delete;
 
 	class AdaptiveSpinMutex;
 
