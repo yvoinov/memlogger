@@ -221,7 +221,7 @@ void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 					std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 					printReport(i, p_stream);
 				}
-			} else p_stream << ERR_MSG_NF << std::endl;
+			} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
 		}
 
 		printElapsedTime(p_stream);

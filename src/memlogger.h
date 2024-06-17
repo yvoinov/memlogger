@@ -86,7 +86,8 @@
 #define ERR_MSG "ERROR: "
 #define ERR_MSG_A ERR_MSG "Report array empty"
 #define ERR_MSG_F ERR_MSG "Failed to open file "
-#define ERR_MSG_NF "No other calls found"
+#define ERR_MSG_NF1 "No "
+#define ERR_MSG_NF2 " calls found"
 
 /* Return codes */
 #define EXIT_0 0	//Normal exit
