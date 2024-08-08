@@ -449,3 +449,7 @@ IMPROVEMENT: Some code formatting.
 06-17-2024
 ==========
 IMPROVEMENT: Added function name in printReportTotal() not found message.
+
+08-08-2024
+==========
+FIX: Code formatting.

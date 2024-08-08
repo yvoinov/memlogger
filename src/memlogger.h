@@ -212,7 +212,8 @@ private:
 	std::atomic<bool> m_innerMalloc { false };
 
 	#ifdef COMPAT_OS
-	P malloc_internal(T p_size) {
+	P malloc_internal(T p_size)
+	{
 		return reinterpret_cast<P>((reinterpret_cast<std::uintptr_t>(mmap(nullptr, p_size, PROT_READ|PROT_WRITE, MAP_ANON|MAP_PRIVATE, -1, 0)) + 1) & ~1);
 	}
 	#endif
