@@ -63,10 +63,10 @@ void MemoryLogger<P, T, L>::computePeakValue()
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printReport()
 {
+	m_innerMalloc.store(true, std::memory_order_release);
 	if (!m_fname)
 		printReportTotal();
 	else {
-		m_innerMalloc.store(true, std::memory_order_release);
 		std::string v_OutputFile = std::string(m_fname);
 		std::ofstream v_fd = std::ofstream(v_OutputFile, std::ios_base::trunc|std::ios_base::out);
 		if (!v_fd.is_open()) {
@@ -75,8 +75,8 @@ void MemoryLogger<P, T, L>::printReport()
 		}
 		printReportTotal(v_fd);
 		v_fd.close();
-		m_innerMalloc.store(false, std::memory_order_release);
 	}
+	m_innerMalloc.store(false, std::memory_order_release);
 }
 
 template <typename P, typename T, typename L>
@@ -269,7 +269,10 @@ inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 template <typename P, typename T, typename L>
 inline void MemoryLogger<P, T, L>::free_mf_impl(P ptr)
 {
-	fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
+	if (!m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive paired free calls */
+		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
+	else
+		m_innerMalloc.store(false, std::memory_order_release);
 	m_Free(ptr);
 }
 #endif
