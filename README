@@ -7,7 +7,7 @@ by the nature of memory allocations in accordance with the size of the chunks.
 Accordingly, only functions that directly allocate memory are logged.
 
 In   general,   logging of the malloc, realloc, calloc (on compatible platforms)
-and  free  functions  (on  platforms  with  the  malloñ_usable_size function) is
+and  free  functions  (on  platforms  with  the  malloc_usable_size function) is
 supported.
 
 Memlogger  now  implemented  as  only shared library. It produces instant report
