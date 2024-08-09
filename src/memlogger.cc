@@ -76,7 +76,6 @@ void MemoryLogger<P, T, L>::printReport()
 		printReportTotal(v_fd);
 		v_fd.close();
 	}
-	m_innerMalloc.store(false, std::memory_order_release);
 }
 
 template <typename P, typename T, typename L>
@@ -179,6 +178,7 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
 {
+	m_innerMalloc.store(true, std::memory_order_release);
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << m_CounterArray[p_idx].allc_128k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << m_CounterArray[p_idx].allc_256k << std::endl;
@@ -200,6 +200,7 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
 {
+	m_innerMalloc.store(true, std::memory_order_release);
 	const std::time_t c_sec = Now() - m_elapsed_start;
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
 
@@ -213,6 +214,7 @@ void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 {
+	m_innerMalloc.store(true, std::memory_order_release);
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (m_CounterArray.size() > 0) {
