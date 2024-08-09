@@ -6,14 +6,14 @@
 # Process this file with autoconf to produce a configure script.
 
 m4_define([VERSION_MAJOR],[2])
-m4_define([VERSION_MINOR],[0])
-m4_define([VERSION_MICRO],[37])
+m4_define([VERSION_MINOR],[1])
+m4_define([VERSION_MICRO],[0])
 
 AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
-MEMLOGGER_CURRENT=2
-MEMLOGGER_REVISION=37
-MEMLOGGER_AGE=0
+MEMLOGGER_CURRENT=3
+MEMLOGGER_REVISION=0
+MEMLOGGER_AGE=1
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
 # 1.0.2 had 1:2:0
@@ -65,6 +65,7 @@ MEMLOGGER_AGE=0
 # 2.0.35 had 2:35:0
 # 2.0.36 had 2:36:0
 # 2.0.37 had 2:37:0
+# 3.1.0 had 3:0:1
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -197,6 +198,8 @@ AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NO
 
 dnl Check required headers
 AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])])
+
+AC_CHECK_FUNCS([malloc_usable_size], [AC_DEFINE([HAVE_MALLOC_USABLE_SIZE], [1])])
 
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)

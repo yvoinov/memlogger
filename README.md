@@ -4,7 +4,7 @@
 
 Unlike most similar solutions, memlogger is designed to profile the application by the nature of memory allocations in accordance with the size of the chunks.
 
-Accordingly, only functions that directly allocate memory are logged.
+Accordingly, only functions that directly allocate memory are logged. In general, logging of the malloñ, realloc, calloñ (on compatible platforms) and free functions(on platforms with the malloñ_usable_size function) is supported.
 
 Memlogger now implemented as only shared library. It produces instant report immediately after logging completion with O(1) complexity. No more log processor required.
 
@@ -104,21 +104,21 @@ The result will be as follows:
 ```
 Memory allocations report
 ===================================================
-malloc up to 64k           : 9725
-malloc from 64k to 128k    : 7
-malloc from 128k to 256k   : 1
-malloc from 256k to 512k   : 14
+malloc up to 64k           : 31709
+malloc from 64k to 128k    : 1
+malloc from 128k to 256k   : 2
+malloc from 256k to 512k   : 0
 malloc from 512k to 1024k  : 0
 malloc from 1024k to 2048k : 0
 malloc from 2048k to 4096k : 0
 malloc from 4096k to 8192k : 0
 malloc >8192k              : 0
-malloc max size            : 380k
+malloc max size            : 132k
 ---------------------------------------------------
-Avg 1624 malloc calls/sec
-Peak 7103 malloc calls/sec
+Avg 43 malloc calls/sec
+Peak 686 malloc calls/sec
 ---------------------------------------------------
-realloc up to 64k           : 76
+realloc up to 64k           : 19
 realloc from 64k to 128k    : 0
 realloc from 128k to 256k   : 0
 realloc from 256k to 512k   : 0
@@ -127,26 +127,40 @@ realloc from 1024k to 2048k : 0
 realloc from 2048k to 4096k : 0
 realloc from 4096k to 8192k : 0
 realloc >8192k              : 0
-realloc max size            : 40k
+realloc max size            : 52k
 ---------------------------------------------------
-Avg 38 realloc calls/sec
-Peak 48 realloc calls/sec
+Avg 19 realloc calls/sec
+Peak 19 realloc calls/sec
 ---------------------------------------------------
-calloc up to 64k           : 490
+calloc up to 64k           : 281
 calloc from 64k to 128k    : 0
 calloc from 128k to 256k   : 0
 calloc from 256k to 512k   : 0
 calloc from 512k to 1024k  : 0
-calloc from 1024k to 2048k : 0
+calloc from 1024k to 2048k : 1
 calloc from 2048k to 4096k : 0
 calloc from 4096k to 8192k : 0
 calloc >8192k              : 0
-calloc max size            : 8k
+calloc max size            : 1412k
 ---------------------------------------------------
-Avg 490 calloc calls/sec
-Peak 490 calloc calls/sec
+Avg 0 calloc calls/sec
+Peak 41 calloc calls/sec
 ---------------------------------------------------
-Elapsed time: 6 seconds (00:00:06)
+free up to 64k           : 33264
+free from 64k to 128k    : 0
+free from 128k to 256k   : 0
+free from 256k to 512k   : 0
+free from 512k to 1024k  : 0
+free from 1024k to 2048k : 0
+free from 2048k to 4096k : 0
+free from 4096k to 8192k : 0
+free >8192k              : 0
+free max size            : 36k
+---------------------------------------------------
+Avg 45 free calls/sec
+Peak 792 free calls/sec
+---------------------------------------------------
+Elapsed time: 726 seconds (00:12:06)
 ```
 
 where the numbers show the number of calls to the corresponding function with the size in the range of the corresponding bucket. "Elapsed time" shows total logging time. Max allocations represents peak allocations per second value.

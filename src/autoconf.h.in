@@ -12,6 +12,9 @@
 /* Define to 1 if LIBDL is found */
 #undef HAVE_LIBDL
 
+/* Define to 1 if you have the 'malloc_usable_size' function. */
+#undef HAVE_MALLOC_USABLE_SIZE
+
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
 

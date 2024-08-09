@@ -167,6 +167,10 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 		case static_cast<T>(Func_values::calloc_fvalue):
 			return m_c_func3;
 		#endif
+		#ifdef HAVE_MALLOC_USABLE_SIZE
+		case static_cast<T>(Func_values::free_fvalue):
+			return m_c_func4;
+		#endif
 		default:
 			return "";
 	}
@@ -261,6 +265,15 @@ inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 }
 #endif
 
+#ifdef HAVE_MALLOC_USABLE_SIZE
+template <typename P, typename T, typename L>
+inline void MemoryLogger<P, T, L>::free_mf_impl(P ptr)
+{
+	fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
+	m_Free(ptr);
+}
+#endif
+
 }	/* namespace */
 
 extern "C" {
@@ -282,6 +295,14 @@ voidPtr_t calloc(uInt_t n, uInt_t size)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
 	return mli.calloc_mf_impl(n, size);
+}
+#endif
+
+#ifdef HAVE_MALLOC_USABLE_SIZE
+void free(voidPtr_t ptr)
+{
+	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	mli.free_mf_impl(ptr);
 }
 #endif
 

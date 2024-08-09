@@ -453,3 +453,7 @@ IMPROVEMENT: Added function name in printReportTotal() not found message.
 08-08-2024
 ==========
 FIX: Code formatting.
+
+08-09-2024
+==========
+IMPROVEMENT: Added free() calls logging (if supported malloc_usable_size() function).
