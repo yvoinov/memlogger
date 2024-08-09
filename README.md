@@ -4,7 +4,7 @@
 
 Unlike most similar solutions, memlogger is designed to profile the application by the nature of memory allocations in accordance with the size of the chunks.
 
-Accordingly, only functions that directly allocate memory are logged. In general, logging of the malloc, realloc, calloc (on compatible platforms) and free functions(on platforms with the malloc_usable_size function) is supported.
+Accordingly, only functions that directly allocate memory are logged. In general, logging of the malloc, realloc, calloc (on compatible platforms) and free functions (on platforms with the malloc_usable_size function) is supported.
 
 Memlogger now implemented as only shared library. It produces instant report immediately after logging completion with O(1) complexity. No more log processor required.
 
