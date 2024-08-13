@@ -121,7 +121,7 @@ using uInt_t = std::size_t;
 using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 
 template <typename P, typename T, typename L>
-class MemoryLogger : public InnerMallocFlag {
+class MemoryLogger : protected InnerMallocFlag {
 public:
 	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
 	using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
