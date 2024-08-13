@@ -465,3 +465,4 @@ IMPROVEMENT: Do not log paired free() for inner malloc() calls.
 08-13-2024
 ==========
 IMPROVEMENT: Code formatting.
+IMPROVEMENT: Refactored inner malloc flag processing.

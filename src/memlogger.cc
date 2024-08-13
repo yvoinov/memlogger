@@ -12,7 +12,8 @@ public:
 	AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
 	~AdaptiveSpinMutex() = default;
 
-	void lock() noexcept {
+	void lock() noexcept
+	{
 		T v_spin_count { 0 };
 
 		while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
@@ -29,7 +30,8 @@ public:
 		m_spin_pred += (v_spin_count - m_spin_pred) >> 3;	/* x >> 3 is eq x / 8 */
 	}
 
-	void unlock() noexcept {
+	void unlock() noexcept
+	{
 		m_lock.store(false, std::memory_order_release);
 		#if !defined(__FreeBSD__)
 		m_conditional_lock.notify_one();
@@ -63,7 +65,7 @@ void MemoryLogger<P, T, L>::computePeakValue()
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printReport()
 {
-	m_innerMalloc.store(true, std::memory_order_release);
+	set_flag();
 	if (!m_fname)
 		printReportTotal();
 	else {
@@ -156,7 +158,6 @@ void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
 template <typename P, typename T, typename L>
 const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 {
-
 	switch (p_idx) {
 		case static_cast<T>(Func_values::malloc_fvalue):
 			return m_c_func1;
@@ -178,7 +179,7 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
 {
-	m_innerMalloc.store(true, std::memory_order_release);
+	set_flag();
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << m_CounterArray[p_idx].allc_128k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << m_CounterArray[p_idx].allc_256k << std::endl;
@@ -200,7 +201,7 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
 {
-	m_innerMalloc.store(true, std::memory_order_release);
+	set_flag();
 	const std::time_t c_sec = Now() - m_elapsed_start;
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
 
@@ -214,7 +215,7 @@ void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
 template <typename P, typename T, typename L>
 void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 {
-	m_innerMalloc.store(true, std::memory_order_release);
+	set_flag();
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (m_CounterArray.size() > 0) {
@@ -240,10 +241,9 @@ void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::malloc_mf_impl(T size)
 {
-	if (!m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive malloc calls */
+	if (!get_flag())	/* Do not log own recursive malloc calls */
 		fillArrayEntry(static_cast<T>(Func_values::malloc_fvalue), size);
-	else
-		m_innerMalloc.store(false, std::memory_order_release);
+	else set_flag(false);
 	return m_Malloc(size);
 }
 
@@ -251,7 +251,7 @@ template <typename P, typename T, typename L>
 inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 {
 	fillArrayEntry(static_cast<T>(Func_values::realloc_fvalue), size);
-	m_innerMalloc.store(true, std::memory_order_release);
+	set_flag();
 	return m_Realloc(ptr, size);
 }
 
@@ -262,7 +262,7 @@ inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 	if (!m_Calloc)	/* Requires calloc replacement to stop recursion during dlsym inner calloc call */
 		return malloc_internal(n * size);
 	fillArrayEntry(static_cast<T>(Func_values::calloc_fvalue), n * size);
-	m_innerMalloc.store(true, std::memory_order_release);
+	set_flag();
 	return m_Calloc(n, size);
 }
 #endif
@@ -271,10 +271,8 @@ inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 template <typename P, typename T, typename L>
 inline void MemoryLogger<P, T, L>::free_mf_impl(P ptr)
 {
-	if (!m_innerMalloc.load(std::memory_order_acquire))	/* Do not log own recursive paired free calls */
+	if (!get_flag())	/* Do not log own recursive paired free calls */
 		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
-	else
-		m_innerMalloc.store(false, std::memory_order_release);
 	m_Free(ptr);
 }
 #endif

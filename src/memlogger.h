@@ -98,12 +98,30 @@
 
 namespace {
 
+class InnerMallocFlag {
+public:
+	InnerMallocFlag() { m_innerMalloc.store(true, std::memory_order_release); }
+	~InnerMallocFlag() { m_innerMalloc.store(false, std::memory_order_release); }	
+
+	bool get_flag()
+	{
+		return m_innerMalloc.load(std::memory_order_acquire);
+	}
+
+	void set_flag(bool p_flag = true)
+	{
+		m_innerMalloc.store(p_flag, std::memory_order_release);
+	}
+private:
+	std::atomic<bool> m_innerMalloc { false };
+};
+
 using voidPtr_t = void*;
 using uInt_t = std::size_t;
 using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 
 template <typename P, typename T, typename L>
-class MemoryLogger {
+class MemoryLogger : public InnerMallocFlag {
 public:
 	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
 	using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
@@ -229,8 +247,6 @@ private:
 	static constexpr const T m_c_num_8192K { 8192 * KBYTES };
 
 	std::time_t m_elapsed_start;	/* Elapsed time start value */
-
-	std::atomic<bool> m_innerMalloc { false };
 
 	#ifdef COMPAT_OS
 	P malloc_internal(T p_size)
