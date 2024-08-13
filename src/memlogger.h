@@ -98,23 +98,23 @@
 
 namespace {
 
-template <typename F>
+template <typename Fl>
 class InnerMallocFlag {
 public:
 	InnerMallocFlag() { m_innerMalloc.store(true, std::memory_order_release); }
 	~InnerMallocFlag() { m_innerMalloc.store(false, std::memory_order_release); }
 protected:
-	F get_flag()
+	Fl get_flag()
 	{
 		return m_innerMalloc.load(std::memory_order_acquire);
 	}
 
-	void set_flag(F p_flag = true)
+	void set_flag(Fl p_flag = true)
 	{
 		m_innerMalloc.store(p_flag, std::memory_order_release);
 	}
 private:
-	std::atomic<F> m_innerMalloc { false };
+	std::atomic<Fl> m_innerMalloc { false };
 };
 
 using innerMallocFlag_t = InnerMallocFlag<bool>;
@@ -279,10 +279,10 @@ using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t>;
 
 /* Timer class with on-load init */
 /* Intended to run a given block (lambda) on a periodic basis at a given interval */
-template <typename T, typename F>
+template <typename T, typename Fn>
 class Timer {
 public:
-	Timer(T p_interval, F p_exec) : m_interval(p_interval), m_exec(p_exec) {
+	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec) {
 		std::thread([=]() { while (m_running) {
 					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
 					m_exec();
@@ -293,7 +293,7 @@ public:
 private:
 	bool m_running { true };
 	T m_interval;
-	F m_exec;
+	Fn m_exec;
 };
 
 Timer<uInt_t, std::function<void()>> timer(TIMER_INTERVAL,
