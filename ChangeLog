@@ -461,3 +461,7 @@ IMPROVEMENT: Added free() calls logging (if supported malloc_usable_size() funct
 08-10-2024
 ==========
 IMPROVEMENT: Do not log paired free() for inner malloc() calls.
+
+08-13-2024
+==========
+IMPROVEMENT: Code formatting.

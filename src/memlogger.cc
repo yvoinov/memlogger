@@ -7,41 +7,41 @@ namespace {
 
 template <typename P, typename T, typename L>
 class MemoryLogger<P, T, L>::AdaptiveSpinMutex {
-	public:
-		AdaptiveSpinMutex(std::atomic<bool>& p_lock) : m_lock(p_lock) {};
-		AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
-		~AdaptiveSpinMutex() = default;
+public:
+	AdaptiveSpinMutex(std::atomic<bool>& p_lock) : m_lock(p_lock) {};
+	AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
+	~AdaptiveSpinMutex() = default;
 
-		void lock() noexcept {
-			T v_spin_count { 0 };
+	void lock() noexcept {
+		T v_spin_count { 0 };
 
-			while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
-				++v_spin_count;
-				if (v_spin_count < m_spin_pred << 1) continue;	/* m_spin_pred << 1 is eq m_spin_pred * 2 */
-				#if !defined(__FreeBSD__)
-				std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-				m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !m_lock.load(std::memory_order_relaxed); });
-				#else
-				std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-				#endif
-			}
-
-			m_spin_pred += (v_spin_count - m_spin_pred) >> 3;	/* x >> 3 is eq x / 8 */
-		}
-
-		void unlock() noexcept {
-			m_lock.store(false, std::memory_order_release);
+		while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
+			++v_spin_count;
+			if (v_spin_count < m_spin_pred << 1) continue;	/* m_spin_pred << 1 is eq m_spin_pred * 2 */
 			#if !defined(__FreeBSD__)
-			m_conditional_lock.notify_one();
+			std::unique_lock<std::mutex> tlock(m_conditional_mutex);
+			m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !m_lock.load(std::memory_order_relaxed); });
+			#else
+			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 			#endif
 		}
-	private:
-		std::atomic<bool>& m_lock;
-		std::atomic<T> m_spin_pred { 0 };
+
+		m_spin_pred += (v_spin_count - m_spin_pred) >> 3;	/* x >> 3 is eq x / 8 */
+	}
+
+	void unlock() noexcept {
+		m_lock.store(false, std::memory_order_release);
 		#if !defined(__FreeBSD__)
-		std::mutex m_conditional_mutex;
-		std::condition_variable m_conditional_lock;
+		m_conditional_lock.notify_one();
 		#endif
+	}
+private:
+	std::atomic<bool>& m_lock;
+	std::atomic<T> m_spin_pred { 0 };
+	#if !defined(__FreeBSD__)
+	std::mutex m_conditional_mutex;
+	std::condition_variable m_conditional_lock;
+	#endif
 };
 
 template <typename P, typename T, typename L>
