@@ -98,30 +98,33 @@
 
 namespace {
 
+template <typename F>
 class InnerMallocFlag {
 public:
 	InnerMallocFlag() { m_innerMalloc.store(true, std::memory_order_release); }
 	~InnerMallocFlag() { m_innerMalloc.store(false, std::memory_order_release); }
 protected:
-	bool get_flag()
+	F get_flag()
 	{
 		return m_innerMalloc.load(std::memory_order_acquire);
 	}
 
-	void set_flag(bool p_flag = true)
+	void set_flag(F p_flag = true)
 	{
 		m_innerMalloc.store(p_flag, std::memory_order_release);
 	}
 private:
-	std::atomic<bool> m_innerMalloc { false };
+	std::atomic<F> m_innerMalloc { false };
 };
+
+using innerMallocFlag_t = InnerMallocFlag<bool>;
 
 using voidPtr_t = void*;
 using uInt_t = std::size_t;
 using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 
 template <typename P, typename T, typename L>
-class MemoryLogger : protected InnerMallocFlag {
+class MemoryLogger : protected innerMallocFlag_t {
 public:
 	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
 	using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
