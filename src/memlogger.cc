@@ -273,6 +273,7 @@ inline void MemoryLogger<P, T, L>::free_mf_impl(P ptr)
 {
 	if (!get_flag())	/* Do not log own recursive paired free calls */
 		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
+	else set_flag(false);
 	m_Free(ptr);
 }
 #endif
