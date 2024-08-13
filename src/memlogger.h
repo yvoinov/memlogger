@@ -102,7 +102,7 @@ class InnerMallocFlag {
 public:
 	InnerMallocFlag() { m_innerMalloc.store(true, std::memory_order_release); }
 	~InnerMallocFlag() { m_innerMalloc.store(false, std::memory_order_release); }
-
+protected:
 	bool get_flag()
 	{
 		return m_innerMalloc.load(std::memory_order_acquire);
