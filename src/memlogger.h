@@ -114,7 +114,7 @@ protected:
 		m_innerMalloc.store(p_flag, std::memory_order_release);
 	}
 private:
-	std::atomic<Fl> m_innerMalloc { false };
+	std::atomic<Fl> m_innerMalloc;
 };
 
 using innerMallocFlag_t = InnerMallocFlag<bool>;

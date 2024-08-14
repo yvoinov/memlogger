@@ -467,3 +467,7 @@ IMPROVEMENT: Do not log paired free() for inner malloc() calls.
 IMPROVEMENT: Code formatting.
 IMPROVEMENT: Refactored inner malloc flag processing.
 IMPROVEMENT: Made methods of InnerMallocFlag class protected.
+
+08-15-2024
+==========
+FIX: Removed unnesessary in-class initialization.
