@@ -98,6 +98,11 @@
 
 namespace {
 
+using voidPtr_t = void*;
+using uInt_t = std::size_t;
+using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
+using flag_t = int;
+
 template <typename Fl>
 class InnerMallocFlag {
 public:
@@ -117,13 +122,9 @@ private:
 	std::atomic<Fl> m_innerMalloc;
 };
 
-using innerMallocFlag_t = InnerMallocFlag<bool>;
+using innerMallocFlag_t = InnerMallocFlag<flag_t>;
 
-using voidPtr_t = void*;
-using uInt_t = std::size_t;
-using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
-
-template <typename P, typename T, typename L>
+template <typename P, typename T, typename L, typename Fl>
 class MemoryLogger : protected innerMallocFlag_t {
 public:
 	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
@@ -228,7 +229,7 @@ private:
 		L allc_more;
 		L allc_max;		/* Max allocation size */
 		std::time_t start, stop;/* Time interval */
-		std::atomic<bool> lock;
+		std::atomic<Fl> lock;
 	};
 
 	std::array<Counters, m_c_array_size> m_CounterArray;
@@ -275,14 +276,14 @@ private:
 	void printReportTotal(std::ostream& p_stream = std::cout);
 };
 
-using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t>;
+using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t, flag_t>;
 
 /* Timer class with on-load init */
 /* Intended to run a given block (lambda) on a periodic basis at a given interval */
 template <typename T, typename Fn>
 class Timer {
 public:
-	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec) {
+	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec), m_running(true) {
 		std::thread([=]() { while (m_running) {
 					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
 					m_exec();
@@ -291,7 +292,7 @@ public:
 	}
 	~Timer() { m_running = false; }
 private:
-	bool m_running { true };
+	bool m_running;
 	T m_interval;
 	Fn m_exec;
 };

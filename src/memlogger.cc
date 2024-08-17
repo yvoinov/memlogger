@@ -5,10 +5,10 @@
 
 namespace {
 
-template <typename P, typename T, typename L>
-class MemoryLogger<P, T, L>::AdaptiveSpinMutex {
+template <typename P, typename T, typename L, typename Fl>
+class MemoryLogger<P, T, L, Fl>::AdaptiveSpinMutex {
 public:
-	AdaptiveSpinMutex(std::atomic<bool>& p_lock) : m_lock(p_lock) {};
+	AdaptiveSpinMutex(std::atomic<Fl>& p_lock) : m_lock(p_lock) {};
 	AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
 	~AdaptiveSpinMutex() = default;
 
@@ -38,7 +38,7 @@ public:
 		#endif
 	}
 private:
-	std::atomic<bool>& m_lock;
+	std::atomic<Fl>& m_lock;
 	std::atomic<T> m_spin_pred { 0 };
 	#if !defined(__FreeBSD__)
 	std::mutex m_conditional_mutex;
@@ -46,8 +46,8 @@ private:
 	#endif
 };
 
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::computePeakValue()
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::computePeakValue()
 {
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
 		L v_sum { 0 };
@@ -62,8 +62,8 @@ void MemoryLogger<P, T, L>::computePeakValue()
 	}
 }
 
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printReport()
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::printReport()
 {
 	set_flag();
 	if (!m_fname)
@@ -80,30 +80,30 @@ void MemoryLogger<P, T, L>::printReport()
 	}
 }
 
-template <typename P, typename T, typename L>
-inline T MemoryLogger<P, T, L>::get_page_size()
+template <typename P, typename T, typename L, typename Fl>
+inline T MemoryLogger<P, T, L, Fl>::get_page_size()
 {
 	static T pagesize { 0 };
 	if (!pagesize) pagesize = T(sysconf(_SC_PAGE_SIZE));
 	return pagesize;
 }
 
-template <typename P, typename T, typename L>
-inline L MemoryLogger<P, T, L>::roundup_to_page_size(const T p_size)
+template <typename P, typename T, typename L, typename Fl>
+inline L MemoryLogger<P, T, L, Fl>::roundup_to_page_size(const T p_size)
 {
 	return p_size + (get_page_size() - p_size % get_page_size());
 }
 
 /* Return steady clock since from boot */
-template <typename P, typename T, typename L>
-inline std::time_t MemoryLogger<P, T, L>::Now()
+template <typename P, typename T, typename L, typename Fl>
+inline std::time_t MemoryLogger<P, T, L, Fl>::Now()
 {
 	const std::chrono::steady_clock::duration c_dtn = std::chrono::steady_clock::now().time_since_epoch();
 	return c_dtn.count() * std::chrono::steady_clock::period::num / std::chrono::steady_clock::period::den;
 }
 
-template <typename P, typename T, typename L>
-L MemoryLogger<P, T, L>::sumCounters(const T p_idx)
+template <typename P, typename T, typename L, typename Fl>
+L MemoryLogger<P, T, L, Fl>::sumCounters(const T p_idx)
 {
 	L v_sum { 0 };
 	v_sum += m_CounterArray[p_idx].allc_64k;
@@ -118,8 +118,8 @@ L MemoryLogger<P, T, L>::sumCounters(const T p_idx)
 	return v_sum;
 }
 
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
 	const std::time_t c_timestamp = Now();
@@ -155,8 +155,8 @@ void MemoryLogger<P, T, L>::fillArrayEntry(const T p_idx, const T p_value)
 		m_CounterArray[p_idx].allc_max = c_value;
 }
 
-template <typename P, typename T, typename L>
-const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
+template <typename P, typename T, typename L, typename Fl>
+const char* MemoryLogger<P, T, L, Fl>::decodeMemFunc(const T p_idx)
 {
 	switch (p_idx) {
 		case static_cast<T>(Func_values::malloc_fvalue):
@@ -176,8 +176,8 @@ const char* MemoryLogger<P, T, L>::decodeMemFunc(const T p_idx)
 	}
 }
 
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::printReport(const T p_idx, std::ostream& p_stream)
 {
 	set_flag();
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
@@ -198,8 +198,8 @@ void MemoryLogger<P, T, L>::printReport(const T p_idx, std::ostream& p_stream)
 	p_stream << SEPARATION_LINE_2 << std::endl;
 }
 
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::printElapsedTime(std::ostream& p_stream)
 {
 	set_flag();
 	const std::time_t c_sec = Now() - m_elapsed_start;
@@ -212,8 +212,8 @@ void MemoryLogger<P, T, L>::printElapsedTime(std::ostream& p_stream)
 	<< std::endl;
 }
 
-template <typename P, typename T, typename L>
-void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 {
 	set_flag();
 	p_stream << REPORT_HEADING << std::endl;
@@ -238,8 +238,8 @@ void MemoryLogger<P, T, L>::printReportTotal(std::ostream& p_stream)
 	}
 }
 
-template <typename P, typename T, typename L>
-inline P MemoryLogger<P, T, L>::malloc_mf_impl(T size)
+template <typename P, typename T, typename L, typename Fl>
+inline P MemoryLogger<P, T, L, Fl>::malloc_mf_impl(T size)
 {
 	if (!get_flag())	/* Do not log own recursive malloc calls */
 		fillArrayEntry(static_cast<T>(Func_values::malloc_fvalue), size);
@@ -247,8 +247,8 @@ inline P MemoryLogger<P, T, L>::malloc_mf_impl(T size)
 	return m_Malloc(size);
 }
 
-template <typename P, typename T, typename L>
-inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
+template <typename P, typename T, typename L, typename Fl>
+inline P MemoryLogger<P, T, L, Fl>::realloc_mf_impl(P ptr, T size)
 {
 	fillArrayEntry(static_cast<T>(Func_values::realloc_fvalue), size);
 	set_flag();
@@ -256,8 +256,8 @@ inline P MemoryLogger<P, T, L>::realloc_mf_impl(P ptr, T size)
 }
 
 #ifdef COMPAT_OS
-template <typename P, typename T, typename L>
-inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
+template <typename P, typename T, typename L, typename Fl>
+inline P MemoryLogger<P, T, L, Fl>::calloc_mf_impl(T n, T size)
 {
 	if (!m_Calloc)	/* Requires calloc replacement to stop recursion during dlsym inner calloc call */
 		return malloc_internal(n * size);
@@ -268,8 +268,8 @@ inline P MemoryLogger<P, T, L>::calloc_mf_impl(T n, T size)
 #endif
 
 #ifdef HAVE_MALLOC_USABLE_SIZE
-template <typename P, typename T, typename L>
-inline void MemoryLogger<P, T, L>::free_mf_impl(P ptr)
+template <typename P, typename T, typename L, typename Fl>
+inline void MemoryLogger<P, T, L, Fl>::free_mf_impl(P ptr)
 {
 	if (!get_flag())	/* Do not log own recursive paired free calls */
 		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));

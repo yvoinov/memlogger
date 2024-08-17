@@ -471,3 +471,7 @@ IMPROVEMENT: Made methods of InnerMallocFlag class protected.
 08-15-2024
 ==========
 FIX: Removed unnesessary in-class initialization.
+
+08-18-2024
+==========
+IMPROVEMENT: Refactoring - templated flag.
