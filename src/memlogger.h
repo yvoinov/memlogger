@@ -1,11 +1,11 @@
 #pragma once
 
 #if !__cplusplus >= 201103L || !__cplusplus >= 199711L
-	#error This program needs at least a C++11 compliant compiler
+#	error This program needs at least a C++11 compliant compiler
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include "autoconf.h"
+#	include "autoconf.h"
 #endif
 
 #include <climits>	/* For UINT_MAX */
