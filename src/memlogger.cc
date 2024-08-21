@@ -1,6 +1,7 @@
 /**
  * Memory allocation calls simple logger
  */
+
 #include "memlogger.h"
 
 namespace {

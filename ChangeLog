@@ -475,3 +475,7 @@ FIX: Removed unnesessary in-class initialization.
 08-18-2024
 ==========
 IMPROVEMENT: Refactoring - templated flag.
+
+08-22-2024
+==========
+IMPROVEMENT: Code formatting.

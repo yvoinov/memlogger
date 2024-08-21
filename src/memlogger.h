@@ -1,7 +1,7 @@
 #pragma once
 
 #if !__cplusplus >= 201103L || !__cplusplus >= 199711L
-  #error This program needs at least a C++11 compliant compiler
+	#error This program needs at least a C++11 compliant compiler
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -25,26 +25,26 @@
 #include <thread>
 #include <functional>	/* For std::function */
 #if !defined(__FreeBSD__)
-#include <condition_variable>
+#	include <condition_variable>
 #endif
 #ifdef HAVE_MALLOC_USABLE_SIZE
-#include <malloc.h>
+#	include <malloc.h>
 #endif
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+#	define _GNU_SOURCE
 #endif
 
 #if !HAVE_DLFCN_H
-#error Require dlfcn.h to build
+#	error Require dlfcn.h to build
 #else
-#include <dlfcn.h>
+#	include <dlfcn.h>
 #endif
 
 #if !HAVE_UNISTD_H
-#error Require unistd.h to build
+#	error Require unistd.h to build
 #else
-#include <unistd.h>
+#	include <unistd.h>
 #endif
 
 #ifdef __linux__
@@ -57,11 +57,11 @@
 #endif
 
 #ifdef COMPAT_OS
-#if !HAVE_SYS_MMAN_H
-#error Require sys/mman.h to build
-#else
-#include <sys/mman.h>
-#endif
+#	if !HAVE_SYS_MMAN_H
+#		error Require sys/mman.h to build
+#	else
+#		include <sys/mman.h>
+#	endif
 #endif
 
 /* Timer interval in seconds */
