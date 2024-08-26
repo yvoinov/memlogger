@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[1])
-m4_define([VERSION_MICRO],[0])
+m4_define([VERSION_MICRO],[1])
 
 AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
 MEMLOGGER_CURRENT=3
-MEMLOGGER_REVISION=0
+MEMLOGGER_REVISION=1
 MEMLOGGER_AGE=1
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -66,6 +66,7 @@ MEMLOGGER_AGE=1
 # 2.0.36 had 2:36:0
 # 2.0.37 had 2:37:0
 # 3.1.0 had 3:0:1
+# 3.1.1 had 3:1:1
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -144,8 +145,15 @@ fi
 dnl If the user did not specify a C++ version.
 user_cxx=`echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-std="`
 if test "x$user_cxx" = "x"; then
-  dnl Check for C++11 compiler support
-  AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
+  dnl Set highest possible C++ support
+  AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
+  if test "$HAVE_CXX20" = "0"; then
+    AX_CXX_COMPILE_STDCXX(17, [noext], [optional])
+  elif test "$HAVE_CXX17" = "0"; then
+    AX_CXX_COMPILE_STDCXX(14, [noext], [optional])
+  elif test "$HAVE_CXX14" = "0"; then
+    AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
+  fi
 fi
 
 dnl If the user did not specify optimization level

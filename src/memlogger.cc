@@ -9,7 +9,7 @@ namespace {
 template <typename P, typename T, typename L, typename Fl>
 class MemoryLogger<P, T, L, Fl>::AdaptiveSpinMutex {
 public:
-	AdaptiveSpinMutex(std::atomic<Fl>& p_lock) : m_lock(p_lock) {};
+	AdaptiveSpinMutex(Fl& p_lock) : m_lock(p_lock) {};
 	AdaptiveSpinMutex(const AdaptiveSpinMutex&) = delete;
 	~AdaptiveSpinMutex() = default;
 
@@ -17,12 +17,12 @@ public:
 	{
 		T v_spin_count { 0 };
 
-		while (m_lock.load(std::memory_order_relaxed) || m_lock.exchange(true, std::memory_order_acquire)) {
+		while (MEMLOGGER_RELAXED_LOAD(m_lock) || MEMLOGGER_ACQUIRE_CAS(m_lock)) {
 			++v_spin_count;
 			if (v_spin_count < m_spin_pred << 1) continue;	/* m_spin_pred << 1 is eq m_spin_pred * 2 */
 			#if !defined(__FreeBSD__)
 			std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-			m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !m_lock.load(std::memory_order_relaxed); });
+			m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !MEMLOGGER_RELAXED_LOAD(m_lock); });
 			#else
 			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 			#endif
@@ -33,13 +33,13 @@ public:
 
 	void unlock() noexcept
 	{
-		m_lock.store(false, std::memory_order_release);
+		MEMLOGGER_RELEASE(m_lock);
 		#if !defined(__FreeBSD__)
 		m_conditional_lock.notify_one();
 		#endif
 	}
 private:
-	std::atomic<Fl>& m_lock;
+	Fl& m_lock;
 	std::atomic<T> m_spin_pred { 0 };
 	#if !defined(__FreeBSD__)
 	std::mutex m_conditional_mutex;
@@ -66,7 +66,7 @@ void MemoryLogger<P, T, L, Fl>::computePeakValue()
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReport()
 {
-	set_flag();
+	set_flag_on();
 	if (!m_fname)
 		printReportTotal();
 	else {
@@ -180,7 +180,7 @@ const char* MemoryLogger<P, T, L, Fl>::decodeMemFunc(const T p_idx)
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReport(const T p_idx, std::ostream& p_stream)
 {
-	set_flag();
+	set_flag_on();
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << m_CounterArray[p_idx].allc_128k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << m_CounterArray[p_idx].allc_256k << std::endl;
@@ -202,7 +202,7 @@ void MemoryLogger<P, T, L, Fl>::printReport(const T p_idx, std::ostream& p_strea
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printElapsedTime(std::ostream& p_stream)
 {
-	set_flag();
+	set_flag_on();
 	const std::time_t c_sec = Now() - m_elapsed_start;
 	const std::chrono::seconds c_sec2 = std::chrono::seconds(c_sec);
 
@@ -216,7 +216,7 @@ void MemoryLogger<P, T, L, Fl>::printElapsedTime(std::ostream& p_stream)
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 {
-	set_flag();
+	set_flag_on();
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	if (m_CounterArray.size() > 0) {
@@ -244,7 +244,7 @@ inline P MemoryLogger<P, T, L, Fl>::malloc_mf_impl(T size)
 {
 	if (!get_flag())	/* Do not log own recursive malloc calls */
 		fillArrayEntry(static_cast<T>(Func_values::malloc_fvalue), size);
-	else set_flag(false);
+	else set_flag_off();
 	return m_Malloc(size);
 }
 
@@ -252,7 +252,7 @@ template <typename P, typename T, typename L, typename Fl>
 inline P MemoryLogger<P, T, L, Fl>::realloc_mf_impl(P ptr, T size)
 {
 	fillArrayEntry(static_cast<T>(Func_values::realloc_fvalue), size);
-	set_flag();
+	set_flag_on();
 	return m_Realloc(ptr, size);
 }
 
@@ -263,7 +263,7 @@ inline P MemoryLogger<P, T, L, Fl>::calloc_mf_impl(T n, T size)
 	if (!m_Calloc)	/* Requires calloc replacement to stop recursion during dlsym inner calloc call */
 		return malloc_internal(n * size);
 	fillArrayEntry(static_cast<T>(Func_values::calloc_fvalue), n * size);
-	set_flag();
+	set_flag_on();
 	return m_Calloc(n, size);
 }
 #endif
@@ -274,7 +274,7 @@ inline void MemoryLogger<P, T, L, Fl>::free_mf_impl(P ptr)
 {
 	if (!get_flag())	/* Do not log own recursive paired free calls */
 		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
-	else set_flag(false);
+	else set_flag_off();
 	m_Free(ptr);
 }
 #endif

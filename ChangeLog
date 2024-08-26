@@ -479,3 +479,8 @@ IMPROVEMENT: Refactoring - templated flag.
 08-22-2024
 ==========
 IMPROVEMENT: Code formatting.
+
+08-26-2024
+==========
+IMPROVEMENT: Added C++20 atomic_flag support.
+FIX: Implicit capture of 'this' via '[=]' is deprecated in C++20.

@@ -96,30 +96,60 @@
 #define EXIT_0 0	//Normal exit
 #define EXIT_1 1	//Report array empty
 
+#if __cpp_lib_atomic_flag_test >= 201907L
+#	define MEMLOGGER_FLAG_TYPE std::atomic_flag
+#else // On sparc integer flag type runs much faster; bool is implicitly converted to int (allowed by the standard)
+#	define MEMLOGGER_FLAG_TYPE std::atomic<int>
+#endif
+
+#define MEMLOGGER_MEM_RELAXED std::memory_order_relaxed
+#define MEMLOGGER_MEM_ACQUIRE std::memory_order_acquire
+#define MEMLOGGER_MEM_RELEASE std::memory_order_release
+
+#if __cpp_lib_atomic_flag_test >= 201907L
+#	define MEMLOGGER_RELAXED_LOAD(x) x.test(MEMLOGGER_MEM_RELAXED)
+#	define MEMLOGGER_ACQUIRE_LOAD(x) x.test(MEMLOGGER_MEM_ACQUIRE)
+#	define MEMLOGGER_RELEASE_STORE(x) x.test_and_set(MEMLOGGER_MEM_RELEASE)
+#	define MEMLOGGER_ACQUIRE_CAS(x) x.test_and_set(MEMLOGGER_MEM_ACQUIRE)
+#	define MEMLOGGER_RELEASE(x) x.clear(MEMLOGGER_MEM_RELEASE)
+#else
+#	define MEMLOGGER_RELAXED_LOAD(x) x.load(MEMLOGGER_MEM_RELAXED)
+#	define MEMLOGGER_ACQUIRE_LOAD(x) x.load(MEMLOGGER_MEM_ACQUIRE)
+#	define MEMLOGGER_RELEASE_STORE(x) x.store(true, MEMLOGGER_MEM_RELEASE)
+#	define MEMLOGGER_ACQUIRE_CAS(x) x.exchange(true, MEMLOGGER_MEM_ACQUIRE)
+#	define MEMLOGGER_RELEASE(x) x.store(false, MEMLOGGER_MEM_RELEASE)
+#endif
+
 namespace {
 
 using voidPtr_t = void*;
 using uInt_t = std::size_t;
 using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
-using flag_t = int;
+using flag_t = MEMLOGGER_FLAG_TYPE;
 
 template <typename Fl>
 class InnerMallocFlag {
 public:
-	InnerMallocFlag() { m_innerMalloc.store(true, std::memory_order_release); }
-	~InnerMallocFlag() { m_innerMalloc.store(false, std::memory_order_release); }
+	InnerMallocFlag() { MEMLOGGER_RELEASE_STORE(m_innerMalloc); }
+	~InnerMallocFlag() { MEMLOGGER_RELEASE(m_innerMalloc); }
 protected:
-	Fl get_flag()
+	bool get_flag()
 	{
-		return m_innerMalloc.load(std::memory_order_acquire);
+		if (MEMLOGGER_ACQUIRE_LOAD(m_innerMalloc)) return true;
+		else return false;
 	}
 
-	void set_flag(Fl p_flag = true)
+	void set_flag_on()
 	{
-		m_innerMalloc.store(p_flag, std::memory_order_release);
+		MEMLOGGER_RELEASE_STORE(m_innerMalloc);
+	}
+
+	void set_flag_off()
+	{
+		MEMLOGGER_RELEASE(m_innerMalloc);
 	}
 private:
-	std::atomic<Fl> m_innerMalloc;
+	Fl m_innerMalloc;
 };
 
 using innerMallocFlag_t = InnerMallocFlag<flag_t>;
@@ -229,7 +259,7 @@ private:
 		L allc_more;
 		L allc_max;		/* Max allocation size */
 		std::time_t start, stop;/* Time interval */
-		std::atomic<Fl> lock;
+		Fl lock;
 	};
 
 	std::array<Counters, m_c_array_size> m_CounterArray;
@@ -284,7 +314,11 @@ template <typename T, typename Fn>
 class Timer {
 public:
 	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec), m_running(true) {
+		#if __cpp_capture_star_this >= 201603L
+		std::thread([=, this]() { while (m_running) {
+		#else
 		std::thread([=]() { while (m_running) {
+		#endif
 					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
 					m_exec();
 				}
