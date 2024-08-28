@@ -261,7 +261,7 @@ private:
 		std::time_t start, stop;/* Time interval */
 		Fl lock;
 
-		Counters& operator=(const Counters& other) {
+		Counters& operator=(const Counters& other) {	/* Will use custom copy assignment overload */
 			if (this != &other) {
 				allc_64k = other.allc_64k;
 				allc_128k = other.allc_128k;
@@ -275,7 +275,6 @@ private:
 				allc_max = other.allc_max;
 				start = other.start;
 				stop = other.stop;
-				MEMLOGGER_RELEASE(lock);	/* Just clear flag when assignment */
 			}
 			return *this;
 		}

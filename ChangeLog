@@ -488,3 +488,7 @@ FIX: Implicit capture of 'this' via '[=]' is deprecated in C++20.
 08-28-2024
 ==========
 IMPROVEMENT: Reduced locking level in fillArrayEntry().
+
+08-29-2024
+==========
+IMPROVEMENT: It is not necessary to copy an atomic field.
