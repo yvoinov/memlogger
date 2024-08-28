@@ -242,7 +242,6 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 				}
 			} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
 		}
-
 		printElapsedTime(p_stream);
 	} else {
 		std::cerr << ERR_MSG_A << std::endl;
