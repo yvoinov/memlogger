@@ -125,35 +125,46 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 	const L c_value = roundup_to_page_size(p_value);
 	const std::time_t c_timestamp = Now();
 
-	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
-	std::lock_guard<AdaptiveSpinMutex> lock(spmux);	/* Take row-level spinlock here */
+	Counters v_tmp_row;
 
-	if (!m_CounterArray[p_idx].start)		/* Save timestamp; let's inline it */
-		m_CounterArray[p_idx].start = c_timestamp;
-	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
-		m_CounterArray[p_idx].stop = c_timestamp;
+	{
+		AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
+		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+		v_tmp_row = m_CounterArray[p_idx];
+	}
+
+	if (!v_tmp_row.start)		/* Save timestamp; let's inline it */
+		v_tmp_row.start = c_timestamp;
+	else if (!v_tmp_row.stop || v_tmp_row.stop < c_timestamp)
+		v_tmp_row.stop = c_timestamp;
 
 	if (c_value > 0 && c_value <= m_c_num_64K)
-		++m_CounterArray[p_idx].allc_64k;
+		++v_tmp_row.allc_64k;
 	else if (c_value > m_c_num_64K && c_value <= m_c_num_128K)
-		++m_CounterArray[p_idx].allc_128k;
+		++v_tmp_row.allc_128k;
 	else if (c_value > m_c_num_128K && c_value <= m_c_num_256K)
-		++m_CounterArray[p_idx].allc_256k;
+		++v_tmp_row.allc_256k;
 	else if (c_value > m_c_num_256K && c_value <= m_c_num_512K)
-		++m_CounterArray[p_idx].allc_512k;
+		++v_tmp_row.allc_512k;
 	else if (c_value > m_c_num_512K && c_value <= m_c_num_1024K)
-		++m_CounterArray[p_idx].allc_1024k;
+		++v_tmp_row.allc_1024k;
 	else if (c_value > m_c_num_1024K && c_value <= m_c_num_2048K)
-		++m_CounterArray[p_idx].allc_2048k;
+		++v_tmp_row.allc_2048k;
 	else if (c_value > m_c_num_2048K && c_value <= m_c_num_4096K)
-		++m_CounterArray[p_idx].allc_4096k;
+		++v_tmp_row.allc_4096k;
 	else if (c_value > m_c_num_4096K && c_value <= m_c_num_8192K)
-		++m_CounterArray[p_idx].allc_8192k;
+		++v_tmp_row.allc_8192k;
 	else if (c_value > m_c_num_8192K && c_value < UINT_MAX)
-		++m_CounterArray[p_idx].allc_more;
+		++v_tmp_row.allc_more;
 
-	if (c_value > m_CounterArray[p_idx].allc_max && c_value < UINT_MAX)
-		m_CounterArray[p_idx].allc_max = c_value;
+	if (c_value > v_tmp_row.allc_max && c_value < UINT_MAX)
+		v_tmp_row.allc_max = c_value;
+
+	{
+		AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
+		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+		m_CounterArray[p_idx] = v_tmp_row;
+	}
 }
 
 template <typename P, typename T, typename L, typename Fl>

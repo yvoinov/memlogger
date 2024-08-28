@@ -260,6 +260,25 @@ private:
 		L allc_max;		/* Max allocation size */
 		std::time_t start, stop;/* Time interval */
 		Fl lock;
+
+		Counters& operator=(const Counters& other) {
+			if (this != &other) {
+				allc_64k = other.allc_64k;
+				allc_128k = other.allc_128k;
+				allc_256k = other.allc_256k;
+				allc_512k = other.allc_512k;
+				allc_1024k = other.allc_1024k;
+				allc_2048k = other.allc_2048k;
+				allc_4096k = other.allc_4096k;
+				allc_8192k = other.allc_8192k;
+				allc_more = other.allc_more;
+				allc_max = other.allc_max;
+				start = other.start;
+				stop = other.stop;
+				MEMLOGGER_RELEASE(lock);	/* Just clear flag when assignment */
+			}
+			return *this;
+		}
 	};
 
 	std::array<Counters, m_c_array_size> m_CounterArray;
