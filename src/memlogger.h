@@ -98,8 +98,10 @@
 
 #if __cpp_lib_atomic_flag_test >= 201907L
 #	define MEMLOGGER_FLAG_TYPE std::atomic_flag
+#	define MEMLOGGER_FLAG_DEFAULT
 #else // On sparc integer flag type runs much faster; bool is implicitly converted to int (allowed by the standard)
 #	define MEMLOGGER_FLAG_TYPE std::atomic<int>
+#	define MEMLOGGER_FLAG_DEFAULT false
 #endif
 
 #define MEMLOGGER_MEM_RELAXED std::memory_order_relaxed
@@ -248,18 +250,18 @@ private:
 	#endif
 
 	using Counters = struct Counters {
-		L allc_64k;
-		L allc_128k;
-		L allc_256k;
-		L allc_512k;
-		L allc_1024k;
-		L allc_2048k;
-		L allc_4096k;
-		L allc_8192k;
-		L allc_more;
-		L allc_max;		/* Max allocation size */
-		std::time_t start, stop;/* Time interval */
-		Fl lock;
+		L allc_64k {};
+		L allc_128k {};
+		L allc_256k {};
+		L allc_512k {};
+		L allc_1024k {};
+		L allc_2048k {};
+		L allc_4096k {};
+		L allc_8192k {};
+		L allc_more {};
+		L allc_max {};		/* Max allocation size */
+		std::time_t start {}, stop {};	/* Time interval */
+		Fl lock { MEMLOGGER_FLAG_DEFAULT };
 
 		Counters& operator=(const Counters& other) {	/* Will use custom copy assignment overload */
 			if (this != &other) {
@@ -283,8 +285,8 @@ private:
 	std::array<Counters, m_c_array_size> m_CounterArray;
 
 	using Summary = struct Summary {
-		L previous;
-		L peak;
+		L previous {};
+		L peak {};
 	};
 
 	std::array<Summary, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
@@ -344,9 +346,9 @@ public:
 	}
 	~Timer() { m_running = false; }
 private:
-	bool m_running;
 	T m_interval;
 	Fn m_exec;
+	bool m_running;
 };
 
 Timer<uInt_t, std::function<void()>> timer(TIMER_INTERVAL,

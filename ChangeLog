@@ -492,3 +492,8 @@ IMPROVEMENT: Reduced locking level in fillArrayEntry().
 08-29-2024
 ==========
 IMPROVEMENT: It is not necessary to copy an atomic field.
+
+08-31-2024
+==========
+FIX: m_running, m_exec reorder warning in Timer class.
+FIX: Explicit arrays of structs initialization.
