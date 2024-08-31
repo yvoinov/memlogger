@@ -259,8 +259,8 @@ private:
 		L allc_4096k {};
 		L allc_8192k {};
 		L allc_more {};
-		L allc_max {};		/* Max allocation size */
-		std::time_t start {}, stop {};	/* Time interval */
+		L allc_max {};					/* Max allocation size */
+		std::time_t start {}, stop {};			/* Time interval */
 		Fl lock { MEMLOGGER_FLAG_DEFAULT };
 
 		Counters& operator=(const Counters& other) {	/* Will use custom copy assignment overload */
@@ -334,11 +334,11 @@ template <typename T, typename Fn>
 class Timer {
 public:
 	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec), m_running(true) {
+		std::thread([=
 		#if __cpp_capture_star_this >= 201603L
-		std::thread([=, this]() { while (m_running) {
-		#else
-		std::thread([=]() { while (m_running) {
+			, this
 		#endif
+		]() { while (m_running) {
 					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
 					m_exec();
 				}
