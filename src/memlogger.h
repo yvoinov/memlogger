@@ -334,11 +334,7 @@ template <typename T, typename Fn>
 class Timer {
 public:
 	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec), m_running(true) {
-		std::thread([=
-		#if __cpp_capture_star_this >= 201603L
-			, this
-		#endif
-		]() { while (m_running) {
+		std::thread([this]() { while (m_running) {
 					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
 					m_exec();
 				}

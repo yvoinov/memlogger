@@ -497,3 +497,4 @@ IMPROVEMENT: It is not necessary to copy an atomic field.
 ==========
 FIX: m_running, m_exec reorder warning in Timer class.
 FIX: Explicit arrays of structs initialization.
+IMPROVEMENT: It is enough to capture 'this' in Timer class for C++11/C++20 compatibility.
