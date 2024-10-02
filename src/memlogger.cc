@@ -230,23 +230,18 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 	set_flag_on();
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
-	if (m_CounterArray.size() > 0) {
-		for (T i = 0; i < m_CounterArray.size(); ++i) {
-			if (m_CounterArray[i].start) {	/* If no memory calls registered, start is empty */
-				if (!m_fname)
-					printReport(i, p_stream);
-				else {
-					AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
-					std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-					printReport(i, p_stream);
-				}
-			} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
-		}
-		printElapsedTime(p_stream);
-	} else {
-		std::cerr << ERR_MSG_A << std::endl;
-		std::exit(EXIT_1);
+	for (T i = 0; i < m_CounterArray.size(); ++i) {
+		if (m_CounterArray[i].start) {	/* If no memory calls registered, start is empty */
+			if (!m_fname)
+				printReport(i, p_stream);
+			else {
+				AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+				std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+				printReport(i, p_stream);
+			}
+		} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
 	}
+	printElapsedTime(p_stream);
 }
 
 template <typename P, typename T, typename L, typename Fl>
