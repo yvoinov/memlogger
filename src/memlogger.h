@@ -210,7 +210,6 @@ private:
 		#ifdef HAVE_MALLOC_USABLE_SIZE
 		m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
 		#endif
-		if (!dlerror()) return;	/* If any of dlsym() fails, throw */
 	}
 
 	MemoryLogger(const MemoryLogger&) = delete;
