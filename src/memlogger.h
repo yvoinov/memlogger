@@ -94,7 +94,6 @@
 
 /* Return codes */
 #define EXIT_0 0	//Normal exit
-#define EXIT_1 1	//Report array empty
 
 #if __cpp_lib_atomic_flag_test >= 201907L
 #	define MEMLOGGER_FLAG_TYPE std::atomic_flag
