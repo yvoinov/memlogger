@@ -23,10 +23,7 @@
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
-#include <functional>	/* For std::function */
-#if !defined(__FreeBSD__)
-#	include <condition_variable>
-#endif
+
 #ifdef HAVE_MALLOC_USABLE_SIZE
 #	include <malloc.h>
 #endif
