@@ -20,12 +20,7 @@ public:
 		while (MEMLOGGER_RELAXED_LOAD(m_lock) || MEMLOGGER_ACQUIRE_CAS(m_lock)) {
 			++v_spin_count;
 			if (v_spin_count < m_spin_pred << 1) continue;	/* m_spin_pred << 1 is eq m_spin_pred * 2 */
-			#if !defined(__FreeBSD__)
-			std::unique_lock<std::mutex> tlock(m_conditional_mutex);
-			m_conditional_lock.wait_for(tlock, std::chrono::nanoseconds(1), [this]() { return !MEMLOGGER_RELAXED_LOAD(m_lock); });
-			#else
 			std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-			#endif
 		}
 
 		m_spin_pred += (v_spin_count - m_spin_pred) >> 3;	/* x >> 3 is eq x / 8 */
@@ -34,17 +29,10 @@ public:
 	void unlock() noexcept
 	{
 		MEMLOGGER_RELEASE(m_lock);
-		#if !defined(__FreeBSD__)
-		m_conditional_lock.notify_one();
-		#endif
 	}
 private:
 	Fl& m_lock;
 	std::atomic<T> m_spin_pred { 0 };
-	#if !defined(__FreeBSD__)
-	std::mutex m_conditional_mutex;
-	std::condition_variable m_conditional_lock;
-	#endif
 };
 
 template <typename P, typename T, typename L, typename Fl>
