@@ -111,20 +111,13 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
-	const std::time_t c_timestamp = Now();
 
 	Counters v_tmp_row;
 
-	{
-		AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
-		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-		v_tmp_row = m_CounterArray[p_idx];
-	}
+	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
+	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 
-	if (!v_tmp_row.start)		/* Save timestamp; let's inline it */
-		v_tmp_row.start = c_timestamp;
-	else if (!v_tmp_row.stop || v_tmp_row.stop < c_timestamp)
-		v_tmp_row.stop = c_timestamp;
+	v_tmp_row = m_CounterArray[p_idx];
 
 	if (c_value > 0 && c_value <= m_c_num_64K)
 		++v_tmp_row.allc_64k;
@@ -148,11 +141,13 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 	if (c_value > v_tmp_row.allc_max && c_value < UINT_MAX)
 		v_tmp_row.allc_max = c_value;
 
-	{
-		AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
-		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-		m_CounterArray[p_idx] = v_tmp_row;
-	}
+	const std::time_t c_timestamp = Now();
+	if (!v_tmp_row.start)		/* Save timestamp; let's inline it */
+		v_tmp_row.start = c_timestamp;
+	else if (!v_tmp_row.stop || v_tmp_row.stop < c_timestamp)
+		v_tmp_row.stop = c_timestamp;
+
+	m_CounterArray[p_idx] = v_tmp_row;
 }
 
 template <typename P, typename T, typename L, typename Fl>
