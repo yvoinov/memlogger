@@ -507,3 +507,6 @@ IMPROVEMENT: Removed obsoleted code.
 ==========
 IMPROVEMENT: Got rid CVs and unnesessary headers.
 
+10-19-2024
+==========
+IMPROVEMENT: Performance of logging function.
