@@ -510,3 +510,8 @@ IMPROVEMENT: Got rid CVs and unnesessary headers.
 10-19-2024
 ==========
 IMPROVEMENT: Performance of logging function.
+
+10-21-2024
+==========
+IMPROVEMENT: Reduced overhead of logging function.
+
