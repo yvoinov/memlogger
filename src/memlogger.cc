@@ -112,7 +112,7 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
 
-	Counters v_tmp_row;
+	static thread_local Counters v_tmp_row;
 
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
