@@ -316,7 +316,7 @@ private:
 	L sumCounters(const T p_idx);
 	void fillArrayEntry(const T p_idx, const T p_value);
 	const char* decodeMemFunc(const T p_idx);
-	void printReport(const T p_idx, std::ostream& p_stream = std::cout);
+	void printReportByIdx(const T p_idx, std::ostream& p_stream = std::cout);
 	void printElapsedTime(std::ostream& p_stream = std::cout);
 	void printReportTotal(std::ostream& p_stream = std::cout);
 };

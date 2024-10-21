@@ -112,7 +112,7 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
 
-	static thread_local Counters v_tmp_row;
+	static thread_local Counters v_tmp_row {};
 
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
@@ -172,7 +172,7 @@ const char* MemoryLogger<P, T, L, Fl>::decodeMemFunc(const T p_idx)
 }
 
 template <typename P, typename T, typename L, typename Fl>
-void MemoryLogger<P, T, L, Fl>::printReport(const T p_idx, std::ostream& p_stream)
+void MemoryLogger<P, T, L, Fl>::printReportByIdx(const T p_idx, std::ostream& p_stream)
 {
 	set_flag_on();
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
@@ -216,11 +216,11 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
 		if (m_CounterArray[i].start) {	/* If no memory calls registered, start is empty */
 			if (!m_fname)
-				printReport(i, p_stream);
+				printReportByIdx(i, p_stream);
 			else {
 				AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
 				std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-				printReport(i, p_stream);
+				printReportByIdx(i, p_stream);
 			}
 		} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
 	}
