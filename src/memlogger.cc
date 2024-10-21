@@ -112,7 +112,7 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
 
-	static thread_local Counters v_tmp_row {};
+	static thread_local Counters v_tmp_row;	//Fix PVS note: V519 The 'v_tmp_row' variable is assigned values twice successively. 
 
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
