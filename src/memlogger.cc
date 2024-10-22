@@ -112,42 +112,36 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
 
-	static thread_local Counters v_tmp_row;	//Fix PVS note: V519 The 'v_tmp_row' variable is assigned values twice successively. 
-
 	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 
-	v_tmp_row = m_CounterArray[p_idx];
-
 	if (c_value > 0 && c_value <= m_c_num_64K)
-		++v_tmp_row.allc_64k;
+		++m_CounterArray[p_idx].allc_64k;
 	else if (c_value > m_c_num_64K && c_value <= m_c_num_128K)
-		++v_tmp_row.allc_128k;
+		++m_CounterArray[p_idx].allc_128k;
 	else if (c_value > m_c_num_128K && c_value <= m_c_num_256K)
-		++v_tmp_row.allc_256k;
+		++m_CounterArray[p_idx].allc_256k;
 	else if (c_value > m_c_num_256K && c_value <= m_c_num_512K)
-		++v_tmp_row.allc_512k;
+		++m_CounterArray[p_idx].allc_512k;
 	else if (c_value > m_c_num_512K && c_value <= m_c_num_1024K)
-		++v_tmp_row.allc_1024k;
+		++m_CounterArray[p_idx].allc_1024k;
 	else if (c_value > m_c_num_1024K && c_value <= m_c_num_2048K)
-		++v_tmp_row.allc_2048k;
+		++m_CounterArray[p_idx].allc_2048k;
 	else if (c_value > m_c_num_2048K && c_value <= m_c_num_4096K)
-		++v_tmp_row.allc_4096k;
+		++m_CounterArray[p_idx].allc_4096k;
 	else if (c_value > m_c_num_4096K && c_value <= m_c_num_8192K)
-		++v_tmp_row.allc_8192k;
+		++m_CounterArray[p_idx].allc_8192k;
 	else if (c_value > m_c_num_8192K && c_value < UINT_MAX)
-		++v_tmp_row.allc_more;
+		++m_CounterArray[p_idx].allc_more;
 
-	if (c_value > v_tmp_row.allc_max && c_value < UINT_MAX)
-		v_tmp_row.allc_max = c_value;
+	if (c_value > m_CounterArray[p_idx].allc_max && c_value < UINT_MAX)
+		m_CounterArray[p_idx].allc_max = c_value;
 
 	const std::time_t c_timestamp = Now();
-	if (!v_tmp_row.start)		/* Save timestamp; let's inline it */
-		v_tmp_row.start = c_timestamp;
-	else if (!v_tmp_row.stop || v_tmp_row.stop < c_timestamp)
-		v_tmp_row.stop = c_timestamp;
-
-	m_CounterArray[p_idx] = v_tmp_row;
+	if (!m_CounterArray[p_idx].start)		/* Save timestamp; let's inline it */
+		m_CounterArray[p_idx].start = c_timestamp;
+	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
+		m_CounterArray[p_idx].stop = c_timestamp;
 }
 
 template <typename P, typename T, typename L, typename Fl>
