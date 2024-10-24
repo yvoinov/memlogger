@@ -307,19 +307,17 @@ using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t, flag_t>;
 template <typename T>
 class Timer {
 public:
-	Timer(T p_interval) : m_interval(p_interval), m_running(true) {
-		std::thread([this]() { while (m_running) {
-					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
-					memoryLogger_t& mli = memoryLogger_t::GetInstance();
-					mli.computePeakValue();
-					if (mli.m_fname) mli.printReport();
-				}
+	Timer(T p_interval) : m_interval(p_interval) {
+		std::thread([this]() { while (true) {
+				std::this_thread::sleep_for(std::chrono::seconds(m_interval));
+				memoryLogger_t& mli = memoryLogger_t::GetInstance();
+				mli.computePeakValue();
+				if (mli.m_fname) mli.printReport();
+			}
 		}).detach();
 	}
-	~Timer() { m_running = false; }
 private:
 	T m_interval;
-	bool m_running;
 };
 
 Timer<uInt_t> timer(TIMER_INTERVAL);
