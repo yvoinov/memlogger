@@ -23,7 +23,6 @@
 #include <fstream>
 #include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
-#include <functional>	/* For std::function */
 
 #ifdef HAVE_MALLOC_USABLE_SIZE
 #	include <malloc.h>
@@ -305,30 +304,24 @@ private:
 
 using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t, flag_t>;
 
-/* Timer class with on-load init */
-/* Intended to run a given block (lambda) on a periodic basis at a given interval */
-template <typename T, typename Fn>
+template <typename T>
 class Timer {
 public:
-	Timer(T p_interval, Fn p_exec) : m_interval(p_interval), m_exec(p_exec), m_running(true) {
+	Timer(T p_interval) : m_interval(p_interval), m_running(true) {
 		std::thread([this]() { while (m_running) {
 					std::this_thread::sleep_for(std::chrono::seconds(m_interval));
-					m_exec();
+					memoryLogger_t& mli = memoryLogger_t::GetInstance();
+					mli.computePeakValue();
+					if (mli.m_fname) mli.printReport();
 				}
 		}).detach();
 	}
 	~Timer() { m_running = false; }
 private:
 	T m_interval;
-	Fn m_exec;
 	bool m_running;
 };
 
-Timer<uInt_t, std::function<void()>> timer(TIMER_INTERVAL,
-						[]() {  memoryLogger_t& mli = memoryLogger_t::GetInstance();
-							mli.computePeakValue();
-							if (mli.m_fname)
-								mli.printReport();
-						});
+Timer<uInt_t> timer(TIMER_INTERVAL);
 
 }	/* namespace */
