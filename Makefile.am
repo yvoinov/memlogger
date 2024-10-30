@@ -14,7 +14,9 @@ EXTRA_DIST = \
 	README* \
 	ChangeLog \
 	bootstrap.sh \
-	LICENSE
+	LICENSE \
+	CMakeLists.txt \
+	cmake_uninstall.cmake.in
 
 DISTCLEANFILES = \
         _configs.sed

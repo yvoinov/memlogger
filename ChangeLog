@@ -519,3 +519,7 @@ FIX: PVS note V519 in logging function.
 10-24-2024
 ==========
 IMPROVEMENT: Refactoring.
+
+10-30-2024
+==========
+IMPROVEMENT: CMake support added.

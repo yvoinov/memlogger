@@ -8,6 +8,7 @@ libmemlogger_la_SOURCES = memlogger.h memlogger.cc
 DISTCLEANFILES = \
 	Makefile
 
-
-
+EXTRA_DIST = \
+	CMakeLists.txt \
+	autoconf.h.cmake.in
 
