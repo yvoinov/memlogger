@@ -144,7 +144,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
 fi
 
 dnl If the user did not specify a C++ version.
-user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\-std="`
+user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`
 if test "x$user_cxx" = "x"; then
   dnl Set highest possible C++ support
   AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
