@@ -675,9 +675,9 @@ ac_ct_DUMPBIN
 DUMPBIN
 LD
 FGREP
+EGREP
 SED
 LIBTOOL
-EGREP
 GREP
 LN_S
 CPP
@@ -7030,85 +7030,8 @@ printf "%s\n" "$ac_cv_path_GREP" >&6; }
  GREP="$ac_cv_path_GREP"
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
-printf %s "checking for egrep... " >&6; }
-if test ${ac_cv_path_EGREP+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e) if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
-   then ac_cv_path_EGREP="$GREP -E"
-   else
-     if test -z "$EGREP"; then
-  ac_path_EGREP_found=false
-  # Loop through the user's path and test for each of PROGNAME-LIST
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
-do
-  IFS=$as_save_IFS
-  case $as_dir in #(((
-    '') as_dir=./ ;;
-    */) ;;
-    *) as_dir=$as_dir/ ;;
-  esac
-    for ac_prog in egrep
-   do
-    for ac_exec_ext in '' $ac_executable_extensions; do
-      ac_path_EGREP="$as_dir$ac_prog$ac_exec_ext"
-      as_fn_executable_p "$ac_path_EGREP" || continue
-# Check for GNU ac_path_EGREP and select it if it is found.
-  # Check for GNU $ac_path_EGREP
-case `"$ac_path_EGREP" --version 2>&1` in #(
-*GNU*)
-  ac_cv_path_EGREP="$ac_path_EGREP" ac_path_EGREP_found=:;;
-#(
-*)
-  ac_count=0
-  printf %s 0123456789 >"conftest.in"
-  while :
-  do
-    cat "conftest.in" "conftest.in" >"conftest.tmp"
-    mv "conftest.tmp" "conftest.in"
-    cp "conftest.in" "conftest.nl"
-    printf "%s\n" 'EGREP' >> "conftest.nl"
-    "$ac_path_EGREP" 'EGREP$' < "conftest.nl" >"conftest.out" 2>/dev/null || break
-    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
-    as_fn_arith $ac_count + 1 && ac_count=$as_val
-    if test $ac_count -gt ${ac_path_EGREP_max-0}; then
-      # Best one so far, save it but keep looking for a better one
-      ac_cv_path_EGREP="$ac_path_EGREP"
-      ac_path_EGREP_max=$ac_count
-    fi
-    # 10*(2^10) chars as input seems more than enough
-    test $ac_count -gt 10 && break
-  done
-  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
-esac
-
-      $ac_path_EGREP_found && break 3
-    done
-  done
-  done
-IFS=$as_save_IFS
-  if test -z "$ac_cv_path_EGREP"; then
-    as_fn_error $? "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
-  fi
-else
-  ac_cv_path_EGREP=$EGREP
-fi
-
-   fi ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_EGREP" >&5
-printf "%s\n" "$ac_cv_path_EGREP" >&6; }
- EGREP="$ac_cv_path_EGREP"
-
-         EGREP_TRADITIONAL=$EGREP
- ac_cv_path_EGREP_TRADITIONAL=$EGREP
-
-if test "x$ac_cv_path_EGREP" = "xno"; then
-  as_fn_error $? "egrep was not found; install it first" "$LINENO" 5
+if test "x$ac_cv_path_GREP" = "xno"; then
+  as_fn_error $? "grep was not found; install it first" "$LINENO" 5
 fi
 
 case `pwd` in
@@ -7295,6 +7218,83 @@ Xsed="$SED -e 1s/^X//"
 
 
 
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for egrep" >&5
+printf %s "checking for egrep... " >&6; }
+if test ${ac_cv_path_EGREP+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
+   then ac_cv_path_EGREP="$GREP -E"
+   else
+     if test -z "$EGREP"; then
+  ac_path_EGREP_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH$PATH_SEPARATOR/usr/xpg4/bin
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_prog in egrep
+   do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_EGREP="$as_dir$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_EGREP" || continue
+# Check for GNU ac_path_EGREP and select it if it is found.
+  # Check for GNU $ac_path_EGREP
+case `"$ac_path_EGREP" --version 2>&1` in #(
+*GNU*)
+  ac_cv_path_EGREP="$ac_path_EGREP" ac_path_EGREP_found=:;;
+#(
+*)
+  ac_count=0
+  printf %s 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    printf "%s\n" 'EGREP' >> "conftest.nl"
+    "$ac_path_EGREP" 'EGREP$' < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_EGREP_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_EGREP="$ac_path_EGREP"
+      ac_path_EGREP_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_EGREP_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_EGREP"; then
+    as_fn_error $? "no acceptable egrep could be found in $PATH$PATH_SEPARATOR/usr/xpg4/bin" "$LINENO" 5
+  fi
+else
+  ac_cv_path_EGREP=$EGREP
+fi
+
+   fi ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_EGREP" >&5
+printf "%s\n" "$ac_cv_path_EGREP" >&6; }
+ EGREP="$ac_cv_path_EGREP"
+
+         EGREP_TRADITIONAL=$EGREP
+ ac_cv_path_EGREP_TRADITIONAL=$EGREP
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for fgrep" >&5
 printf %s "checking for fgrep... " >&6; }
@@ -18344,7 +18344,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
   as_fn_error $? "STL was not found; it is require to build" "$LINENO" 5
 fi
 
-user_cxx=`echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-std="`
+user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\-std="`
 if test "x$user_cxx" = "x"; then
       ax_cxx_compile_alternatives="20"    ax_cxx_compile_cxx20_required=false
   ac_ext=cpp
@@ -20995,12 +20995,12 @@ printf "%s\n" "#define HAVE_CXX11 1" >>confdefs.h
 fi
 
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-fast|\-xO"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-fast|\\-xO"`; then
     CXXFLAGS="$CXXFLAGS -xO4"
     LDFLAGS="$LDFLAGS -xO4"
   fi
 else
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-O"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-O"`; then
     CXXFLAGS="$CXXFLAGS -O3"
   fi
 fi
@@ -21008,7 +21008,7 @@ fi
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
   CXXFLAGS="$CXXFLAGS -mt=yes"
   LDFLAGS="$LDFLAGS -mt=yes"
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-xatomic"`; then
     CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
 elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
