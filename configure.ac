@@ -131,9 +131,9 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AX_COMPILER_VENDOR
 
-AC_PROG_EGREP
-if test "x$ac_cv_path_EGREP" = "xno"; then
-  AC_MSG_ERROR([egrep was not found; install it first])
+AC_PROG_GREP
+if test "x$ac_cv_path_GREP" = "xno"; then
+  AC_MSG_ERROR([grep was not found; install it first])
 fi
 
 LT_INIT
@@ -144,7 +144,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
 fi
 
 dnl If the user did not specify a C++ version.
-user_cxx=`echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-std="`
+user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\-std="`
 if test "x$user_cxx" = "x"; then
   dnl Set highest possible C++ support
   AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
@@ -159,12 +159,12 @@ fi
 
 dnl If the user did not specify optimization level
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-fast|\-xO"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-fast|\\-xO"`; then
     CXXFLAGS="$CXXFLAGS -xO4"
     LDFLAGS="$LDFLAGS -xO4"
   fi
 else
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-O"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-O"`; then
     CXXFLAGS="$CXXFLAGS -O3"
   fi
 fi
@@ -173,7 +173,7 @@ dnl Do the stuff needed for compiler-specific optimization/platform settings
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
   CXXFLAGS="$CXXFLAGS -mt=yes"
   LDFLAGS="$LDFLAGS -mt=yes"
-  if test -z `echo "$PRESET_CXXFLAGS" | $EGREP -o -E "\-xatomic"`; then
+  if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-xatomic"`; then
     CXXFLAGS="$CXXFLAGS -xatomic=studio"
   fi
 elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
