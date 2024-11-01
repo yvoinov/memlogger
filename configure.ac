@@ -161,7 +161,6 @@ dnl If the user did not specify optimization level
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
   if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-fast|\\-xO"`; then
     CXXFLAGS="$CXXFLAGS -xO4"
-    LDFLAGS="$LDFLAGS -xO4"
   fi
 else
   if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-O"`; then
