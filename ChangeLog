@@ -527,3 +527,7 @@ IMPROVEMENT: CMake support added.
 11-01-2024
 ==========
 FIX: Configure error 'grep: warning: stray \ before -'.
+
+11-02-2024
+==========
+FIX: Removed unnesessary option for Sun Studio.
