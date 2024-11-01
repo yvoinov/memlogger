@@ -18344,7 +18344,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
   as_fn_error $? "STL was not found; it is require to build" "$LINENO" 5
 fi
 
-user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\-std="`
+user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`
 if test "x$user_cxx" = "x"; then
       ax_cxx_compile_alternatives="20"    ax_cxx_compile_cxx20_required=false
   ac_ext=cpp
