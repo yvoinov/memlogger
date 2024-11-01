@@ -523,3 +523,7 @@ IMPROVEMENT: Refactoring.
 10-30-2024
 ==========
 IMPROVEMENT: CMake support added.
+
+11-01-2024
+==========
+FIX: Configure error 'grep: warning: stray \ before -'.
