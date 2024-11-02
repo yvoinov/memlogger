@@ -21097,7 +21097,7 @@ fi
 printf "%s\n" "$ax_cv_check_cxxflags___xlinkopt" >&6; }
 if test "x$ax_cv_check_cxxflags___xlinkopt" = xyes
 then :
-  CXXFLAGS="$CXXFLAGS -xlinkopt=2"; LDFLAGS="$LDFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes
+  CXXFLAGS="$CXXFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes
 else case e in #(
   e) ac_cv_lto_supported=no ;;
 esac
@@ -21139,7 +21139,7 @@ fi
 printf "%s\n" "$ax_cv_check_cxxflags___flto" >&6; }
 if test "x$ax_cv_check_cxxflags___flto" = xyes
 then :
-  CXXFLAGS="$CXXFLAGS -flto=thin"; LDFLAGS="$LDFLAGS -flto=thin"; ac_cv_lto_supported=yes
+  CXXFLAGS="$CXXFLAGS -flto=thin"; ac_cv_lto_supported=yes
 else case e in #(
   e) ac_cv_lto_supported=no ;;
 esac
@@ -21181,7 +21181,7 @@ fi
 printf "%s\n" "$ax_cv_check_cxxflags___flto" >&6; }
 if test "x$ax_cv_check_cxxflags___flto" = xyes
 then :
-  CXXFLAGS="$CXXFLAGS -flto"; LDFLAGS="$LDFLAGS -flto"; ac_cv_lto_supported=yes
+  CXXFLAGS="$CXXFLAGS -flto"; ac_cv_lto_supported=yes
 else case e in #(
   e) ac_cv_lto_supported=no ;;
 esac
