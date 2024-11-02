@@ -188,13 +188,13 @@ fi
 
 if test "$ax_cv_cxx_compiler_vendor" = "sun"; then
     dnl Check linkopt (Oracle Developer Studio)
-    AX_CHECK_COMPILE_FLAG([-xlinkopt], [CXXFLAGS="$CXXFLAGS -xlinkopt=2"; LDFLAGS="$LDFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
+    AX_CHECK_COMPILE_FLAG([-xlinkopt], [CXXFLAGS="$CXXFLAGS -xlinkopt=2"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
     dnl Check ThinLTO (clang)
-    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto=thin"; LDFLAGS="$LDFLAGS -flto=thin"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
+    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto=thin"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 elif test "$ax_cv_cxx_compiler_vendor" = "gnu"; then
     dnl Check LTO (GCC)
-    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto"; LDFLAGS="$LDFLAGS -flto"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
+    AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 fi
 
 if test x"$ac_cv_lto_supported" = xno; then
