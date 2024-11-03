@@ -531,3 +531,7 @@ FIX: Configure error 'grep: warning: stray \ before -'.
 11-02-2024
 ==========
 FIX: Removed unnesessary option for Sun Studio.
+
+11-03-2024
+==========
+FIX: Small fixes.
