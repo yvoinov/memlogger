@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 #  @configure_input@
 #
-#  Configuration scipt for ltalloc Library
+#  Configuration scipt for memlogger library
 #
 # Process this file with autoconf to produce a configure script.
 
@@ -9,7 +9,7 @@ m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[1])
 m4_define([VERSION_MICRO],[2])
 
-AC_INIT(memory logger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
+AC_INIT(memlogger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
 MEMLOGGER_CURRENT=3
 MEMLOGGER_REVISION=2
