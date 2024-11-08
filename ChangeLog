@@ -535,3 +535,8 @@ FIX: Removed unnesessary option for Sun Studio.
 11-03-2024
 ==========
 FIX: Small fixes.
+
+11-08-2024
+==========
+IMPROVEMENT: Added CPack support for source package.
+FIX: Minor bugs with CMake LTO block.
