@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12.0 FATAL_ERROR)
 project(memlogger VERSION 2.1.2 LANGUAGES CXX)
 
 option(ENABLE_RELEASE "Enable release build" ON)
+option(ENABLE_TOPDIR "Enable including package top dir to distribution" OFF)
 
 include(CheckCXXCompilerFlag)
 
@@ -82,9 +83,13 @@ Feel free to check project wiki at https://github.com/yvoinov/memlogger/wiki\
 ")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/yvoinov/memlogger")
 
-set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+set(CPACK_SET_DESTDIR ON)
+
+set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ${ENABLE_TOPDIR})
 
 set(CPACK_SOURCE_GENERATOR "TBZ2;TGZ")
+set(CPACK_GENERATOR "TBZ2;TGZ")
+
 set(CPACK_SOURCE_IGNORE_FILES
     /.git
     /.libs
