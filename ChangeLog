@@ -544,3 +544,7 @@ FIX: Minor bugs with CMake LTO block.
 11-11-2024
 ==========
 IMPROVEMENT: Added CPack support for binary packages.
+
+11-12-2024
+==========
+IMPROVEMENT: Added CPack system name and system processor to package name.
