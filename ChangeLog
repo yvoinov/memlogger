@@ -540,3 +540,7 @@ FIX: Small fixes.
 ==========
 IMPROVEMENT: Added CPack support for source package.
 FIX: Minor bugs with CMake LTO block.
+
+11-11-2024
+==========
+IMPROVEMENT: Added CPack support for binary packages.
