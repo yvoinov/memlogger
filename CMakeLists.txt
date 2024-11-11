@@ -77,6 +77,7 @@ endif()
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION})
+set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_PROCESSOR})
 set(CPACK_PACKAGE_DESCRIPTION "\
 Very simple memory logger, designed to profile the application by the nature of memory allocations in accordance with the size of the chunks.\
 Feel free to check project wiki at https://github.com/yvoinov/memlogger/wiki\
