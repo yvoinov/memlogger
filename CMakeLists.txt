@@ -50,6 +50,11 @@ else()
     add_link_options(-lpthread)
 endif()
 
+if (ENABLE_RELEASE)
+    # Strip binary for release builds
+    add_link_options(-s)
+endif()
+
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 

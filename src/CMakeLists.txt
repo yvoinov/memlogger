@@ -8,10 +8,4 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_CONFIG_H=1)
 
-if (ENABLE_RELEASE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE -s)
-endif()
-
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-
