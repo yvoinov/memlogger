@@ -552,3 +552,7 @@ IMPROVEMENT: Added CPack system name and system processor to package name.
 11-13-2024
 ==========
 FIX: Stripping release binaries with CMake.
+
+11-21-2024
+==========
+IMPROVEMENT: Added _REENTRANT define.

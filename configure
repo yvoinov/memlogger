@@ -21320,6 +21320,10 @@ fi
 done
 
 
+printf "%s\n" "#define _REENTRANT 1" >>confdefs.h
+
+
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

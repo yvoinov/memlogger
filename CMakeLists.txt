@@ -24,6 +24,13 @@ else()
     message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
 
+find_package(Threads)
+
+if (Threads_FOUND AND CMAKE_USE_PTHREADS_INIT)
+    set(HAVE_PTHREAD_H 1)
+    set(_REENTRANT 1)
+endif()
+
 # Check and set compiler specific options
 if (CMAKE_CXX_COMPILER_ID MATCHES SunPro)
     add_compile_options(-xO4 -mt=yes -xatomic=studio)
@@ -102,8 +109,9 @@ set(CPACK_SOURCE_IGNORE_FILES
     /.deps
     /autom4te.cache
     /.*build.*
+    /*~$
     /dist.sh
-    /libtool
+    /libtool$
     /Makefile$
     /autoconf.h$
     /config.log

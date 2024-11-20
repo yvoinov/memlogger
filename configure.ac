@@ -209,6 +209,8 @@ AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])]
 
 AC_CHECK_FUNCS([malloc_usable_size], [AC_DEFINE([HAVE_MALLOC_USABLE_SIZE], [1])])
 
+AC_DEFINE(_REENTRANT, 1, [Enable reentrant system calls])
+
 AC_SUBST(AM_CXXFLAGS)
 AC_SUBST(AM_LDFLAGS)
 AC_OUTPUT
