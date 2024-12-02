@@ -556,3 +556,7 @@ FIX: Stripping release binaries with CMake.
 11-21-2024
 ==========
 IMPROVEMENT: Added _REENTRANT define.
+
+12-02-2024
+==========
+IMPROVEMENT: Added check STL to CMakeLists.txt.
