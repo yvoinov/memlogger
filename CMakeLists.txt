@@ -5,6 +5,32 @@ project(memlogger VERSION 2.1.2 LANGUAGES CXX)
 option(ENABLE_RELEASE "Enable release build" ON)
 option(ENABLE_TOPDIR "Enable including package top dir to distribution" OFF)
 
+include(CheckCXXSourceCompiles)
+
+check_cxx_source_compiles("namespace Outer {namespace Inner { int i = 0; }}
+                           using namespace Outer::Inner;
+                           int foo() { return i; }
+                           int main() { return foo(); }"
+                           HAVE_NAMESPACES
+                         )
+
+if (HAVE_NAMESPACES)
+    check_cxx_source_compiles("#include <list>
+                               #include <deque>
+                               using namespace std;
+                               int main() { list<int> x; x.push_back(5);
+                               list<int>::iterator iter = x.begin();
+                               if (iter != x.end()) ++iter;
+                               return 0; }"
+                               HAVE_STL
+                             )
+    if (NOT HAVE_STL)
+        message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER} has no STL.")
+    endif()
+else()
+        message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER} has no namespaces.")
+endif()
+
 include(CheckCXXCompilerFlag)
 
 # Check and set highest possible C++ dialect
@@ -65,11 +91,11 @@ endif()
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 
-check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
-
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(unistd.h HAVE_UNISTD_H)
 check_include_files(sys/mman.h HAVE_SYS_MMAN_H)
+
+check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
