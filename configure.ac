@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 #  @configure_input@
 #
-#  Configuration scipt for memlogger library
+#  Configuration script for memlogger library
 #
 # Process this file with autoconf to produce a configure script.
 
