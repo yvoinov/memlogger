@@ -560,3 +560,7 @@ IMPROVEMENT: Added _REENTRANT define.
 12-02-2024
 ==========
 IMPROVEMENT: Added check STL to CMakeLists.txt.
+
+12-08-2024
+==========
+FIX: Typo in configure.ac.
