@@ -1,5 +1,6 @@
 * text=auto
 * text eol=lf
+* linguist-vendored
 *.cc linguist-vendored=false
 *.h linguist-vendored=false
 *.cmake.in linguist-vendored=false
