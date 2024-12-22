@@ -7,4 +7,4 @@
 CMakeLists.txt linguist-vendored=false
 configure.ac linguist-vendored=false
 autoconf.h.* linguist-vendored=false
-Makefile* linguist-vendored=false
+Makefile.* linguist-vendored=false
