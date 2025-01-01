@@ -265,20 +265,20 @@ inline void MemoryLogger<P, T, L, Fl>::free_mf_impl(P ptr)
 
 extern "C" {
 
-voidPtr_t malloc(uInt_t size)
+void* malloc(std::size_t size)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
 	return mli.malloc_mf_impl(size);
 }
 
-voidPtr_t realloc(voidPtr_t ptr, uInt_t size)
+void* realloc(void* ptr, std::size_t size)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
 	return mli.realloc_mf_impl(ptr, size);
 }
 
 #ifdef COMPAT_OS
-voidPtr_t calloc(uInt_t n, uInt_t size)
+void* calloc(std::size_t n, std::size_t size)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
 	return mli.calloc_mf_impl(n, size);
@@ -286,7 +286,7 @@ voidPtr_t calloc(uInt_t n, uInt_t size)
 #endif
 
 #ifdef HAVE_MALLOC_USABLE_SIZE
-void free(voidPtr_t ptr)
+void free(void* ptr)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
 	mli.free_mf_impl(ptr);
