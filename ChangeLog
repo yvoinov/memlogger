@@ -564,3 +564,7 @@ IMPROVEMENT: Added check STL to CMakeLists.txt.
 12-08-2024
 ==========
 FIX: Typo in configure.ac.
+
+01-01-2025
+==========
+IMPROVEMENT: Replaced POSIX-like type names in external API.
