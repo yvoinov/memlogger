@@ -193,7 +193,7 @@ public:
 
 	~MemoryLogger() { printReport(); }
 private:
-	MemoryLogger() : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_elapsed_start(Now()) {
+	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_elapsed_start(Now()) {
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
