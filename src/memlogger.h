@@ -303,6 +303,8 @@ private:
 };
 
 using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t, flag_t>;
+/* Instantiate on load */
+memoryLogger_t& mli = memoryLogger_t::GetInstance();
 
 template <typename T>
 class Timer {
