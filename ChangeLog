@@ -572,3 +572,7 @@ IMPROVEMENT: Replaced POSIX-like type names in external API.
 01-04-2025
 ==========
 IMPROVEMENT: Mark MemoryLogger class ctor as noexcept.
+
+01-16-2024
+==========
+IMPROVEMENT: Singleton instantiation on load.
