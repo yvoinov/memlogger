@@ -95,8 +95,6 @@ check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(unistd.h HAVE_UNISTD_H)
 check_include_files(sys/mman.h HAVE_SYS_MMAN_H)
 
-check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 
 configure_file(${PROJECT_SOURCE_DIR}/src/autoconf.h.cmake.in ${PROJECT_SOURCE_DIR}/src/autoconf.h)
