@@ -581,3 +581,7 @@ IMPROVEMENT: Singleton instantiation on load.
 ==========
 FIX: Typos.
 
+01-23-2025
+==========
+IMPROVEMENT: Added runtime detection of malloc_usable_size() to log free() calls if used in conjunction with a preloaded
+             third-party allocator that supports malloc_usable_size().
