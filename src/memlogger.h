@@ -24,10 +24,6 @@
 #include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
 
-#ifdef HAVE_MALLOC_USABLE_SIZE
-#	include <malloc.h>
-#endif
-
 #ifndef _GNU_SOURCE
 #	define _GNU_SOURCE
 #endif
