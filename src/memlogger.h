@@ -160,7 +160,7 @@ public:
 	using func3_t = P (*)(T, T);	/* func3_t Type 3: calloc */
 	#endif
 	#ifdef HAVE_MALLOC_USABLE_SIZE
-	using func4_t = void (*)(P);	/* func4_t Type 2: free */
+	using func4_t = void (*)(P);	/* func4_t Type 4: free */
 	#endif
 
 	func1_t m_Malloc;	/* Arg type 1 */
