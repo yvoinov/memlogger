@@ -156,10 +156,8 @@ const char* MemoryLogger<P, T, L, Fl>::decodeMemFunc(const T p_idx)
 		case static_cast<T>(Func_values::calloc_fvalue):
 			return m_c_func3;
 		#endif
-		#ifdef HAVE_MALLOC_USABLE_SIZE
 		case static_cast<T>(Func_values::free_fvalue):
 			return m_c_func4;
-		#endif
 		default:
 			return "";
 	}
@@ -250,16 +248,14 @@ inline P MemoryLogger<P, T, L, Fl>::calloc_mf_impl(T n, T size)
 }
 #endif
 
-#ifdef HAVE_MALLOC_USABLE_SIZE
 template <typename P, typename T, typename L, typename Fl>
 inline void MemoryLogger<P, T, L, Fl>::free_mf_impl(P ptr)
 {
-	if (!get_flag())	/* Do not log own recursive paired free calls */
-		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), malloc_usable_size(ptr));
+	if (!get_flag() && m_MallocUsable)	/* Do not log own recursive paired free calls and do not log free when malloc_usable_size not exist */
+		fillArrayEntry(static_cast<T>(Func_values::free_fvalue), m_MallocUsable(ptr));
 	else set_flag_off();
 	m_Free(ptr);
 }
-#endif
 
 }	/* namespace */
 
@@ -285,12 +281,10 @@ void* calloc(std::size_t n, std::size_t size)
 }
 #endif
 
-#ifdef HAVE_MALLOC_USABLE_SIZE
 void free(void* ptr)
 {
 	memoryLogger_t& mli = memoryLogger_t::GetInstance();
 	mli.free_mf_impl(ptr);
 }
-#endif
 
 }	/* extern C */

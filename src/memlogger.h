@@ -159,18 +159,16 @@ public:
 	#ifdef COMPAT_OS
 	using func3_t = P (*)(T, T);	/* func3_t Type 3: calloc */
 	#endif
-	#ifdef HAVE_MALLOC_USABLE_SIZE
 	using func4_t = void (*)(P);	/* func4_t Type 4: free */
-	#endif
+	using func5_t = T (*)(P);	/* func5_t Type 5: malloc_usable_size */
 
 	func1_t m_Malloc;	/* Arg type 1 */
 	func2_t m_Realloc;	/* Arg type 2 */
 	#ifdef COMPAT_OS
 	func3_t m_Calloc;	/* Arg type 3 */
 	#endif
-	#ifdef HAVE_MALLOC_USABLE_SIZE
 	func4_t m_Free;		/* Arg type 4 */
-	#endif
+	func5_t m_MallocUsable;	/* Arg type 5 */
 
 	char* m_fname;
 
@@ -182,9 +180,7 @@ public:
 	#ifdef COMPAT_OS
 	P calloc_mf_impl(T n, T size);
 	#endif
-	#ifdef HAVE_MALLOC_USABLE_SIZE
 	void free_mf_impl(P ptr);
-	#endif
 
 	static MemoryLogger& GetInstance() {
 		static MemoryLogger inst;
@@ -202,9 +198,8 @@ private:
 		#ifdef COMPAT_OS
 		m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
 		#endif
-		#ifdef HAVE_MALLOC_USABLE_SIZE
 		m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
-		#endif
+		m_MallocUsable = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func5));
 	}
 
 	MemoryLogger(const MemoryLogger&) = delete;
@@ -221,9 +216,7 @@ private:
 		#ifdef COMPAT_OS
 		,calloc_fvalue
 		#endif
-		#ifdef HAVE_MALLOC_USABLE_SIZE
 		,free_fvalue
-		#endif
 	};
 
 	/* Memory functions names */
@@ -232,14 +225,13 @@ private:
 	#ifdef COMPAT_OS
 	static constexpr const char* m_c_func3 { "calloc" };
 	#endif
-	#ifdef HAVE_MALLOC_USABLE_SIZE
 	static constexpr const char* m_c_func4 { "free" };
-	#endif
+	static constexpr const char* m_c_func5 { "malloc_usable_size" };
 
 	/* Counters array size; for 3 functions */
-	#if defined(COMPAT_OS) && HAVE_MALLOC_USABLE_SIZE
+	#if defined(COMPAT_OS)
 	static constexpr T m_c_array_size = 4;
-	#elif !defined(COMPAT_OS) || !HAVE_MALLOC_USABLE_SIZE
+	#elif !defined(COMPAT_OS)
 	static constexpr T m_c_array_size = 3;
 	#endif
 
