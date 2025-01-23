@@ -208,8 +208,6 @@ AX_CHECK_LIBRARY([LIBDL], [dlfcn.h], [dl], [LDFLAGS="$LDFLAGS -ldl"], [AC_MSG_NO
 dnl Check required headers
 AC_CHECK_HEADERS([sys/mman.h], [], [AC_MSG_ERROR([Require sys/mman.h to build])])
 
-AC_CHECK_FUNCS([malloc_usable_size], [AC_DEFINE([HAVE_MALLOC_USABLE_SIZE], [1])])
-
 AC_DEFINE(_REENTRANT, 1, [Enable reentrant system calls])
 
 AC_SUBST(AM_CXXFLAGS)
