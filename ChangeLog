@@ -586,3 +586,7 @@ FIX: Typos.
 IMPROVEMENT: Added runtime detection of malloc_usable_size() to log free() calls if used in conjunction with a preloaded
              third-party allocator that supports malloc_usable_size().
 IMPROVEMENT: Got rid unnesessary compile-time detection of malloc_usable_size().
+
+02-27-2025
+==========
+FIX: Replaced _t suffixes for custom types.
