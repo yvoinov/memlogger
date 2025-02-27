@@ -263,27 +263,27 @@ extern "C" {
 
 void* malloc(std::size_t size)
 {
-	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	memoryLogger_type& mli = memoryLogger_type::GetInstance();
 	return mli.malloc_mf_impl(size);
 }
 
 void* realloc(void* ptr, std::size_t size)
 {
-	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	memoryLogger_type& mli = memoryLogger_type::GetInstance();
 	return mli.realloc_mf_impl(ptr, size);
 }
 
 #ifdef COMPAT_OS
 void* calloc(std::size_t n, std::size_t size)
 {
-	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	memoryLogger_type& mli = memoryLogger_type::GetInstance();
 	return mli.calloc_mf_impl(n, size);
 }
 #endif
 
 void free(void* ptr)
 {
-	memoryLogger_t& mli = memoryLogger_t::GetInstance();
+	memoryLogger_type& mli = memoryLogger_type::GetInstance();
 	mli.free_mf_impl(ptr);
 }
 

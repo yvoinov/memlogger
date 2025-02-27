@@ -115,10 +115,10 @@
 
 namespace {
 
-using voidPtr_t = void*;
-using uInt_t = std::size_t;
-using uLongInt_t = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
-using flag_t = MEMLOGGER_FLAG_TYPE;
+using voidPtr_type = void*;
+using uInt_type = std::size_t;
+using uLongInt_type = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
+using flag_type = MEMLOGGER_FLAG_TYPE;
 
 template <typename Fl>
 class InnerMallocFlag {
@@ -145,26 +145,26 @@ private:
 	Fl m_innerMalloc;
 };
 
-using innerMallocFlag_t = InnerMallocFlag<flag_t>;
+using innerMallocFlag_type = InnerMallocFlag<flag_type>;
 
 template <typename P, typename T, typename L, typename Fl>
-class MemoryLogger : protected innerMallocFlag_t {
+class MemoryLogger : protected innerMallocFlag_type {
 public:
-	using func1_t = P (*)(T);	/* func1_t Type 1: malloc */
-	using func2_t = P (*)(P, T);	/* func2_t Type 2: realloc */
+	using func1_type = P (*)(T);	/* func1_type Type 1: malloc */
+	using func2_type = P (*)(P, T);	/* func2_type Type 2: realloc */
 	#ifdef COMPAT_OS
-	using func3_t = P (*)(T, T);	/* func3_t Type 3: calloc */
+	using func3_type = P (*)(T, T);	/* func3_type Type 3: calloc */
 	#endif
-	using func4_t = void (*)(P);	/* func4_t Type 4: free */
-	using func5_t = T (*)(P);	/* func5_t Type 5: malloc_usable_size */
+	using func4_type = void (*)(P);	/* func4_type Type 4: free */
+	using func5_type = T (*)(P);	/* func5_type Type 5: malloc_usable_size */
 
-	func1_t m_Malloc;	/* Arg type 1 */
-	func2_t m_Realloc;	/* Arg type 2 */
+	func1_type m_Malloc;	/* Arg type 1 */
+	func2_type m_Realloc;	/* Arg type 2 */
 	#ifdef COMPAT_OS
-	func3_t m_Calloc;	/* Arg type 3 */
+	func3_type m_Calloc;	/* Arg type 3 */
 	#endif
-	func4_t m_Free;		/* Arg type 4 */
-	func5_t m_MallocUsable;	/* Arg type 5 */
+	func4_type m_Free;		/* Arg type 4 */
+	func5_type m_MallocUsable;	/* Arg type 5 */
 
 	char* m_fname;
 
@@ -189,13 +189,13 @@ private:
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
-		m_Malloc = reinterpret_cast<func1_t>(dlsym(RTLD_NEXT, m_c_func1));
-		m_Realloc = reinterpret_cast<func2_t>(dlsym(RTLD_NEXT, m_c_func2));
+		m_Malloc = reinterpret_cast<func1_type>(dlsym(RTLD_NEXT, m_c_func1));
+		m_Realloc = reinterpret_cast<func2_type>(dlsym(RTLD_NEXT, m_c_func2));
 		#ifdef COMPAT_OS
-		m_Calloc = reinterpret_cast<func3_t>(dlsym(RTLD_NEXT, m_c_func3));
+		m_Calloc = reinterpret_cast<func3_type>(dlsym(RTLD_NEXT, m_c_func3));
 		#endif
-		m_Free = reinterpret_cast<func4_t>(dlsym(RTLD_NEXT, m_c_func4));
-		m_MallocUsable = reinterpret_cast<func5_t>(dlsym(RTLD_NEXT, m_c_func5));
+		m_Free = reinterpret_cast<func4_type>(dlsym(RTLD_NEXT, m_c_func4));
+		m_MallocUsable = reinterpret_cast<func5_type>(dlsym(RTLD_NEXT, m_c_func5));
 	}
 
 	MemoryLogger(const MemoryLogger&) = delete;
@@ -290,9 +290,9 @@ private:
 	void printReportTotal(std::ostream& p_stream = std::cout);
 };
 
-using memoryLogger_t = MemoryLogger<voidPtr_t, uInt_t, uLongInt_t, flag_t>;
+using memoryLogger_type = MemoryLogger<voidPtr_type, uInt_type, uLongInt_type, flag_type>;
 /* Instantiate on load */
-memoryLogger_t& mli = memoryLogger_t::GetInstance();
+memoryLogger_type& mli = memoryLogger_type::GetInstance();
 
 template <typename T>
 class Timer {
@@ -300,7 +300,7 @@ public:
 	Timer(T p_interval) : m_interval(p_interval) {
 		std::thread([this]() { while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(m_interval));
-				memoryLogger_t& mli = memoryLogger_t::GetInstance();
+				memoryLogger_type& mli = memoryLogger_type::GetInstance();
 				mli.computePeakValue();
 				if (mli.m_fname) mli.printReport();
 			}
@@ -310,6 +310,6 @@ private:
 	T m_interval;
 };
 
-Timer<uInt_t> timer(TIMER_INTERVAL);
+Timer<uInt_type> timer(TIMER_INTERVAL);
 
 }	/* namespace */
