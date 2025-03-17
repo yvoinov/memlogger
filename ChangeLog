@@ -590,3 +590,7 @@ IMPROVEMENT: Got rid unnesessary compile-time detection of malloc_usable_size().
 02-27-2025
 ==========
 FIX: Replaced _t suffixes for custom types.
+
+03-17-2025
+==========
+IMPROVEMENT: Partial rollback of one simplification, potential UB fixed; FreeBSD workaround preserved.
