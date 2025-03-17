@@ -595,3 +595,7 @@ FIX: Replaced _t suffixes for custom types.
 ==========
 IMPROVEMENT: Partial rollback of one simplification, potential UB fixed; FreeBSD workaround preserved.
 IMPROVEMENT: Refactored a bit.
+
+03-18-2025
+==========
+IMPROVEMENT: Made some auto's const.
