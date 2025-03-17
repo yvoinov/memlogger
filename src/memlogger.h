@@ -16,7 +16,10 @@
 #include <chrono>
 #include <array>
 #include <atomic>
-#include <mutex>
+#if !defined(__FreeBSD__)
+#	include <condition_variable>
+#	include <mutex>
+#endif
 #include <string>
 #include <ostream>
 #include <iostream>	/* For std::cout, std::ostream, std::ios */
