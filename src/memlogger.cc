@@ -60,9 +60,10 @@ void MemoryLogger<P, T, L, Fl>::computePeakValue()
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 			v_sum = sumCounters(i);
 		}
-		if (v_sum - m_PeakValueArray[i].previous > m_PeakValueArray[i].peak)
-			m_PeakValueArray[i].peak = v_sum - m_PeakValueArray[i].previous;
-		m_PeakValueArray[i].previous = v_sum;
+		auto& v_pv_by_idx = m_PeakValueArray[i];
+		if (v_sum - v_pv_by_idx.previous > v_pv_by_idx.peak)
+			v_pv_by_idx.peak = v_sum - v_pv_by_idx.previous;
+		v_pv_by_idx.previous = v_sum;
 	}
 }
 
@@ -110,15 +111,16 @@ template <typename P, typename T, typename L, typename Fl>
 L MemoryLogger<P, T, L, Fl>::sumCounters(const T p_idx)
 {
 	L v_sum { 0 };
-	v_sum += m_CounterArray[p_idx].allc_64k;
-	v_sum += m_CounterArray[p_idx].allc_128k;
-	v_sum += m_CounterArray[p_idx].allc_256k;
-	v_sum += m_CounterArray[p_idx].allc_512k;
-	v_sum += m_CounterArray[p_idx].allc_1024k;
-	v_sum += m_CounterArray[p_idx].allc_2048k;
-	v_sum += m_CounterArray[p_idx].allc_4096k;
-	v_sum += m_CounterArray[p_idx].allc_8192k;
-	v_sum += m_CounterArray[p_idx].allc_more;
+	auto& v_ca_by_idx = m_CounterArray[p_idx];
+	v_sum += v_ca_by_idx.allc_64k;
+	v_sum += v_ca_by_idx.allc_128k;
+	v_sum += v_ca_by_idx.allc_256k;
+	v_sum += v_ca_by_idx.allc_512k;
+	v_sum += v_ca_by_idx.allc_1024k;
+	v_sum += v_ca_by_idx.allc_2048k;
+	v_sum += v_ca_by_idx.allc_4096k;
+	v_sum += v_ca_by_idx.allc_8192k;
+	v_sum += v_ca_by_idx.allc_more;
 	return v_sum;
 }
 
@@ -126,37 +128,38 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
+	auto& v_ca_by_idx = m_CounterArray[p_idx];
 
-	AdaptiveSpinMutex spmux(m_CounterArray[p_idx].lock);
+	AdaptiveSpinMutex spmux(v_ca_by_idx.lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 
 	if (c_value > 0 && c_value <= m_c_num_64K)
-		++m_CounterArray[p_idx].allc_64k;
+		++v_ca_by_idx.allc_64k;
 	else if (c_value > m_c_num_64K && c_value <= m_c_num_128K)
-		++m_CounterArray[p_idx].allc_128k;
+		++v_ca_by_idx.allc_128k;
 	else if (c_value > m_c_num_128K && c_value <= m_c_num_256K)
-		++m_CounterArray[p_idx].allc_256k;
+		++v_ca_by_idx.allc_256k;
 	else if (c_value > m_c_num_256K && c_value <= m_c_num_512K)
-		++m_CounterArray[p_idx].allc_512k;
+		++v_ca_by_idx.allc_512k;
 	else if (c_value > m_c_num_512K && c_value <= m_c_num_1024K)
-		++m_CounterArray[p_idx].allc_1024k;
+		++v_ca_by_idx.allc_1024k;
 	else if (c_value > m_c_num_1024K && c_value <= m_c_num_2048K)
-		++m_CounterArray[p_idx].allc_2048k;
+		++v_ca_by_idx.allc_2048k;
 	else if (c_value > m_c_num_2048K && c_value <= m_c_num_4096K)
-		++m_CounterArray[p_idx].allc_4096k;
+		++v_ca_by_idx.allc_4096k;
 	else if (c_value > m_c_num_4096K && c_value <= m_c_num_8192K)
-		++m_CounterArray[p_idx].allc_8192k;
+		++v_ca_by_idx.allc_8192k;
 	else if (c_value > m_c_num_8192K && c_value < UINT_MAX)
-		++m_CounterArray[p_idx].allc_more;
+		++v_ca_by_idx.allc_more;
 
-	if (c_value > m_CounterArray[p_idx].allc_max && c_value < UINT_MAX)
-		m_CounterArray[p_idx].allc_max = c_value;
+	if (c_value > v_ca_by_idx.allc_max && c_value < UINT_MAX)
+		v_ca_by_idx.allc_max = c_value;
 
 	const std::time_t c_timestamp = Now();
-	if (!m_CounterArray[p_idx].start)		/* Save timestamp; let's inline it */
-		m_CounterArray[p_idx].start = c_timestamp;
-	else if (!m_CounterArray[p_idx].stop || m_CounterArray[p_idx].stop < c_timestamp)
-		m_CounterArray[p_idx].stop = c_timestamp;
+	if (!v_ca_by_idx.start)		/* Save timestamp; let's inline it */
+		v_ca_by_idx.start = c_timestamp;
+	else if (!v_ca_by_idx.stop || v_ca_by_idx.stop < c_timestamp)
+		v_ca_by_idx.stop = c_timestamp;
 }
 
 template <typename P, typename T, typename L, typename Fl>
@@ -182,19 +185,20 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReportByIdx(const T p_idx, std::ostream& p_stream)
 {
 	set_flag_on();
-	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << m_CounterArray[p_idx].allc_64k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << m_CounterArray[p_idx].allc_128k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << m_CounterArray[p_idx].allc_256k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_512K << m_CounterArray[p_idx].allc_512k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_1024K << m_CounterArray[p_idx].allc_1024k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_2048K << m_CounterArray[p_idx].allc_2048k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_4096K << m_CounterArray[p_idx].allc_4096k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_8192K << m_CounterArray[p_idx].allc_8192k << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_MORE << m_CounterArray[p_idx].allc_more << std::endl;
-	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << m_CounterArray[p_idx].allc_max / KBYTES << "k" << std::endl;
+	auto& v_ca_by_idx = m_CounterArray[p_idx];
+	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << v_ca_by_idx.allc_64k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << v_ca_by_idx.allc_128k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << v_ca_by_idx.allc_256k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_512K << v_ca_by_idx.allc_512k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_1024K << v_ca_by_idx.allc_1024k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_2048K << v_ca_by_idx.allc_2048k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_4096K << v_ca_by_idx.allc_4096k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_8192K << v_ca_by_idx.allc_8192k << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_MORE << v_ca_by_idx.allc_more << std::endl;
+	p_stream << decodeMemFunc(p_idx) << ALLOC_MAX << v_ca_by_idx.allc_max / KBYTES << "k" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
 	const std::ptrdiff_t c_time_diff =
-		!(m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start) ? 1 : m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start;
+		!(v_ca_by_idx.stop - v_ca_by_idx.start) ? 1 : v_ca_by_idx.stop - v_ca_by_idx.start;
 	p_stream << "Avg " << sumCounters(p_idx) / c_time_diff << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << "Peak " << m_PeakValueArray[p_idx].peak << " " << decodeMemFunc(p_idx) << " calls/sec" << std::endl;
 	p_stream << SEPARATION_LINE_2 << std::endl;
@@ -221,11 +225,12 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
-		if (m_CounterArray[i].start) {	/* If no memory calls registered, start is empty */
+		auto& v_ca_by_idx = m_CounterArray[i];
+		if (v_ca_by_idx.start) {	/* If no memory calls registered, start is empty */
 			if (!m_fname)
 				printReportByIdx(i, p_stream);
 			else {
-				AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
+				AdaptiveSpinMutex spmux(v_ca_by_idx.lock);
 				std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 				printReportByIdx(i, p_stream);
 			}
