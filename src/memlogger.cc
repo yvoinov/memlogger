@@ -60,7 +60,7 @@ void MemoryLogger<P, T, L, Fl>::computePeakValue()
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 			v_sum = sumCounters(i);
 		}
-		auto& v_pv_by_idx = m_PeakValueArray[i];
+		auto& v_pv_by_idx = m_PeakValueArray[i];	/* Can't be const */
 		if (v_sum - v_pv_by_idx.previous > v_pv_by_idx.peak)
 			v_pv_by_idx.peak = v_sum - v_pv_by_idx.previous;
 		v_pv_by_idx.previous = v_sum;
@@ -111,7 +111,7 @@ template <typename P, typename T, typename L, typename Fl>
 L MemoryLogger<P, T, L, Fl>::sumCounters(const T p_idx)
 {
 	L v_sum { 0 };
-	auto& v_ca_by_idx = m_CounterArray[p_idx];
+	const auto& v_ca_by_idx = m_CounterArray[p_idx];
 	v_sum += v_ca_by_idx.allc_64k;
 	v_sum += v_ca_by_idx.allc_128k;
 	v_sum += v_ca_by_idx.allc_256k;
@@ -128,7 +128,7 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
-	auto& v_ca_by_idx = m_CounterArray[p_idx];
+	auto& v_ca_by_idx = m_CounterArray[p_idx];	/* Can't be const */
 
 	AdaptiveSpinMutex spmux(v_ca_by_idx.lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
@@ -185,7 +185,7 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReportByIdx(const T p_idx, std::ostream& p_stream)
 {
 	set_flag_on();
-	auto& v_ca_by_idx = m_CounterArray[p_idx];
+	const auto& v_ca_by_idx = m_CounterArray[p_idx];
 	p_stream << decodeMemFunc(p_idx) << ALLOC_64K << v_ca_by_idx.allc_64k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_128K << v_ca_by_idx.allc_128k << std::endl;
 	p_stream << decodeMemFunc(p_idx) << ALLOC_256K << v_ca_by_idx.allc_256k << std::endl;
@@ -225,8 +225,8 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
-		auto& v_ca_by_idx = m_CounterArray[i];
-		if (v_ca_by_idx.start) {	/* If no memory calls registered, start is empty */
+		auto& v_ca_by_idx = m_CounterArray[i];	/* Can't be const */
+		if (v_ca_by_idx.start) {		/* If no memory calls registered, start is empty */
 			if (!m_fname)
 				printReportByIdx(i, p_stream);
 			else {
