@@ -301,14 +301,13 @@ template <typename T>
 class Timer {
 public:
 	Timer(T p_interval) : m_interval(p_interval) {
-		mli.set_flag_off();
+		mli.set_flag_on();
 		std::thread([this]() { while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(m_interval));
 				mli.computePeakValue();
 				if (mli.m_fname) mli.printReport();
 			}
 		}).detach();
-		mli.set_flag_on();
 	}
 private:
 	T m_interval;
