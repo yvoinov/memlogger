@@ -599,3 +599,7 @@ IMPROVEMENT: Refactored a bit.
 03-18-2025
 ==========
 IMPROVEMENT: Made some auto's const.
+
+05-30-2025
+==========
+IMPROVEMENT: Do not log allocations for timer thread.
