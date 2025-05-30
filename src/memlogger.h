@@ -128,7 +128,7 @@ class InnerMallocFlag {
 public:
 	InnerMallocFlag() { MEMLOGGER_RELEASE_STORE(m_innerMalloc); }
 	~InnerMallocFlag() { MEMLOGGER_RELEASE(m_innerMalloc); }
-protected:
+
 	bool get_flag()
 	{
 		if (MEMLOGGER_ACQUIRE_LOAD(m_innerMalloc)) return true;
@@ -151,7 +151,7 @@ private:
 using innerMallocFlag_type = InnerMallocFlag<flag_type>;
 
 template <typename P, typename T, typename L, typename Fl>
-class MemoryLogger : protected innerMallocFlag_type {
+class MemoryLogger : public innerMallocFlag_type {
 public:
 	using func1_type = P (*)(T);	/* func1_type Type 1: malloc */
 	using func2_type = P (*)(P, T);	/* func2_type Type 2: realloc */
@@ -301,13 +301,14 @@ template <typename T>
 class Timer {
 public:
 	Timer(T p_interval) : m_interval(p_interval) {
+		mli.set_flag_off();
 		std::thread([this]() { while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(m_interval));
-				memoryLogger_type& mli = memoryLogger_type::GetInstance();
 				mli.computePeakValue();
 				if (mli.m_fname) mli.printReport();
 			}
 		}).detach();
+		mli.set_flag_on();
 	}
 private:
 	T m_interval;
