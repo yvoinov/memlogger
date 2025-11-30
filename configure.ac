@@ -7,12 +7,12 @@
 
 m4_define([VERSION_MAJOR],[2])
 m4_define([VERSION_MINOR],[2])
-m4_define([VERSION_MICRO],[1])
+m4_define([VERSION_MICRO],[2])
 
 AC_INIT(memlogger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
 MEMLOGGER_CURRENT=4
-MEMLOGGER_REVISION=1
+MEMLOGGER_REVISION=2
 MEMLOGGER_AGE=2
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
@@ -70,6 +70,7 @@ MEMLOGGER_AGE=2
 # 3.1.2 had 3:2:1
 # 4.2.0 had 4:0:2
 # 4.2.1 had 4:1:2
+# 4.2.2 had 4:2:2
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
@@ -107,6 +108,7 @@ m4_include([acinclude/ax_cxx_compile_stdcxx.m4])
 m4_include([acinclude/ax_cxx_namespaces.m4])
 m4_include([acinclude/ax_cxx_have_stl.m4])
 m4_include([acinclude/ax_compiler_vendor.m4])
+m4_include([acinclude/ax_interference_sizes.m4])
 m4_include([acinclude/ax_check_compile_flag.m4])
 m4_include([acinclude/ax_check_library.m4])
 
@@ -126,7 +128,6 @@ AC_PROG_CXX([clang++ g++])
 AC_LANG([C++])
 AX_CXX_HAVE_STL
 AM_PROG_AR
-AC_PROG_RANLIB
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -201,6 +202,16 @@ fi
 
 if test x"$ac_cv_lto_supported" = xno; then
   AC_MSG_NOTICE([LTO/Link optimization not supported])
+fi
+
+dnl Check if interference_sizes are defined
+AX_INTERFERENCE_SIZES([INTERFERENCE_SIZES])
+if test "$INTERFERENCE_SIZES" = "0"; then
+  CXXFLAGS="$CXXFLAGS -DINTERFERENCE_SIZES"
+  if test "x$ax_cv_cxx_compiler_vendor" = xgnu; then
+    # Suppress GNU warning: use of std::hardware_destructive_interference_size [-Winterference-size]
+    CXXFLAGS="$CXXFLAGS -Wno-interference-size"
+  fi
 fi
 
 dnl Check libdl and header

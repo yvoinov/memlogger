@@ -88,6 +88,8 @@ if (ENABLE_RELEASE)
     add_link_options(-s)
 endif()
 
+include(cmake_check_interference_sizes.cmake)
+
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 
@@ -108,7 +110,8 @@ if (NOT TARGET uninstall)
     IMMEDIATE @ONLY)
 
   add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
+  )
 endif()
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
