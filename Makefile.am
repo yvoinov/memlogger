@@ -16,7 +16,8 @@ EXTRA_DIST = \
 	bootstrap.sh \
 	LICENSE \
 	CMakeLists.txt \
-	cmake_uninstall.cmake.in
+	cmake_uninstall.cmake.in \
+	cmake_check_interference_sizes.cmake
 
 DISTCLEANFILES = \
         _configs.sed
