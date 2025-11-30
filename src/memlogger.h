@@ -8,7 +8,7 @@
 #	include "autoconf.h"
 #endif
 
-#include <climits>	/* For UINT_MAX */
+#include <climits>	/* For UINT_MAX, CHAR_BIT */
 #include <csignal>
 #include <cstdlib>	/* For std::exit, std::getenv */
 #include <cstdint>	/* For std::uint64_t */
@@ -114,6 +114,24 @@
 #	define MEMLOGGER_RELEASE_STORE(x) x.store(true, MEMLOGGER_MEM_RELEASE)
 #	define MEMLOGGER_ACQUIRE_CAS(x) x.exchange(true, MEMLOGGER_MEM_ACQUIRE)
 #	define MEMLOGGER_RELEASE(x) x.store(false, MEMLOGGER_MEM_RELEASE)
+#endif
+
+#if __cpp_lib_hardware_interference_size >= 201603L && defined INTERFERENCE_SIZES
+#	define MEMLOGGER_CACHE_LINE_SIZE (std::hardware_destructive_interference_size)
+#else
+#	include <cstddef>	/* For std::max_align_t */
+#	include <type_traits>
+#
+template <typename T,
+	typename = typename std::enable_if<std::is_integral<T>::value>::type,
+	typename = typename std::enable_if<std::is_unsigned<T>::value>::type>
+constexpr T roundup_(T value, unsigned maxb = sizeof(T) * CHAR_BIT, unsigned curb = 1)
+{
+	return maxb <= curb ? value : roundup_(((value - 1) | ((value - 1) >> curb)) + 1, maxb, curb << 1);
+}
+#	define MEMLOGGER_CACHE_LINE_SIZE (((2 * sizeof(std::max_align_t)) & ((2 * sizeof(std::max_align_t)) - 1)) == 0 ? \
+					(2 * sizeof(std::max_align_t)) : \
+					roundup_(2 * sizeof(std::max_align_t)))
 #endif
 
 namespace {
@@ -234,7 +252,8 @@ private:
 	static constexpr T m_c_array_size = 3;
 	#endif
 
-	using Counters = struct Counters {
+	using Counters = struct alignas(MEMLOGGER_CACHE_LINE_SIZE) Counters {
+		Fl lock { MEMLOGGER_FLAG_DEFAULT };
 		L allc_64k {};
 		L allc_128k {};
 		L allc_256k {};
@@ -246,10 +265,9 @@ private:
 		L allc_more {};
 		L allc_max {};					/* Max allocation size */
 		std::time_t start {}, stop {};			/* Time interval */
-		Fl lock { MEMLOGGER_FLAG_DEFAULT };
 	};
 
-	std::array<Counters, m_c_array_size> m_CounterArray;
+	alignas(MEMLOGGER_CACHE_LINE_SIZE) std::array<Counters, m_c_array_size> m_CounterArray;
 
 	using Summary = struct Summary {
 		L previous {};
