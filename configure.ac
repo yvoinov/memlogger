@@ -95,7 +95,7 @@ AC_SUBST(MEMLOGGER_REVISION)
 AC_SUBST(MEMLOGGER_AGE)
 
 AC_CONFIG_AUX_DIR(cfgaux)
-AC_CONFIG_MACRO_DIRS([m4])
+AC_CONFIG_MACRO_DIRS([m4 acinclude])
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_CONFIG_HEADERS([src/autoconf.h:src/autoconf.h.in])
 
@@ -103,14 +103,6 @@ AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([1.16 subdir-objects])
 AM_MAINTAINER_MODE
 AM_SILENT_RULES([yes])
-
-m4_include([acinclude/ax_cxx_compile_stdcxx.m4])
-m4_include([acinclude/ax_cxx_namespaces.m4])
-m4_include([acinclude/ax_cxx_have_stl.m4])
-m4_include([acinclude/ax_compiler_vendor.m4])
-m4_include([acinclude/ax_interference_sizes.m4])
-m4_include([acinclude/ax_check_compile_flag.m4])
-m4_include([acinclude/ax_check_library.m4])
 
 dnl Detect the canonical host and target build environment
 AC_CANONICAL_HOST

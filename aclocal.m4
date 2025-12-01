@@ -1413,6 +1413,13 @@ AS_IF([test "$am_cv_xargs_n_works" = yes], [am__xargs_n='xargs -n'], [dnl
 AC_SUBST(am__xargs_n)
 ])
 
+m4_include([acinclude/ax_check_compile_flag.m4])
+m4_include([acinclude/ax_check_library.m4])
+m4_include([acinclude/ax_compiler_vendor.m4])
+m4_include([acinclude/ax_cxx_compile_stdcxx.m4])
+m4_include([acinclude/ax_cxx_have_stl.m4])
+m4_include([acinclude/ax_cxx_namespaces.m4])
+m4_include([acinclude/ax_interference_sizes.m4])
 m4_include([m4/libtool.m4])
 m4_include([m4/ltoptions.m4])
 m4_include([m4/ltsugar.m4])
