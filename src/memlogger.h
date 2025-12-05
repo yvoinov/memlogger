@@ -138,35 +138,36 @@ namespace {
 
 using voidPtr_type = void*;
 using uInt_type = std::size_t;
+using ptrDiff_type = std::ptrdiff_t;
 using uLongInt_type = std::uint64_t;	/* Accumulators type to prevent possible wrap around with long sessions */
 using flag_type = MEMLOGGER_FLAG_TYPE;
 
-template <typename Fl>
+template <typename D>
 class InnerMallocFlag {
 public:
-	InnerMallocFlag() { MEMLOGGER_RELEASE_STORE(m_innerMalloc); }
-	~InnerMallocFlag() { MEMLOGGER_RELEASE(m_innerMalloc); }
+	InnerMallocFlag() { m_innerMalloc.store(1, MEMLOGGER_MEM_RELEASE); }
+	~InnerMallocFlag() { m_innerMalloc.store(0, MEMLOGGER_MEM_RELEASE); }
 
 	bool get_flag()
 	{
-		if (MEMLOGGER_ACQUIRE_LOAD(m_innerMalloc)) return true;
+		if (m_innerMalloc.load(MEMLOGGER_MEM_ACQUIRE) > 0) return true;
 		else return false;
 	}
 
 	void set_flag_on()
 	{
-		MEMLOGGER_RELEASE_STORE(m_innerMalloc);
+		m_innerMalloc.fetch_add(1, MEMLOGGER_MEM_RELEASE);
 	}
 
 	void set_flag_off()
 	{
-		MEMLOGGER_RELEASE(m_innerMalloc);
+		m_innerMalloc.fetch_sub(1, MEMLOGGER_MEM_RELEASE);
 	}
 private:
-	Fl m_innerMalloc;
+	std::atomic<D> m_innerMalloc;
 };
 
-using innerMallocFlag_type = InnerMallocFlag<flag_type>;
+using innerMallocFlag_type = InnerMallocFlag<ptrDiff_type>;
 
 template <typename P, typename T, typename L, typename Fl>
 class MemoryLogger : public innerMallocFlag_type {
