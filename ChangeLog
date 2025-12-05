@@ -611,3 +611,7 @@ IMPROVEMENT: Added counter alignment to reduce CPU cache false-sharing.
 03-12-2025
 ==========
 IMPROVEMENT: Improved CMake build options processing.
+
+05-12-2025
+==========
+IMPROVEMENT: Improved accuracy of bypassing own allocations by semaphore-like logic (a potential ABA problem).
