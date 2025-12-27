@@ -615,3 +615,7 @@ IMPROVEMENT: Improved CMake build options processing.
 05-12-2025
 ==========
 IMPROVEMENT: Improved accuracy of bypassing own allocations by semaphore-like logic (a potential ABA problem).
+
+12-27-2025
+==========
+IMPROVEMENT: Relaxed m_spin_pred computation.
