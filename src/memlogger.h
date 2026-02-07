@@ -16,6 +16,7 @@
 #include <chrono>
 #include <array>
 #include <atomic>
+#include <type_traits>
 #if !defined(__FreeBSD__)
 #	include <condition_variable>
 #	include <mutex>
@@ -102,12 +103,28 @@
 #define MEMLOGGER_MEM_ACQUIRE std::memory_order_acquire
 #define MEMLOGGER_MEM_RELEASE std::memory_order_release
 
+template <typename A>
+inline typename std::enable_if<!std::is_same<A, std::atomic_flag>::value,
+	typename std::remove_reference<decltype(std::declval<const A&>().load(std::declval<std::memory_order>()))>::type>::type
+atomic_read(const A& a, std::memory_order order)
+{
+	return a.load(order);//returns value
+}
+
 #if __cpp_lib_atomic_flag_test >= 201907L
-#	define MEMLOGGER_RELAXED_LOAD(x) x.test(MEMLOGGER_MEM_RELAXED)
+template <typename A>
+inline typename std::enable_if<std::is_same<A, std::atomic_flag>::value, bool>::type
+atomic_read(const A& a, std::memory_order order)
+{
+	return a.test(order);//returns bool
+}
+#endif
+
+#define MEMLOGGER_RELAXED_LOAD(x) atomic_read(x, MEMLOGGER_MEM_RELAXED)
+#if __cpp_lib_atomic_flag_test >= 201907L
 #	define MEMLOGGER_ACQUIRE_CAS(x) x.test_and_set(MEMLOGGER_MEM_ACQUIRE)
 #	define MEMLOGGER_RELEASE(x) x.clear(MEMLOGGER_MEM_RELEASE)
 #else
-#	define MEMLOGGER_RELAXED_LOAD(x) x.load(MEMLOGGER_MEM_RELAXED)
 #	define MEMLOGGER_ACQUIRE_CAS(x) x.exchange(true, MEMLOGGER_MEM_ACQUIRE)
 #	define MEMLOGGER_RELEASE(x) x.store(false, MEMLOGGER_MEM_RELEASE)
 #endif
@@ -116,7 +133,6 @@
 #	define MEMLOGGER_CACHE_LINE_SIZE (std::hardware_destructive_interference_size)
 #else
 #	include <cstddef>	/* For std::max_align_t */
-#	include <type_traits>
 #
 template <typename T,
 	typename = typename std::enable_if<std::is_integral<T>::value>::type,
