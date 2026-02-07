@@ -619,3 +619,8 @@ IMPROVEMENT: Improved accuracy of bypassing own allocations by semaphore-like lo
 12-27-2025
 ==========
 IMPROVEMENT: Relaxed m_spin_pred computation.
+
+02-07-2026
+==========
+IMPROVEMENT: Relaxed m_spin_pred expression load.
+IMPROVEMENT: Refactored atomic loads.
