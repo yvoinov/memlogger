@@ -18026,8 +18026,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
   as_fn_error $? "STL was not found; it is require to build" "$LINENO" 5
 fi
 
-user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`
-if test "x$user_cxx" = "x"; then
+if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`; then
       ax_cxx_compile_alternatives="20"    ax_cxx_compile_cxx20_required=false
   ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -20737,7 +20736,7 @@ else case e in #(
 esac
 fi
 
-  if test x"$ac_cv_pth_supported" = xno; then
+  if test "x$ac_cv_pth_supported" = "xno"; then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: -pthread not supported" >&5
 printf "%s\n" "$as_me: -pthread not supported" >&6;}
   fi
@@ -20871,7 +20870,7 @@ fi
 
 fi
 
-if test x"$ac_cv_lto_supported" = xno; then
+if test "x$ac_cv_lto_supported" = "xno"; then
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: LTO/Link optimization not supported" >&5
 printf "%s\n" "$as_me: LTO/Link optimization not supported" >&6;}
 fi
@@ -20933,7 +20932,7 @@ fi
 
 if test "$INTERFERENCE_SIZES" = "0"; then
   CXXFLAGS="$CXXFLAGS -DINTERFERENCE_SIZES"
-  if test "x$ax_cv_cxx_compiler_vendor" = xgnu; then
+  if test "$ax_cv_cxx_compiler_vendor" = "gnu"; then
     # Suppress GNU warning: use of std::hardware_destructive_interference_size [-Winterference-size]
     CXXFLAGS="$CXXFLAGS -Wno-interference-size"
   fi
