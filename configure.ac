@@ -139,8 +139,7 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
 fi
 
 dnl If the user did not specify a C++ version.
-user_cxx=`echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`
-if test "x$user_cxx" = "x"; then
+if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`; then
   dnl Set highest possible C++ support
   AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
   if test "$HAVE_CXX20" = "0"; then
@@ -176,7 +175,7 @@ elif test "$ax_cv_cxx_compiler_vendor" = "clang"; then
 else
   dnl Check -pthread
   AX_CHECK_COMPILE_FLAG([-pthread], [CXXFLAGS="$CXXFLAGS -pthread"; LDFLAGS="$LDFLAGS -pthread -lpthread"; ac_cv_pth_supported=yes], [ac_cv_pth_supported=no], [])
-  if test x"$ac_cv_pth_supported" = xno; then
+  if test "x$ac_cv_pth_supported" = "xno"; then
     AC_MSG_NOTICE([-pthread not supported])
   fi
 fi
@@ -192,7 +191,7 @@ elif test "$ax_cv_cxx_compiler_vendor" = "gnu"; then
     AX_CHECK_COMPILE_FLAG([-flto], [CXXFLAGS="$CXXFLAGS -flto"; ac_cv_lto_supported=yes], [ac_cv_lto_supported=no], [])
 fi
 
-if test x"$ac_cv_lto_supported" = xno; then
+if test "x$ac_cv_lto_supported" = "xno"; then
   AC_MSG_NOTICE([LTO/Link optimization not supported])
 fi
 
@@ -200,7 +199,7 @@ dnl Check if interference_sizes are defined
 AX_INTERFERENCE_SIZES([INTERFERENCE_SIZES])
 if test "$INTERFERENCE_SIZES" = "0"; then
   CXXFLAGS="$CXXFLAGS -DINTERFERENCE_SIZES"
-  if test "x$ax_cv_cxx_compiler_vendor" = xgnu; then
+  if test "$ax_cv_cxx_compiler_vendor" = "gnu"; then
     # Suppress GNU warning: use of std::hardware_destructive_interference_size [-Winterference-size]
     CXXFLAGS="$CXXFLAGS -Wno-interference-size"
   fi
