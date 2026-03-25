@@ -624,3 +624,7 @@ IMPROVEMENT: Relaxed m_spin_pred computation.
 ==========
 IMPROVEMENT: Relaxed m_spin_pred expression load.
 IMPROVEMENT: Refactored atomic loads.
+
+03-25-2026
+==========
+IMPROVEMENT: Code style in configure.ac.
