@@ -100,7 +100,7 @@ AC_CONFIG_FILES([Makefile src/Makefile])
 AC_CONFIG_HEADERS([src/autoconf.h:src/autoconf.h.in])
 
 AC_USE_SYSTEM_EXTENSIONS
-AM_INIT_AUTOMAKE([1.16 subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_MAINTAINER_MODE
 AM_SILENT_RULES([yes])
 
@@ -139,14 +139,16 @@ if test "x$ax_cv_cxx_have_stl" = "xno"; then
 fi
 
 dnl If the user did not specify a C++ version.
-if test -z `echo "$PRESET_CXXFLAGS" | $GREP -o -E "\\-std="`; then
+if test -z "`echo '$PRESET_CXXFLAGS' | $GREP -o -E '\\-std='`"; then
   dnl Set highest possible C++ support
   AX_CXX_COMPILE_STDCXX(20, [noext], [optional])
   if test "$HAVE_CXX20" = "0"; then
     AX_CXX_COMPILE_STDCXX(17, [noext], [optional])
-  elif test "$HAVE_CXX17" = "0"; then
+  fi
+  if test "$HAVE_CXX17" = "0"; then
     AX_CXX_COMPILE_STDCXX(14, [noext], [optional])
-  elif test "$HAVE_CXX14" = "0"; then
+  fi
+  if test "$HAVE_CXX14" = "0"; then
     AX_CXX_COMPILE_STDCXX(11, [noext], [mandatory])
   fi
 fi
