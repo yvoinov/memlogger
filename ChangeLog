@@ -628,3 +628,8 @@ IMPROVEMENT: Refactored atomic loads.
 03-25-2026
 ==========
 IMPROVEMENT: Code style in configure.ac.
+
+05-02-2026
+==========
+FIX: C++ standard detection.
+
