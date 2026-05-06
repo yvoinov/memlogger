@@ -176,6 +176,8 @@ const char* MemoryLogger<P, T, L, Fl>::decodeMemFunc(const T p_idx)
 		#endif
 		case static_cast<T>(Func_values::free_fvalue):
 			return m_c_func4;
+		case static_cast<T>(Func_values::reallocarray_fvalue):
+			return m_c_func6;
 		default:
 			return "";
 	}
@@ -277,6 +279,14 @@ inline void MemoryLogger<P, T, L, Fl>::free_mf_impl(P ptr)
 	m_Free(ptr);
 }
 
+template <typename P, typename T, typename L, typename Fl>
+inline P MemoryLogger<P, T, L, Fl>::reallocarray_mf_impl(P ptr, T nmemb, T size)
+{
+	fillArrayEntry(static_cast<T>(Func_values::reallocarray_fvalue), nmemb * size);
+	set_flag_on();
+	return m_ReallocArray(ptr, nmemb, size);
+}
+
 }	/* namespace */
 
 extern "C" {
@@ -305,6 +315,12 @@ void free(void* ptr)
 {
 	memoryLogger_type& mli = memoryLogger_type::GetInstance();
 	mli.free_mf_impl(ptr);
+}
+
+void* reallocarray(void* ptr, std::size_t nmemb, std::size_t size)
+{
+	memoryLogger_type& mli = memoryLogger_type::GetInstance();
+	return mli.reallocarray_mf_impl(ptr, nmemb, size);
 }
 
 }	/* extern C */

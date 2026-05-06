@@ -191,6 +191,7 @@ public:
 	#endif
 	using func4_type = void (*)(P);	/* func4_type Type 4: free */
 	using func5_type = T (*)(P);	/* func5_type Type 5: malloc_usable_size */
+	using func6_type = P (*)(P, T, T);	/* func6_type Type 6: reallocarray */
 
 	func1_type m_Malloc;	/* Arg type 1 */
 	func2_type m_Realloc;	/* Arg type 2 */
@@ -199,6 +200,7 @@ public:
 	#endif
 	func4_type m_Free;		/* Arg type 4 */
 	func5_type m_MallocUsable;	/* Arg type 5 */
+	func6_type m_ReallocArray;	/* Arg type 6 */
 
 	char* m_fname;
 
@@ -211,6 +213,7 @@ public:
 	P calloc_mf_impl(T n, T size);
 	#endif
 	void free_mf_impl(P ptr);
+	P reallocarray_mf_impl(P ptr, T nmemb, T size);
 
 	static MemoryLogger& GetInstance() {
 		static MemoryLogger inst;
@@ -230,6 +233,7 @@ private:
 		#endif
 		m_Free = reinterpret_cast<func4_type>(dlsym(RTLD_NEXT, m_c_func4));
 		m_MallocUsable = reinterpret_cast<func5_type>(dlsym(RTLD_NEXT, m_c_func5));
+		m_ReallocArray = reinterpret_cast<func6_type>(dlsym(RTLD_NEXT, m_c_func6));
 	}
 
 	MemoryLogger(const MemoryLogger&) = delete;
@@ -247,6 +251,7 @@ private:
 		,calloc_fvalue
 		#endif
 		,free_fvalue
+		,reallocarray_fvalue
 	};
 
 	/* Memory functions names */
@@ -257,12 +262,13 @@ private:
 	#endif
 	static constexpr const char* m_c_func4 { "free" };
 	static constexpr const char* m_c_func5 { "malloc_usable_size" };
+	static constexpr const char* m_c_func6 { "reallocarray" };
 
 	/* Counters array size; for 3 functions */
 	#if defined(COMPAT_OS)
-	static constexpr T m_c_array_size = 4;
+	static constexpr T m_c_array_size = 5;
 	#elif !defined(COMPAT_OS)
-	static constexpr T m_c_array_size = 3;
+	static constexpr T m_c_array_size = 4;
 	#endif
 
 	using Counters = struct alignas(MEMLOGGER_CACHE_LINE_SIZE) Counters {
