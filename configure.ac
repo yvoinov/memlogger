@@ -6,14 +6,14 @@
 # Process this file with autoconf to produce a configure script.
 
 m4_define([VERSION_MAJOR],[2])
-m4_define([VERSION_MINOR],[2])
-m4_define([VERSION_MICRO],[2])
+m4_define([VERSION_MINOR],[3])
+m4_define([VERSION_MICRO],[0])
 
 AC_INIT(memlogger, m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), [], memlogger)
 
-MEMLOGGER_CURRENT=4
-MEMLOGGER_REVISION=2
-MEMLOGGER_AGE=2
+MEMLOGGER_CURRENT=5
+MEMLOGGER_REVISION=0
+MEMLOGGER_AGE=3
 # 1.0.0 had 1:0:0
 # 1.0.1 had 1:1:0
 # 1.0.2 had 1:2:0
@@ -71,6 +71,7 @@ MEMLOGGER_AGE=2
 # 4.2.0 had 4:0:2
 # 4.2.1 had 4:1:2
 # 4.2.2 had 4:2:2
+# 5.0.3 had 5:3:0
 
 #   Current  -- the number of the binary API that we're implementing
 #   Revision -- which iteration of the implementation of the binary
