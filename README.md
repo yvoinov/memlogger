@@ -16,15 +16,15 @@ Generally speaking, such statistics helps you define appropriate chunk size for 
 
 ## Build and installation
 
-### Build memlogger
+### Autotools build
 
-To make and install memlogger run:
+To make and install memlogger run (GCC, most platforms):
 ```sh
-# ./configure 'CXXFLAGS=-m64'
+# ./configure 'CXXFLAGS=-m64' --libdir=/usr/local/lib/64
 ```
 or
 ```sh
-# ./configure 'CXXFLAGS=-m32'
+# ./configure 'CXXFLAGS=-m32' --libdir=/usr/local/lib
 ```
 then
 ```sh
@@ -32,6 +32,26 @@ then
 ```
 
 Installation prefix by default is /usr/local. Logging library `libmemlogger.so` will install into `$PREFIX/lib`.
+
+### CMake build
+
+32 bit (GCC, Clang):
+```sh
+mkdir build
+cd build
+CXX=g++ cmake -G "Unix Makefiles" ..
+make
+make install
+```
+64 bit (GCC, Clang):
+```sh
+mkdir build
+cd build
+CXX=g++ CXXFLAGS="-m64" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/64 ..
+make
+make install
+```
+**Note**: Systems with gcc and clang can mix runtimes, leading to initialization errors due to incompatible ABIs. Typically, the userspace for such systems is gnu. To avoid such errors, explicitly specify the compiler before configuring and building.
 
 ## Using memlogger
 
@@ -80,9 +100,9 @@ Logging  session  runs  (for  foreground processes) till Ctrl+C pressed, or till
 
 After that, report will be output to STDOUT by default.
 
-Note: Some platforms uses `LD_PRELOAD_32/LD_PRELOAD_64/LDR_PRELOAD/LDR_PRELOAD64` environment variables instead.
+**Note**: Some platforms uses `LD_PRELOAD_32/LD_PRELOAD_64/LDR_PRELOAD/LDR_PRELOAD64` environment variables instead.
 
-Note:  To  produce  report  to  log  file  directly,  just  specify filename via environment variable before starting the profiled program:
+**Note**:  To  produce  report  to  log  file  directly,  just  specify filename via environment variable before starting the profiled program:
 
 ```sh
 # export MEMLOGGER_LOG_FILENAME=/tmp/memory.log
@@ -97,7 +117,7 @@ Cannot open log file /1/memory3.log
 
 Please note on some platform current directory can have no permission to write. Choose writable directory to save reports.
 
-Note: If target file exists, it will be overwritten.
+**Note**: If target file exists, it will be overwritten.
 
 The result will be as follows:
 
