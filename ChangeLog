@@ -633,3 +633,7 @@ IMPROVEMENT: Code style in configure.ac.
 ==========
 FIX: C++ standard detection.
 
+05-06-2026
+==========
+IMPROVEMENT: Added reallocarray detection.
+IMPROVEMENT: Improved build instruction.
