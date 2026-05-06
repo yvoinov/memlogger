@@ -32,16 +32,18 @@ chunk-based allocator in accordance with best-fit strategy.
 Build and installation
 ======================
 
-Build memlogger
+Autotools build
 ---------------
 
 To make and install memlogger run:
 
-# ./configure 'CXXFLAGS=-m64'
+# 64 bit (GCC, most platforms)
+./configure 'CXXFLAGS=-m64' --libdir=/usr/local/lib/64
 
-or
+or/and
 
-# ./configure 'CXXFLAGS=-m32'
+# 32 bit (GCC, most platforms)
+./configure 'CXXFLAGS=-m32' --libdir=/usr/local/lib
 
 then
 
@@ -50,6 +52,28 @@ then
 
 Installation  prefix  by  default is /usr/local. Logging library libmemlogger.so
 will  install  into  $PREFIX/lib.
+
+CMake build
+-----------
+
+# 32 bit (GCC, Clang)
+mkdir build
+cd build
+CXX=g++ cmake -G "Unix Makefiles" ..
+make
+make install
+
+# 64 bit (GCC, Clang)
+mkdir build
+cd build
+CXX=g++ CXXFLAGS="-m64" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/64 ..
+make
+make install
+
+Note:  Systems  with  gcc  and clang can mix runtimes, leading to initialization
+errors  due  to  incompatible  ABIs.  Typically,  the userspace for such systems
+is gnu. To avoid such errors, explicitly specify the compiler before configuring
+and building.
 
 Using memlogger
 ===============
