@@ -637,3 +637,8 @@ FIX: C++ standard detection.
 ==========
 IMPROVEMENT: Added reallocarray detection.
 IMPROVEMENT: Improved build instruction.
+
+05-21-2026
+==========
+IMPROVEMENT: libtool updated.
+
