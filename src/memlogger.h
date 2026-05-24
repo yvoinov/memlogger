@@ -264,7 +264,7 @@ private:
 	static constexpr const char* m_c_func5 { "malloc_usable_size" };
 	static constexpr const char* m_c_func6 { "reallocarray" };
 
-	/* Counters array size; for 3 functions */
+	/* Counters array size; for 4 functions */
 	#if defined(COMPAT_OS)
 	static constexpr T m_c_array_size = 5;
 	#elif !defined(COMPAT_OS)
