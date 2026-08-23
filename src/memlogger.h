@@ -77,6 +77,21 @@
 #define ALLOC_8192K " from 4096k to 8192k : "
 #define ALLOC_MORE  " >8192k              : "
 #define ALLOC_MAX   " max size            : "
+#define HIRES_REPORT_HEADING "High resolution small allocations report"
+#define HIRES_ALLOC_4_8 " from 4 to 8         : "
+#define HIRES_ALLOC_9_16 " from 9 to 16        : "
+#define HIRES_ALLOC_17_32 " from 17 to 32       : "
+#define HIRES_ALLOC_33_64 " from 33 to 64       : "
+#define HIRES_ALLOC_65_128 " from 65 to 128      : "
+#define HIRES_ALLOC_129_256 " from 129 to 256     : "
+#define HIRES_ALLOC_257_512 " from 257 to 512     : "
+#define HIRES_ALLOC_513_1024 " from 513 to 1024    : "
+#define HIRES_ALLOC_1025_2048 " from 1025 to 2048   : "
+#define HIRES_ALLOC_2049_4096 " from 2049 to 4096   : "
+#define HIRES_ALLOC_4097_8192 " from 4097 to 8192   : "
+#define HIRES_ALLOC_8193_16384 " from 8193 to 16384  : "
+#define HIRES_ALLOC_16385_32768 " from 16385 to 32768 : "
+#define HIRES_ALLOC_32769_65536 " from 32769 to 65536 : "
 #define SEPARATION_LINE_2 "---------------------------------------------------"
 
 /* Multiplier */
@@ -222,7 +237,8 @@ public:
 
 	~MemoryLogger() { printReport(); }
 private:
-	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_elapsed_start(Now()) {
+	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")),
+		m_hires_small_alloc(std::atoi(std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") ? std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") : "0") == 1), m_elapsed_start(Now()) {
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
@@ -295,6 +311,58 @@ private:
 
 	std::array<Summary, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
+	using HiResCounters = struct alignas(MEMLOGGER_CACHE_LINE_SIZE) HiResCounters {
+		L allc_4_8 {};
+		L allc_9_16 {};
+		L allc_17_32 {};
+		L allc_33_64 {};
+		L allc_65_128 {};
+		L allc_129_256 {};
+		L allc_257_512 {};
+		L allc_513_1024 {};
+		L allc_1025_2048 {};
+		L allc_2049_4096 {};
+		L allc_4097_8192 {};
+		L allc_8193_16384 {};
+		L allc_16385_32768 {};
+		L allc_32769_65536 {};
+	};
+
+	alignas(MEMLOGGER_CACHE_LINE_SIZE) std::array<HiResCounters, m_c_array_size> m_HiResCounterArray;
+
+	using HiResSummary = struct HiResSummary {
+		L previous_4_8 {};
+		L peak_4_8 {};
+		L previous_9_16 {};
+		L peak_9_16 {};
+		L previous_17_32 {};
+		L peak_17_32 {};
+		L previous_33_64 {};
+		L peak_33_64 {};
+		L previous_65_128 {};
+		L peak_65_128 {};
+		L previous_129_256 {};
+		L peak_129_256 {};
+		L previous_257_512 {};
+		L peak_257_512 {};
+		L previous_513_1024 {};
+		L peak_513_1024 {};
+		L previous_1025_2048 {};
+		L peak_1025_2048 {};
+		L previous_2049_4096 {};
+		L peak_2049_4096 {};
+		L previous_4097_8192 {};
+		L peak_4097_8192 {};
+		L previous_8193_16384 {};
+		L peak_8193_16384 {};
+		L previous_16385_32768 {};
+		L peak_16385_32768 {};
+		L previous_32769_65536 {};
+		L peak_32769_65536 {};
+	};
+
+	std::array<HiResSummary, m_c_array_size> m_HiResPeakValueArray;	/* Peak small allocations per second array */
+
 	static constexpr const T m_c_num_64K { 64 * KBYTES };
 	static constexpr const T m_c_num_128K { 128 * KBYTES };
 	static constexpr const T m_c_num_256K { 256 * KBYTES };
@@ -303,6 +371,23 @@ private:
 	static constexpr const T m_c_num_2048K { 2048 * KBYTES };
 	static constexpr const T m_c_num_4096K { 4096 * KBYTES };
 	static constexpr const T m_c_num_8192K { 8192 * KBYTES };
+
+	bool m_hires_small_alloc;
+
+	static constexpr const T m_c_num_hires_8 { 8 };
+	static constexpr const T m_c_num_hires_16 { 16 };
+	static constexpr const T m_c_num_hires_32 { 32 };
+	static constexpr const T m_c_num_hires_64 { 64 };
+	static constexpr const T m_c_num_hires_128 { 128 };
+	static constexpr const T m_c_num_hires_256 { 256 };
+	static constexpr const T m_c_num_hires_512 { 512 };
+	static constexpr const T m_c_num_hires_1024 { 1024 };
+	static constexpr const T m_c_num_hires_2048 { 2048 };
+	static constexpr const T m_c_num_hires_4096 { 4096 };
+	static constexpr const T m_c_num_hires_8192 { 8192 };
+	static constexpr const T m_c_num_hires_16384 { 16384 };
+	static constexpr const T m_c_num_hires_32768 { 32768 };
+	static constexpr const T m_c_num_hires_65536 { 65536 };
 
 	std::time_t m_elapsed_start;	/* Elapsed time start value */
 
@@ -323,6 +408,9 @@ private:
 	}
 
 	L sumCounters(const T p_idx);
+	void computeHiResPeakValue(const T p_idx);
+	void printHiResReportByIdx(const T p_idx, std::ostream& p_stream = std::cout);
+	void fillArrayEntryHiRes(const T p_idx, const T p_value);
 	void fillArrayEntry(const T p_idx, const T p_value);
 	const char* decodeMemFunc(const T p_idx);
 	void printReportByIdx(const T p_idx, std::ostream& p_stream = std::cout);
