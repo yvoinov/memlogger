@@ -59,12 +59,65 @@ void MemoryLogger<P, T, L, Fl>::computePeakValue()
 			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 			v_sum = sumCounters(i);
+			if (m_hires_small_alloc) computeHiResPeakValue(i);
 		}
 		auto& v_pv_by_idx = m_PeakValueArray[i];	/* Can't be const */
 		if (v_sum - v_pv_by_idx.previous > v_pv_by_idx.peak)
 			v_pv_by_idx.peak = v_sum - v_pv_by_idx.previous;
 		v_pv_by_idx.previous = v_sum;
 	}
+}
+
+
+template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::computeHiResPeakValue(const T p_idx)
+{
+	const auto& v_ca_by_idx = m_HiResCounterArray[p_idx];
+	auto& v_pv_by_idx = m_HiResPeakValueArray[p_idx];
+	const L v_4_8 = v_ca_by_idx.allc_4_8;
+	const L v_9_16 = v_ca_by_idx.allc_9_16;
+	const L v_17_32 = v_ca_by_idx.allc_17_32;
+	const L v_33_64 = v_ca_by_idx.allc_33_64;
+	const L v_65_128 = v_ca_by_idx.allc_65_128;
+	const L v_129_256 = v_ca_by_idx.allc_129_256;
+	const L v_257_512 = v_ca_by_idx.allc_257_512;
+	const L v_513_1024 = v_ca_by_idx.allc_513_1024;
+	const L v_1025_2048 = v_ca_by_idx.allc_1025_2048;
+	const L v_2049_4096 = v_ca_by_idx.allc_2049_4096;
+	const L v_4097_8192 = v_ca_by_idx.allc_4097_8192;
+	const L v_8193_16384 = v_ca_by_idx.allc_8193_16384;
+	const L v_16385_32768 = v_ca_by_idx.allc_16385_32768;
+	const L v_32769_65536 = v_ca_by_idx.allc_32769_65536;
+
+	if (v_4_8 - v_pv_by_idx.previous_4_8 > v_pv_by_idx.peak_4_8) v_pv_by_idx.peak_4_8 = v_4_8 - v_pv_by_idx.previous_4_8;
+	if (v_9_16 - v_pv_by_idx.previous_9_16 > v_pv_by_idx.peak_9_16) v_pv_by_idx.peak_9_16 = v_9_16 - v_pv_by_idx.previous_9_16;
+	if (v_17_32 - v_pv_by_idx.previous_17_32 > v_pv_by_idx.peak_17_32) v_pv_by_idx.peak_17_32 = v_17_32 - v_pv_by_idx.previous_17_32;
+	if (v_33_64 - v_pv_by_idx.previous_33_64 > v_pv_by_idx.peak_33_64) v_pv_by_idx.peak_33_64 = v_33_64 - v_pv_by_idx.previous_33_64;
+	if (v_65_128 - v_pv_by_idx.previous_65_128 > v_pv_by_idx.peak_65_128) v_pv_by_idx.peak_65_128 = v_65_128 - v_pv_by_idx.previous_65_128;
+	if (v_129_256 - v_pv_by_idx.previous_129_256 > v_pv_by_idx.peak_129_256) v_pv_by_idx.peak_129_256 = v_129_256 - v_pv_by_idx.previous_129_256;
+	if (v_257_512 - v_pv_by_idx.previous_257_512 > v_pv_by_idx.peak_257_512) v_pv_by_idx.peak_257_512 = v_257_512 - v_pv_by_idx.previous_257_512;
+	if (v_513_1024 - v_pv_by_idx.previous_513_1024 > v_pv_by_idx.peak_513_1024) v_pv_by_idx.peak_513_1024 = v_513_1024 - v_pv_by_idx.previous_513_1024;
+	if (v_1025_2048 - v_pv_by_idx.previous_1025_2048 > v_pv_by_idx.peak_1025_2048) v_pv_by_idx.peak_1025_2048 = v_1025_2048 - v_pv_by_idx.previous_1025_2048;
+	if (v_2049_4096 - v_pv_by_idx.previous_2049_4096 > v_pv_by_idx.peak_2049_4096) v_pv_by_idx.peak_2049_4096 = v_2049_4096 - v_pv_by_idx.previous_2049_4096;
+	if (v_4097_8192 - v_pv_by_idx.previous_4097_8192 > v_pv_by_idx.peak_4097_8192) v_pv_by_idx.peak_4097_8192 = v_4097_8192 - v_pv_by_idx.previous_4097_8192;
+	if (v_8193_16384 - v_pv_by_idx.previous_8193_16384 > v_pv_by_idx.peak_8193_16384) v_pv_by_idx.peak_8193_16384 = v_8193_16384 - v_pv_by_idx.previous_8193_16384;
+	if (v_16385_32768 - v_pv_by_idx.previous_16385_32768 > v_pv_by_idx.peak_16385_32768) v_pv_by_idx.peak_16385_32768 = v_16385_32768 - v_pv_by_idx.previous_16385_32768;
+	if (v_32769_65536 - v_pv_by_idx.previous_32769_65536 > v_pv_by_idx.peak_32769_65536) v_pv_by_idx.peak_32769_65536 = v_32769_65536 - v_pv_by_idx.previous_32769_65536;
+
+	v_pv_by_idx.previous_4_8 = v_4_8;
+	v_pv_by_idx.previous_9_16 = v_9_16;
+	v_pv_by_idx.previous_17_32 = v_17_32;
+	v_pv_by_idx.previous_33_64 = v_33_64;
+	v_pv_by_idx.previous_65_128 = v_65_128;
+	v_pv_by_idx.previous_129_256 = v_129_256;
+	v_pv_by_idx.previous_257_512 = v_257_512;
+	v_pv_by_idx.previous_513_1024 = v_513_1024;
+	v_pv_by_idx.previous_1025_2048 = v_1025_2048;
+	v_pv_by_idx.previous_2049_4096 = v_2049_4096;
+	v_pv_by_idx.previous_4097_8192 = v_4097_8192;
+	v_pv_by_idx.previous_8193_16384 = v_8193_16384;
+	v_pv_by_idx.previous_16385_32768 = v_16385_32768;
+	v_pv_by_idx.previous_32769_65536 = v_32769_65536;
 }
 
 template <typename P, typename T, typename L, typename Fl>
@@ -125,6 +178,40 @@ L MemoryLogger<P, T, L, Fl>::sumCounters(const T p_idx)
 }
 
 template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::fillArrayEntryHiRes(const T p_idx, const T p_value)
+{
+	auto& v_ca_by_idx = m_HiResCounterArray[p_idx];
+	if (p_value >= 4 && p_value <= m_c_num_hires_8)
+		++v_ca_by_idx.allc_4_8;
+	else if (p_value <= m_c_num_hires_16)
+		++v_ca_by_idx.allc_9_16;
+	else if (p_value <= m_c_num_hires_32)
+		++v_ca_by_idx.allc_17_32;
+	else if (p_value <= m_c_num_hires_64)
+		++v_ca_by_idx.allc_33_64;
+	else if (p_value <= m_c_num_hires_128)
+		++v_ca_by_idx.allc_65_128;
+	else if (p_value <= m_c_num_hires_256)
+		++v_ca_by_idx.allc_129_256;
+	else if (p_value <= m_c_num_hires_512)
+		++v_ca_by_idx.allc_257_512;
+	else if (p_value <= m_c_num_hires_1024)
+		++v_ca_by_idx.allc_513_1024;
+	else if (p_value <= m_c_num_hires_2048)
+		++v_ca_by_idx.allc_1025_2048;
+	else if (p_value <= m_c_num_hires_4096)
+		++v_ca_by_idx.allc_2049_4096;
+	else if (p_value <= m_c_num_hires_8192)
+		++v_ca_by_idx.allc_4097_8192;
+	else if (p_value <= m_c_num_hires_16384)
+		++v_ca_by_idx.allc_8193_16384;
+	else if (p_value <= m_c_num_hires_32768)
+		++v_ca_by_idx.allc_16385_32768;
+	else if (p_value <= m_c_num_hires_65536)
+		++v_ca_by_idx.allc_32769_65536;
+}
+
+template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	const L c_value = roundup_to_page_size(p_value);
@@ -132,6 +219,8 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 
 	AdaptiveSpinMutex spmux(v_ca_by_idx.lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+
+	if (m_hires_small_alloc) fillArrayEntryHiRes(p_idx, p_value);
 
 	if (c_value > 0 && c_value <= m_c_num_64K)
 		++v_ca_by_idx.allc_64k;
@@ -184,6 +273,31 @@ const char* MemoryLogger<P, T, L, Fl>::decodeMemFunc(const T p_idx)
 }
 
 template <typename P, typename T, typename L, typename Fl>
+void MemoryLogger<P, T, L, Fl>::printHiResReportByIdx(const T p_idx, std::ostream& p_stream)
+{
+	set_flag_on();
+	const auto& v_ca_by_idx = m_HiResCounterArray[p_idx];
+	const auto& v_pv_by_idx = m_HiResPeakValueArray[p_idx];
+	const std::time_t c_time_diff = m_CounterArray[p_idx].stop - m_CounterArray[p_idx].start;
+	const std::time_t c_interval = c_time_diff ? c_time_diff : 1;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_4_8 << v_ca_by_idx.allc_4_8 << " (Avg " << v_ca_by_idx.allc_4_8 / c_interval << ", Peak " << v_pv_by_idx.peak_4_8 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_9_16 << v_ca_by_idx.allc_9_16 << " (Avg " << v_ca_by_idx.allc_9_16 / c_interval << ", Peak " << v_pv_by_idx.peak_9_16 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_17_32 << v_ca_by_idx.allc_17_32 << " (Avg " << v_ca_by_idx.allc_17_32 / c_interval << ", Peak " << v_pv_by_idx.peak_17_32 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_33_64 << v_ca_by_idx.allc_33_64 << " (Avg " << v_ca_by_idx.allc_33_64 / c_interval << ", Peak " << v_pv_by_idx.peak_33_64 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_65_128 << v_ca_by_idx.allc_65_128 << " (Avg " << v_ca_by_idx.allc_65_128 / c_interval << ", Peak " << v_pv_by_idx.peak_65_128 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_129_256 << v_ca_by_idx.allc_129_256 << " (Avg " << v_ca_by_idx.allc_129_256 / c_interval << ", Peak " << v_pv_by_idx.peak_129_256 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_257_512 << v_ca_by_idx.allc_257_512 << " (Avg " << v_ca_by_idx.allc_257_512 / c_interval << ", Peak " << v_pv_by_idx.peak_257_512 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_513_1024 << v_ca_by_idx.allc_513_1024 << " (Avg " << v_ca_by_idx.allc_513_1024 / c_interval << ", Peak " << v_pv_by_idx.peak_513_1024 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_1025_2048 << v_ca_by_idx.allc_1025_2048 << " (Avg " << v_ca_by_idx.allc_1025_2048 / c_interval << ", Peak " << v_pv_by_idx.peak_1025_2048 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_2049_4096 << v_ca_by_idx.allc_2049_4096 << " (Avg " << v_ca_by_idx.allc_2049_4096 / c_interval << ", Peak " << v_pv_by_idx.peak_2049_4096 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_4097_8192 << v_ca_by_idx.allc_4097_8192 << " (Avg " << v_ca_by_idx.allc_4097_8192 / c_interval << ", Peak " << v_pv_by_idx.peak_4097_8192 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_8193_16384 << v_ca_by_idx.allc_8193_16384 << " (Avg " << v_ca_by_idx.allc_8193_16384 / c_interval << ", Peak " << v_pv_by_idx.peak_8193_16384 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_16385_32768 << v_ca_by_idx.allc_16385_32768 << " (Avg " << v_ca_by_idx.allc_16385_32768 / c_interval << ", Peak " << v_pv_by_idx.peak_16385_32768 << ")" << std::endl;
+	p_stream << decodeMemFunc(p_idx) << HIRES_ALLOC_32769_65536 << v_ca_by_idx.allc_32769_65536 << " (Avg " << v_ca_by_idx.allc_32769_65536 / c_interval << ", Peak " << v_pv_by_idx.peak_32769_65536 << ")" << std::endl;
+	p_stream << SEPARATION_LINE_2 << std::endl;
+}
+
+template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReportByIdx(const T p_idx, std::ostream& p_stream)
 {
 	set_flag_on();
@@ -224,6 +338,16 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 {
 	set_flag_on();
+	if (m_hires_small_alloc) {
+		p_stream << HIRES_REPORT_HEADING << std::endl;
+		p_stream << SEPARATION_LINE_1 << std::endl;
+		for (T i = 0; i < m_CounterArray.size(); ++i) {
+			auto& v_ca_by_idx = m_CounterArray[i];	/* Can't be const */
+			if (v_ca_by_idx.start) printHiResReportByIdx(i, p_stream);
+			else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
+		}
+		p_stream << std::endl;
+	}
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
 	for (T i = 0; i < m_CounterArray.size(); ++i) {
