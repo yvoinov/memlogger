@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12.0 FATAL_ERROR)
 
-project(memlogger VERSION 2.3.0 LANGUAGES CXX)
+project(memlogger VERSION 2.4.0 LANGUAGES CXX)
 
 option(ENABLE_RELEASE "Enable release build" ON)
 option(ENABLE_TOPDIR "Enable including package top dir to distribution" OFF)
