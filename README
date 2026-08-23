@@ -1,33 +1,24 @@
 Concepts
 ========
 
-Unlike  most similar solutions, memlogger is designed to profile the application
-by the nature of memory allocations in accordance with the size of the chunks.
+Unlike  most  similar  solutions,  memlogger  is designed to profile the application by the nature of memory allocations
+in accordance with the size of the chunks.
 
-Accordingly, only functions that directly allocate memory are logged.
+Accordingly,  only functions that directly allocate memory are logged. Logging of malloc, realloc, calloc (on compatible
+platforms), free (on platforms with mallocusablesize), and reallocarray is supported.
 
-In   general,   logging of the malloc, realloc, calloc (on compatible platforms)
-and  free  functions  (on  platforms  with  the  malloc_usable_size function) is
-supported.
+Memlogger  is  implemented as a shared library. It produces the report immediately after logging completion. No separate
+log processor is required.
 
-Memlogger  now  implemented  as  only shared library. It produces instant report
-immediately after logging completion with O(1) complexity. No more log processor
-required.
+Log  processing  is  performed  directly  in the library. The report contains the number of allocation requests for each
+function,  grouped  by requested size into buckets from 64 KiB upward. It also contains the maximum requested allocation
+size, average allocation calls per second, peak allocation calls per second, and logging session elapsed time.
 
-Log   processing  is  now performed directly in library. Library contains global
-shared array. Each entry contains the name of the allocation  function, size  of
-the  requested memory in bytes, start/stop epoch timestamp. The report, produces
-by  library,  contains  the  number  of  allocation  requests  of  each type, in
-accordance  with the entry into the given bucket size - i.e. 0-64 kb, 64-128 kb,
-128-256  kb, and so on. Also it contains average allocation calls per second and
-logging session elapsed time.
+This  data  allows you to get an idea of the memory allocation profile for the application and can be used to select the
+optimal parameters for the external memory allocator to achieve maximum performance.
 
-This  data  allows  you  to get an idea of the memory allocation profile for the
-application  and  can  be used to select the optimal parameters for the external
-memory allocator to achieve maximum performance.
-
-Generally  speaking, such statistics helps you define appropriate chunk size for
-chunk-based allocator in accordance with best-fit strategy.
+Generally speaking, such statistics helps you define appropriate chunk size for chunk-based allocator in accordance with
+best-fit strategy.
 
 Build and installation
 ======================
@@ -35,72 +26,71 @@ Build and installation
 Autotools build
 ---------------
 
-To make and install memlogger run:
+To make and install memlogger run (GCC, most platforms):
 
-# 64 bit (GCC, most platforms)
 ./configure 'CXXFLAGS=-m64' --libdir=/usr/local/lib/64
 
-or/and
+or
 
-# 32 bit (GCC, most platforms)
 ./configure 'CXXFLAGS=-m32' --libdir=/usr/local/lib
 
 then
 
-# make
-# make install-strip
+make && make install-strip
 
-Installation  prefix  by  default is /usr/local. Logging library libmemlogger.so
-will  install  into  $PREFIX/lib.
+Installation prefix by default is /usr/local. Logging library libmemlogger.so will install into $PREFIX/lib.
 
 CMake build
 -----------
 
-# 32 bit (GCC, Clang)
+32 bit (GCC, Clang):
+
 mkdir build
 cd build
 CXX=g++ cmake -G "Unix Makefiles" ..
 make
 make install
 
-# 64 bit (GCC, Clang)
+64 bit (GCC, Clang):
+
 mkdir build
 cd build
-CXX=g++ CXXFLAGS="-m64" cmake -G "Unix Makefiles" -DCMAKE_INSTALL_LIBDIR=/usr/local/lib/64 ..
+CXX=g++ CXXFLAGS="-m64" cmake -G "Unix Makefiles" -DCMAKEINSTALLLIBDIR=/usr/local/lib/64 ..
 make
 make install
 
-Note:  Systems  with  gcc  and clang can mix runtimes, leading to initialization
-errors  due  to  incompatible  ABIs.  Typically,  the userspace for such systems
-is gnu. To avoid such errors, explicitly specify the compiler before configuring
-and building.
+Note: Systems with gcc and clang can mix runtimes, leading to initialization errors due to incompatible ABIs. Typically,
+the  userspace  for  such  systems  is gnu. To avoid such errors, explicitly specify the compiler before configuring and
+building.
 
 Using memlogger
 ===============
 
 Prerequisites
 -------------
-Most  modern  OS  require  to  permit libraries/path to be used with LD_PRELOAD.
-To run libmemlogger, make sure you configured access to installation directory for
-dynamic linker.
+
+Most modern OS require to permit libraries/path to be used with LDPRELOAD. To run libmemlogger, make sure you configured
+access to installation directory for dynamic linker.
 
 Some examples:
 
 Solaris
 -------
+
 Run (for 32 bit memlogger):
 
-# crle -c /var/ld/ld.config -l /lib:/usr/lib:/usr/local/lib -s /lib/secure:/usr/lib/secure:/usr/lib:/usr/local/lib
+crle -c /var/ld/ld.config -l /lib:/usr/lib:/usr/local/lib -s /lib/secure:/usr/lib/secure:/usr/lib:/usr/local/lib
 
 and/or (for 64 bit memlogger):
 
-# crle -64 -c /var/ld/64/ld.config -l /lib/64:/usr/lib/64:/usr/local/lib -s /lib/secure/64:/usr/lib/secure/64:/usr/local/lib
+crle -64 -c /var/ld/64/ld.config -l /lib/64:/usr/lib/64:/usr/local/lib -s /lib/secure/64:/usr/lib/secure/64:/usr/local/lib
 
 Linux
 -----
+
 Run the command:
 
-# echo "/usr/local/lib" > /etc/ld.so.conf.d/memlogger.conf
+echo "/usr/local/lib" > /etc/ld.so.conf.d/memlogger.conf
 
 then run ldconfig as root or reboot your machine
 
@@ -110,36 +100,78 @@ add /usr/local/lib to /etc/ld.so.conf, then run ldconfig as root.
 
 After the preparation is complete, you are ready to profile your application.
 
-Since  the  easiest  way to intercept memory allocation functions cross-platform
-is  to  use  LD_PRELOAD,  you  must  load the logger library before using (after
-building memlogger of the appropriate bit size):
+Since  the  easiest  way  to intercept memory allocation functions cross-platform is to use LDPRELOAD, you must load the
+logger library before using (after building memlogger of the appropriate bit size):
 
-# export LD_PRELOAD=libmemlogger.so
+export LD_PRELOAD=libmemlogger.so
 
-Logging  session  runs  (for  foreground processes) till Ctrl+C pressed, or till
-SIGTERM/SIGINT send to logged process.
+in POSIX-compatible shells, or
+
+setenv LD_PRELOAD libmemlogger.so
+
+in C-shell.
+
+Logging session runs (for foreground processes) till Ctrl+C pressed, or till SIGTERM/SIGINT send to logged process.
 
 After that, report will be output to STDOUT by default.
 
-Note: Some platforms uses  LD_PRELOAD_32/LD_PRELOAD_64/LDR_PRELOAD/LDR_PRELOAD64
-environment variables instead.
+High-resolution small-allocation statistics
+===========================================
 
---------------------------------------------------------------------------------
-Note:  To  produce  report  to  log  file  directly,  just  specify filename via
-environment variable before starting the profiled program:
+For diagnostic runs, detailed statistics for small allocations can be enabled with:
 
-# export MEMLOGGER_LOG_FILENAME=/tmp/memory.log
+export MEMLOGGER_HIRES_SMALL_ALLOC=1
 
-When  permission  denied  or  file  cannot be created (or path does not exists),
+in POSIX-compatible shells, or
+
+setenv MEMLOGGER_HIRES_SMALL_ALLOC 1
+
+in C-shell.
+
+The  variable  accepts  0  or  1.  The  default value is 0, so high-resolution statistics are disabled unless explicitly
+enabled.
+
+When enabled, memlogger maintains a separate set of counters for allocation sizes from 4 to 64 KiB. The range is divided
+into the following buckets:
+
+4-8
+9-16
+17-32
+33-64
+65-128
+129-256
+257-512
+513-1024
+1025-2048
+2049-4096
+4097-8192
+8193-16384
+16385-32768
+32769-65536
+
+The  high-resolution  report  is  printed  before  the  regular memory allocations report. For each supported allocation
+function  it  reports  the  total  number  of  calls,  average  calls  per  second,  and peak calls per second for every
+small-allocation  bucket.  The  report  includes  malloc,  realloc,  calloc where supported, free where mallocusablesize
+is available, and reallocarray. If a function has no calls, the report explicitly states that.
+
+High-resolution  statistics  are  intended  for special diagnostic runs. They are maintained separately from the regular
+allocation statistics and are not updated when MEMLOGGER_HIRES_SMALL_ALLOC=0.
+
+Note: Some platforms uses LD_PRELOAD_32/LD_PRELOAD_64/LDR_PRELOAD/LDR_PRELOAD64 environment variables instead.
+
+Note:  To  produce  report  to  log  file  directly,  just specify filename via environment variable before starting the
+profiled program:
+
+export MEMLOGGER_LOG_FILENAME=/tmp/memory.log
+
+When permission denied or file cannot be created (or path does not exists),
 following occurs (example):
 
 Cannot open log file /1/memory3.log
 
-Please note on some platform current directory can have no permission to write.
-Choose writable directory to save reports.
+Please note on some platform current directory can have no permission to write. Choose writable directory to save reports.
 
 Note: If target file exists, it will be overwritten.
---------------------------------------------------------------------------------
 
 The result will be as follows:
 
@@ -203,6 +235,7 @@ Peak 792 free calls/sec
 ---------------------------------------------------
 Elapsed time: 726 seconds (00:12:06)
 
-where  the  numbers  show the number of calls to the corresponding function with
-the   size  in the range of the corresponding bucket. "Elapsed time" shows total
-logging time. Max allocations represents peak allocations per second value.
+where  the  numbers  show  the number of calls to the corresponding function with the requested size in the range of the
+corresponding  bucket.  Avg  shows  the  average  number of calls per second, Peak shows the maximum number of calls per
+second  observed  during  the  logging  session,  and Elapsed time shows the total logging time. Max size is the maximum
+requested allocation size observed for the corresponding function.
