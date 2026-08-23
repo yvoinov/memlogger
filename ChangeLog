@@ -649,3 +649,7 @@ FIX: Typo.
 08-16-2026
 ==========
 FIX: Version in CMakeLists.txt.
+
+08-23-2026
+==========
+IMPROVEMENT: High resolution small allocations mode added.
