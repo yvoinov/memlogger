@@ -310,6 +310,8 @@ private:
 
 	std::array<Summary, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
+	static constexpr T m_c_hires_min_size { 4 };		/* Minimum allocation size tracked by HiRes counters */
+
 	static constexpr T m_c_hires_class_count { 14 };
 
 	/* Upper bounds of HiRes allocation size classes, sorted for binary search */
