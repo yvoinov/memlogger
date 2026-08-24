@@ -53,11 +53,11 @@ private:
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::computeHiResPeakValue(const T p_idx)
 {
-	const auto& v_ca_by_idx = m_HiResCounterArray[p_idx].allc;
+	const auto& c_ca_by_idx = m_HiResCounterArray[p_idx].allc;
 	auto& v_pv_by_idx = m_HiResPeakValueArray[p_idx];
 
 	for (T i = 0; i < m_c_hires_class_count; ++i) {
-		const L v_current = v_ca_by_idx[i];
+		const L v_current = c_ca_by_idx[i];
 		const L v_delta = v_current - v_pv_by_idx.previous[i];
 		if (v_delta > v_pv_by_idx.peak[i])
 			v_pv_by_idx.peak[i] = v_delta;
