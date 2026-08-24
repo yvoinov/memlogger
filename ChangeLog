@@ -653,3 +653,7 @@ FIX: Version in CMakeLists.txt.
 08-23-2026
 ==========
 IMPROVEMENT: High resolution small allocations mode added.
+
+08-24-2026
+==========
+IMPROVEMENT: Performance fillArrayEntryHiRes() with binary search and computeHiResPeakValue() to one-pass.
