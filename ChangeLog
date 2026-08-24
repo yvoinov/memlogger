@@ -657,3 +657,4 @@ IMPROVEMENT: High resolution small allocations mode added.
 08-24-2026
 ==========
 IMPROVEMENT: Performance fillArrayEntryHiRes() with binary search and computeHiResPeakValue() to one-pass.
+FIX: Invalid entry condition for fillArrayEntryHiRes() function - range bounds check missed.
