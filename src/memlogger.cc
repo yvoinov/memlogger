@@ -167,7 +167,8 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 	AdaptiveSpinMutex spmux(v_ca_by_idx.lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 
-	if (m_hires_small_alloc) fillArrayEntryHiRes(p_idx, p_value);
+	if (m_hires_small_alloc && p_value >= 4 && p_value <= m_c_hires_class_limits[m_c_hires_class_count - 1])
+		fillArrayEntryHiRes(p_idx, p_value);
 
 	if (c_value > 0 && c_value <= m_c_num_64K)
 		++v_ca_by_idx.allc_64k;
