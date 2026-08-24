@@ -237,8 +237,7 @@ public:
 
 	~MemoryLogger() { printReport(); }
 private:
-	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")),
-		m_hires_small_alloc(std::atoi(std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") ? std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") : "0") == 1), m_elapsed_start(Now()) {
+	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_hires_small_alloc(std::atoi(std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") ? std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") : "0") == 1), m_elapsed_start(Now()) {
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
@@ -311,54 +310,22 @@ private:
 
 	std::array<Summary, m_c_array_size> m_PeakValueArray;	/* Peak allocations per second array */
 
+	static constexpr T m_c_hires_class_count { 14 };
+
+	/* Upper bounds of HiRes allocation size classes, sorted for binary search */
+	static constexpr std::array<T, m_c_hires_class_count> m_c_hires_class_limits {{
+		8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536
+	}};
+
 	using HiResCounters = struct alignas(MEMLOGGER_CACHE_LINE_SIZE) HiResCounters {
-		L allc_4_8 {};
-		L allc_9_16 {};
-		L allc_17_32 {};
-		L allc_33_64 {};
-		L allc_65_128 {};
-		L allc_129_256 {};
-		L allc_257_512 {};
-		L allc_513_1024 {};
-		L allc_1025_2048 {};
-		L allc_2049_4096 {};
-		L allc_4097_8192 {};
-		L allc_8193_16384 {};
-		L allc_16385_32768 {};
-		L allc_32769_65536 {};
+		std::array<L, m_c_hires_class_count> allc {};
 	};
 
 	alignas(MEMLOGGER_CACHE_LINE_SIZE) std::array<HiResCounters, m_c_array_size> m_HiResCounterArray;
 
 	using HiResSummary = struct HiResSummary {
-		L previous_4_8 {};
-		L peak_4_8 {};
-		L previous_9_16 {};
-		L peak_9_16 {};
-		L previous_17_32 {};
-		L peak_17_32 {};
-		L previous_33_64 {};
-		L peak_33_64 {};
-		L previous_65_128 {};
-		L peak_65_128 {};
-		L previous_129_256 {};
-		L peak_129_256 {};
-		L previous_257_512 {};
-		L peak_257_512 {};
-		L previous_513_1024 {};
-		L peak_513_1024 {};
-		L previous_1025_2048 {};
-		L peak_1025_2048 {};
-		L previous_2049_4096 {};
-		L peak_2049_4096 {};
-		L previous_4097_8192 {};
-		L peak_4097_8192 {};
-		L previous_8193_16384 {};
-		L peak_8193_16384 {};
-		L previous_16385_32768 {};
-		L peak_16385_32768 {};
-		L previous_32769_65536 {};
-		L peak_32769_65536 {};
+		std::array<L, m_c_hires_class_count> previous {};
+		std::array<L, m_c_hires_class_count> peak {};
 	};
 
 	std::array<HiResSummary, m_c_array_size> m_HiResPeakValueArray;	/* Peak small allocations per second array */
@@ -417,6 +384,9 @@ private:
 	void printElapsedTime(std::ostream& p_stream = std::cout);
 	void printReportTotal(std::ostream& p_stream = std::cout);
 };
+
+template <typename P, typename T, typename L, typename Fl>
+constexpr std::array<T, MemoryLogger<P, T, L, Fl>::m_c_hires_class_count> MemoryLogger<P, T, L, Fl>::m_c_hires_class_limits;
 
 using memoryLogger_type = MemoryLogger<voidPtr_type, uInt_type, uLongInt_type, flag_type>;
 /* Instantiate on load */
