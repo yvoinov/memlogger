@@ -74,12 +74,12 @@ template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::computePeakValue()
 {
 	for (T i = 0; i < m_c_array_size; ++i) {
+		if (m_hires_small_alloc) computeHiResPeakValue(i);
 		L v_sum { 0 };
 		{
 			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 			v_sum = sumCounters(i);
-			if (m_hires_small_alloc) computeHiResPeakValue(i);
 		}
 		auto& v_pv_by_idx = m_PeakValueArray[i];	/* Can't be const */
 		if (v_sum - v_pv_by_idx.previous > v_pv_by_idx.peak)
@@ -306,7 +306,7 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 				printHiResReportByIdx(i, p_stream);
 			} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
 		}
-		p_stream << std::endl;
+		p_stream << std::endl;			/* Reports separator */
 	}
 	p_stream << REPORT_HEADING << std::endl;
 	p_stream << SEPARATION_LINE_1 << std::endl;
