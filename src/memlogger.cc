@@ -53,15 +53,20 @@ private:
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::computeHiResPeakValue(const T p_idx)
 {
-	const auto& c_ca_by_idx = m_HiResCounterArray[p_idx].allc;
+	auto& v_hires_by_idx = m_HiResCounterArray[p_idx];
 	auto& v_pv_by_idx = m_HiResPeakValueArray[p_idx];
 
 	for (T i = 0; i < m_c_hires_class_count; ++i) {
-		const L c_current = c_ca_by_idx[i];
-		const L c_delta = c_current - v_pv_by_idx.previous[i];
+		L v_current;
+		{
+			AdaptiveSpinMutex spmux(v_hires_by_idx.lock);
+			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+			v_current = v_hires_by_idx.allc[i];
+		}
+		const L c_delta = v_current - v_pv_by_idx.previous[i];
 		if (c_delta > v_pv_by_idx.peak[i])
 			v_pv_by_idx.peak[i] = c_delta;
-		v_pv_by_idx.previous[i] = c_current;
+		v_pv_by_idx.previous[i] = v_current;
 	}
 }
 
