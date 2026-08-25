@@ -57,7 +57,7 @@ void MemoryLogger<P, T, L, Fl>::computeHiResPeakValue(const T p_idx)
 	auto& v_pv_by_idx = m_HiResPeakValueArray[p_idx];
 
 	for (T i = 0; i < m_c_hires_class_count; ++i) {
-		L v_current;
+		L v_current { 0 };
 		{
 			AdaptiveSpinMutex spmux(v_hires_by_idx.lock);
 			std::lock_guard<AdaptiveSpinMutex> lock(spmux);
@@ -73,7 +73,7 @@ void MemoryLogger<P, T, L, Fl>::computeHiResPeakValue(const T p_idx)
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::computePeakValue()
 {
-	for (T i = 0; i < m_CounterArray.size(); ++i) {
+	for (T i = 0; i < m_c_array_size; ++i) {
 		L v_sum { 0 };
 		{
 			AdaptiveSpinMutex spmux(m_CounterArray[i].lock);
