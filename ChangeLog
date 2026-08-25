@@ -658,3 +658,7 @@ IMPROVEMENT: High resolution small allocations mode added.
 ==========
 IMPROVEMENT: Performance fillArrayEntryHiRes() with binary search and computeHiResPeakValue() to one-pass.
 FIX: Invalid entry condition for fillArrayEntryHiRes() function - range bounds check missed.
+
+08-25-2026
+==========
+IMPROVEMENT: High resolution small allocations counters row-level locking added.
