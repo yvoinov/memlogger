@@ -662,4 +662,3 @@ FIX: Invalid entry condition for fillArrayEntryHiRes() function - range bounds c
 08-25-2026
 ==========
 IMPROVEMENT: High resolution small allocations counters row-level locking added.
-FIX: False-positive PCS warning V575 in MemoryLogger() CTor.
