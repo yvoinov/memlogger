@@ -320,6 +320,7 @@ private:
 	}};
 
 	using HiResCounters = struct alignas(MEMLOGGER_CACHE_LINE_SIZE) HiResCounters {
+		Fl lock { MEMLOGGER_FLAG_DEFAULT };
 		std::array<L, m_c_hires_class_count> allc {};
 	};
 

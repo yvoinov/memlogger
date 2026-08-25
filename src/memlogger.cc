@@ -161,16 +161,19 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntryHiRes(const T p_idx, const T p_val
 template <typename P, typename T, typename L, typename Fl>
 void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
+	if (m_hires_small_alloc &&
+		p_value >= m_c_hires_min_size &&
+		p_value <= m_c_hires_class_limits[m_c_hires_class_count - 1]) {
+		AdaptiveSpinMutex spmux(m_HiResCounterArray[p_idx].lock);
+		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+		fillArrayEntryHiRes(p_idx, p_value);
+	}
+
 	const L c_value = roundup_to_page_size(p_value);
 	auto& v_ca_by_idx = m_CounterArray[p_idx];	/* Can't be const */
 
 	AdaptiveSpinMutex spmux(v_ca_by_idx.lock);
 	std::lock_guard<AdaptiveSpinMutex> lock(spmux);
-
-	if (m_hires_small_alloc &&
-		p_value >= m_c_hires_min_size &&
-		p_value <= m_c_hires_class_limits[m_c_hires_class_count - 1])
-		fillArrayEntryHiRes(p_idx, p_value);
 
 	if (c_value > 0 && c_value <= m_c_num_64K)
 		++v_ca_by_idx.allc_64k;
@@ -290,10 +293,13 @@ void MemoryLogger<P, T, L, Fl>::printReportTotal(std::ostream& p_stream)
 	if (m_hires_small_alloc) {
 		p_stream << HIRES_REPORT_HEADING << std::endl;
 		p_stream << SEPARATION_LINE_1 << std::endl;
-		for (T i = 0; i < m_CounterArray.size(); ++i) {
-			auto& v_ca_by_idx = m_CounterArray[i];	/* Can't be const */
-			if (v_ca_by_idx.start) printHiResReportByIdx(i, p_stream);
-			else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
+		for (T i = 0; i < m_HiResCounterArray.size(); ++i) {
+			auto& v_hires_by_idx = m_HiResCounterArray[i];	/* Can't be const */
+			if (m_CounterArray[i].start) {
+				AdaptiveSpinMutex spmux(v_hires_by_idx.lock);
+				std::lock_guard<AdaptiveSpinMutex> lock(spmux);
+				printHiResReportByIdx(i, p_stream);
+			} else p_stream << ERR_MSG_NF1 << decodeMemFunc(i) << ERR_MSG_NF2 << std::endl;
 		}
 		p_stream << std::endl;
 	}
