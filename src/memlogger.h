@@ -237,9 +237,7 @@ public:
 
 	~MemoryLogger() { printReport(); }
 private:
-	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")),
-			m_hires_small_alloc(std::atoi(std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") ? std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") : "0") == 1),//-V575
-			m_elapsed_start(Now()) {
+	MemoryLogger() noexcept : m_fname(std::getenv("MEMLOGGER_LOG_FILENAME")), m_hires_small_alloc(std::atoi(std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") ? std::getenv("MEMLOGGER_HIRES_SMALL_ALLOC") : "0") == 1), m_elapsed_start(Now()) {
 		std::signal(SIGINT, signal_handler);
 		std::signal(SIGHUP, signal_handler);
 		std::signal(SIGTERM, signal_handler);
