@@ -58,6 +58,9 @@
 #	endif
 #endif
 
+/* Output buffer in bytes */
+#define IO_BUFFER_SIZE 4096
+
 /* Timer interval in seconds */
 #define TIMER_INTERVAL 1
 

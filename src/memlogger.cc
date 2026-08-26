@@ -6,7 +6,7 @@
 
 namespace {
 
-std::array<char, 4096> g_output_buffer;
+std::array<char, IO_BUFFER_SIZE> g_output_buffer;
 
 template <typename P, typename T, typename L, typename Fl>
 class MemoryLogger<P, T, L, Fl>::AdaptiveSpinMutex {
