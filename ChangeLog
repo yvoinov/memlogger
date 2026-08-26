@@ -662,4 +662,9 @@ FIX: Invalid entry condition for fillArrayEntryHiRes() function - range bounds c
 08-25-2026
 ==========
 IMPROVEMENT: High resolution small allocations counters row-level locking added.
-FIX: False-positive PVS warning V575 in MemoryLogger() CTor.
+FIX: False-positive PCS warning V575 in MemoryLogger() CTor.
+
+08-27-2026
+==========
+IMPROVEMENT: Reworked to lightweight I/O using C functions instead of C++ streams.
+IMPROVEMENT: The printHiResReportByIdx() function has been converted to use a loop.
