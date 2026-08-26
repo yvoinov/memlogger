@@ -11,21 +11,18 @@
 #include <climits>	/* For UINT_MAX, CHAR_BIT */
 #include <csignal>
 #include <cstdlib>	/* For std::exit, std::getenv */
+#include <cstdio>
 #include <cstdint>	/* For std::uint64_t */
 #include <ctime>	/* For std::time_t */
+#include <cinttypes>
 #include <chrono>
 #include <array>
 #include <atomic>
-#include <type_traits>
+#include <type_traits>	/* For std::enable_if, std::enable_if, std::remove_reference */
 #if !defined(__FreeBSD__)
 #	include <condition_variable>
 #	include <mutex>
 #endif
-#include <string>
-#include <ostream>
-#include <iostream>	/* For std::cout, std::ostream, std::ios */
-#include <fstream>
-#include <iomanip>	/* For std::setw, std::setfill */
 #include <thread>
 
 #ifndef _GNU_SOURCE
@@ -361,6 +358,23 @@ private:
 	static constexpr const T m_c_num_hires_32768 { 32768 };
 	static constexpr const T m_c_num_hires_65536 { 65536 };
 
+	static constexpr std::array<const char*, m_c_hires_class_count> m_c_hires_class_labels {{
+		HIRES_ALLOC_4_8,
+		HIRES_ALLOC_9_16,
+		HIRES_ALLOC_17_32,
+		HIRES_ALLOC_33_64,
+		HIRES_ALLOC_65_128,
+		HIRES_ALLOC_129_256,
+		HIRES_ALLOC_257_512,
+		HIRES_ALLOC_513_1024,
+		HIRES_ALLOC_1025_2048,
+		HIRES_ALLOC_2049_4096,
+		HIRES_ALLOC_4097_8192,
+		HIRES_ALLOC_8193_16384,
+		HIRES_ALLOC_16385_32768,
+		HIRES_ALLOC_32769_65536
+	}};
+
 	std::time_t m_elapsed_start;	/* Elapsed time start value */
 
 	#ifdef COMPAT_OS
@@ -381,17 +395,20 @@ private:
 
 	L sumCounters(const T p_idx);
 	void computeHiResPeakValue(const T p_idx);
-	void printHiResReportByIdx(const T p_idx, std::ostream& p_stream = std::cout);
+	void printHiResReportByIdx(const T p_idx, std::FILE* p_stream = stdout);
 	void fillArrayEntryHiRes(const T p_idx, const T p_value);
 	void fillArrayEntry(const T p_idx, const T p_value);
 	const char* decodeMemFunc(const T p_idx);
-	void printReportByIdx(const T p_idx, std::ostream& p_stream = std::cout);
-	void printElapsedTime(std::ostream& p_stream = std::cout);
-	void printReportTotal(std::ostream& p_stream = std::cout);
+	void printReportByIdx(const T p_idx, std::FILE* p_stream = stdout);
+	void printElapsedTime(std::FILE* p_stream = stdout);
+	void printReportTotal(std::FILE* p_stream = stdout);
 };
 
 template <typename P, typename T, typename L, typename Fl>
 constexpr std::array<T, MemoryLogger<P, T, L, Fl>::m_c_hires_class_count> MemoryLogger<P, T, L, Fl>::m_c_hires_class_limits;
+
+template <typename P, typename T, typename L, typename Fl>
+constexpr std::array<const char*, MemoryLogger<P, T, L, Fl>::m_c_hires_class_count> MemoryLogger<P, T, L, Fl>::m_c_hires_class_labels;
 
 using memoryLogger_type = MemoryLogger<voidPtr_type, uInt_type, uLongInt_type, flag_type>;
 /* Instantiate on load */
