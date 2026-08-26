@@ -346,21 +346,6 @@ private:
 
 	bool m_hires_small_alloc;
 
-	static constexpr const T m_c_num_hires_8 { 8 };
-	static constexpr const T m_c_num_hires_16 { 16 };
-	static constexpr const T m_c_num_hires_32 { 32 };
-	static constexpr const T m_c_num_hires_64 { 64 };
-	static constexpr const T m_c_num_hires_128 { 128 };
-	static constexpr const T m_c_num_hires_256 { 256 };
-	static constexpr const T m_c_num_hires_512 { 512 };
-	static constexpr const T m_c_num_hires_1024 { 1024 };
-	static constexpr const T m_c_num_hires_2048 { 2048 };
-	static constexpr const T m_c_num_hires_4096 { 4096 };
-	static constexpr const T m_c_num_hires_8192 { 8192 };
-	static constexpr const T m_c_num_hires_16384 { 16384 };
-	static constexpr const T m_c_num_hires_32768 { 32768 };
-	static constexpr const T m_c_num_hires_65536 { 65536 };
-
 	static constexpr std::array<const char*, m_c_hires_class_count> m_c_hires_class_labels {{
 		HIRES_ALLOC_4_8,
 		HIRES_ALLOC_9_16,
