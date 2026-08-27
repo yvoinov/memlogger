@@ -156,7 +156,7 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntryHiRes(const T p_idx, const T p_val
 
 	while (v_first < v_last) {
 		const T v_middle = v_first + (v_last - v_first) / 2;
-		if (p_value <= m_c_hires_class_limits[v_middle])
+		if (p_value <= m_c_hires_classes[v_middle].limit)
 			v_last = v_middle;
 		else
 			v_first = v_middle + 1;
@@ -170,7 +170,7 @@ void MemoryLogger<P, T, L, Fl>::fillArrayEntry(const T p_idx, const T p_value)
 {
 	if (m_hires_small_alloc &&
 		p_value >= m_c_hires_min_size &&
-		p_value <= m_c_hires_class_limits[m_c_hires_class_count - 1]) {
+		p_value <= m_c_hires_classes[m_c_hires_class_count - 1].limit) {
 		AdaptiveSpinMutex spmux(m_HiResCounterArray[p_idx].lock);
 		std::lock_guard<AdaptiveSpinMutex> lock(spmux);
 		fillArrayEntryHiRes(p_idx, p_value);
@@ -242,7 +242,7 @@ void MemoryLogger<P, T, L, Fl>::printHiResReportByIdx(const T p_idx, std::FILE* 
 	const std::time_t c_interval = c_time_diff ? c_time_diff : 1;
 	for (T i = 0; i < m_c_hires_class_count; ++i)
 		std::fprintf(p_stream, "%s%s%" PRIu64 " (Avg %" PRIu64 ", Peak %" PRIu64 ")\n",
-			decodeMemFunc(p_idx), m_c_hires_class_labels[i], c_ca_by_idx[i],
+			decodeMemFunc(p_idx), m_c_hires_classes[i].label, c_ca_by_idx[i],
 			c_ca_by_idx[i] / c_interval, c_pv_by_idx.peak[i]);
 	std::fprintf(p_stream, "%s\n", SEPARATION_LINE_2);
 }

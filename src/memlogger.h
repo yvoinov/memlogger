@@ -316,9 +316,26 @@ private:
 
 	static constexpr T m_c_hires_class_count { 14 };
 
-	/* Upper bounds of HiRes allocation size classes, sorted for binary search */
-	static constexpr std::array<T, m_c_hires_class_count> m_c_hires_class_limits {{
-		8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536
+	using HiResClass = struct HiResClass {
+		T limit;
+		const char* label;
+	};
+
+	static constexpr std::array<HiResClass, m_c_hires_class_count> m_c_hires_classes {{
+		{ 8, HIRES_ALLOC_4_8 },
+		{ 16, HIRES_ALLOC_9_16 },
+		{ 32, HIRES_ALLOC_17_32 },
+		{ 64, HIRES_ALLOC_33_64 },
+		{ 128, HIRES_ALLOC_65_128 },
+		{ 256, HIRES_ALLOC_129_256 },
+		{ 512, HIRES_ALLOC_257_512 },
+		{ 1024, HIRES_ALLOC_513_1024 },
+		{ 2048, HIRES_ALLOC_1025_2048 },
+		{ 4096, HIRES_ALLOC_2049_4096 },
+		{ 8192, HIRES_ALLOC_4097_8192 },
+		{ 16384, HIRES_ALLOC_8193_16384 },
+		{ 32768, HIRES_ALLOC_16385_32768 },
+		{ 65536, HIRES_ALLOC_32769_65536 }
 	}};
 
 	using HiResCounters = struct alignas(MEMLOGGER_CACHE_LINE_SIZE) HiResCounters {
@@ -345,23 +362,6 @@ private:
 	static constexpr const T m_c_num_8192K { 8192 * KBYTES };
 
 	bool m_hires_small_alloc;
-
-	static constexpr std::array<const char*, m_c_hires_class_count> m_c_hires_class_labels {{
-		HIRES_ALLOC_4_8,
-		HIRES_ALLOC_9_16,
-		HIRES_ALLOC_17_32,
-		HIRES_ALLOC_33_64,
-		HIRES_ALLOC_65_128,
-		HIRES_ALLOC_129_256,
-		HIRES_ALLOC_257_512,
-		HIRES_ALLOC_513_1024,
-		HIRES_ALLOC_1025_2048,
-		HIRES_ALLOC_2049_4096,
-		HIRES_ALLOC_4097_8192,
-		HIRES_ALLOC_8193_16384,
-		HIRES_ALLOC_16385_32768,
-		HIRES_ALLOC_32769_65536
-	}};
 
 	std::time_t m_elapsed_start;	/* Elapsed time start value */
 
@@ -393,10 +393,7 @@ private:
 };
 
 template <typename P, typename T, typename L, typename Fl>
-constexpr std::array<T, MemoryLogger<P, T, L, Fl>::m_c_hires_class_count> MemoryLogger<P, T, L, Fl>::m_c_hires_class_limits;
-
-template <typename P, typename T, typename L, typename Fl>
-constexpr std::array<const char*, MemoryLogger<P, T, L, Fl>::m_c_hires_class_count> MemoryLogger<P, T, L, Fl>::m_c_hires_class_labels;
+constexpr std::array<typename MemoryLogger<P, T, L, Fl>::HiResClass, MemoryLogger<P, T, L, Fl>::m_c_hires_class_count> MemoryLogger<P, T, L, Fl>::m_c_hires_classes;
 
 using memoryLogger_type = MemoryLogger<voidPtr_type, uInt_type, uLongInt_type, flag_type>;
 /* Instantiate on load */
