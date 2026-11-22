@@ -668,3 +668,7 @@ FIX: False-positive PCS warning V575 in MemoryLogger() CTor.
 ==========
 IMPROVEMENT: Reworked to lightweight I/O using C functions instead of C++ streams.
 IMPROVEMENT: The printHiResReportByIdx() function has been converted to use a loop.
+
+11-23-2026
+==========
+FIX: Minor bug with __cpp_lib_hardware_interference_size detection.
