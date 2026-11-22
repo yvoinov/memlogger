@@ -144,7 +144,10 @@ atomic_read(const A& a, std::memory_order order)
 #	define MEMLOGGER_RELEASE(x) x.store(false, MEMLOGGER_MEM_RELEASE)
 #endif
 
-#if __cpp_lib_hardware_interference_size >= 201603L && defined INTERFERENCE_SIZES
+#if __cplusplus >= 201703L
+#	include <new>
+#endif
+#if __cpp_lib_hardware_interference_size >= 201703L && defined INTERFERENCE_SIZES
 #	define MEMLOGGER_CACHE_LINE_SIZE (std::hardware_destructive_interference_size)
 #else
 #	include <cstddef>	/* For std::max_align_t */
