@@ -672,3 +672,7 @@ IMPROVEMENT: The printHiResReportByIdx() function has been converted to use a lo
 11-23-2026
 ==========
 FIX: Minor bug with __cpp_lib_hardware_interference_size detection.
+
+11-27-2026
+==========
+IMPROVEMENT: M4 macro update.
